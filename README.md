@@ -1,6 +1,6 @@
 # Nexo Store — Proyecto Base
 
-Proyecto base entregado a los estudiantes para el desarrollo del curso.
+Proyecto base entregado a los estudiantes para el desarrollo del curso. El siguiente proyecto, será modificado por el estudiante Pablo Montaña.
 
 ## Estado inicial
 
