@@ -1,1 +1,257 @@
-:root{--primary:#1f4fd6;--ink:#172033;--surface:#f5f7fb;--accent:#ffc107}*{box-sizing:border-box}body{font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--surface)}.navbar{background:linear-gradient(90deg,#14213d,#1f4fd6)}.navbar .nav-link{color:#ffffffc7}.navbar .nav-link.active,.navbar .nav-link:hover{color:#fff}.brand-mark{display:inline-grid;place-items:center;width:32px;height:32px;background:var(--accent);color:#172033;border-radius:10px;margin-right:.35rem}.hero{background:radial-gradient(circle at 15% 20%,#eef3ff 0,#fff 48%,#eef3ff 100%)}.hero-card{position:relative;background:#fff;border-radius:24px;padding:12px;box-shadow:0 30px 70px #1f4fd633}.hero-card img{height:420px;width:100%;object-fit:cover;border-radius:16px}.hero-card-header{display:flex;gap:7px;padding:5px 4px 12px}.dot{width:9px;height:9px;border-radius:50%;background:#dce2ef}.dot:first-child{background:#ff6b6b}.dot:nth-child(2){background:#ffd43b}.dot:nth-child(3){background:#51cf66}.floating-card{position:absolute;left:-35px;bottom:30px;background:#fff;padding:18px 22px;border-radius:16px;box-shadow:0 18px 40px #1720332e;display:flex;flex-direction:column}.metric{background:#fff;border:1px solid #e7eaf0;border-radius:14px;padding:14px;text-align:center;display:flex;flex-direction:column}.metric span{font-size:.75rem;color:#6c757d}.section-heading{display:flex;justify-content:space-between;align-items:end}.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.14em;color:var(--primary);font-weight:800}.student-task{display:flex;gap:16px;background:#fff;border-left:5px solid var(--primary);border-radius:14px;padding:20px}.student-task-number{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;font-weight:800}.placeholder-product{height:100%;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 10px 28px #17203314}.placeholder-image{height:210px;background:repeating-linear-gradient(45deg,#eef1f7,#eef1f7 12px,#e5e9f1 12px,#e5e9f1 24px);display:grid;place-items:center;color:#7a8497;font-weight:700}.benefits{background:#172033;color:#fff}.benefit-card p{color:#aeb7c8}.footer{background:#0f1728;color:#aeb7c8}.sprint-summary{background:#f5f7fb;border:1px solid #e3e7ef;border-radius:12px;padding:14px;display:flex;flex-direction:column}.locked-module{max-width:860px;margin:40px auto;text-align:center;background:#fff;border-radius:24px;padding:48px;box-shadow:0 18px 45px #17203317}.locked-icon{font-size:4rem}.locked-card{margin-top:28px;text-align:left;background:#f7f8fb;border:1px dashed #b7c0d0;border-radius:16px;padding:24px}@media(max-width:767px){.floating-card{position:static;margin-top:10px}.hero-card img{height:320px}.locked-module{padding:30px 20px}.section-heading{align-items:start;flex-direction:column}}
+/* =====================================================================
+   NIVEL 99 · Gaming Setup Store
+   Hoja de estilos principal - Sprint 1
+   Estudiante: Pablo Montaña Conti
+   ---------------------------------------------------------------------
+   Organización del archivo:
+   1. Variables de la identidad visual
+   2. Estilos base del documento
+   3. Tipografía
+   4. Botones
+   5. Tarjetas
+   6. Barra de navegación
+   7. Pie de página
+   8. Módulos bloqueados (sprints futuros)
+   ===================================================================== */
+
+/* ---------------------------------------------------------------
+   1. VARIABLES DE LA IDENTIDAD VISUAL
+   Paleta azul y blanca con acento cian.
+   --------------------------------------------------------------- */
+:root {
+  /* Colores de marca */
+  --color-primario: #0b6fd4;
+  --color-primario-oscuro: #084c93;
+  --color-primario-claro: #e7f1fd;
+  --color-acento: #22d3ee;
+  --color-noche: #061b33;
+  --color-noche-suave: #0d2947;
+
+  /* Colores neutros */
+  --color-tinta: #0a1a2b;
+  --color-texto-suave: #5a6b7f;
+  --color-fondo: #ffffff;
+  --color-superficie: #f1f6fc;
+  --color-borde: #d7e3f2;
+
+  /* Tipografías */
+  --fuente-titulos: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --fuente-texto: "Inter", "Segoe UI", system-ui, sans-serif;
+
+  /* Bordes y sombras */
+  --radio-chico: 10px;
+  --radio-medio: 16px;
+  --radio-grande: 24px;
+  --sombra-suave: 0 8px 24px rgba(10, 26, 43, 0.08);
+  --sombra-media: 0 16px 40px rgba(11, 111, 212, 0.14);
+  --sombra-fuerte: 0 28px 60px rgba(6, 27, 51, 0.22);
+
+  /* Espaciados */
+  --espacio-seccion: 4.5rem;
+}
+
+/* ---------------------------------------------------------------
+   2. ESTILOS BASE DEL DOCUMENTO
+   --------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--fuente-texto);
+  color: var(--color-tinta);
+  background-color: var(--color-fondo);
+  overflow-x: hidden;
+}
+
+.seccion {
+  padding-block: var(--espacio-seccion);
+}
+
+.seccion-clara {
+  background-color: var(--color-superficie);
+}
+
+/* ---------------------------------------------------------------
+   3. TIPOGRAFÍA
+   --------------------------------------------------------------- */
+h1,
+h2,
+h3,
+h4,
+.navbar-brand {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+p {
+  line-height: 1.65;
+}
+
+.texto-suave {
+  color: var(--color-texto-suave);
+}
+
+.etiqueta-seccion {
+  display: inline-block;
+  font-family: var(--fuente-titulos);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-primario);
+  margin-bottom: 0.35rem;
+}
+
+.encabezado-seccion {
+  max-width: 640px;
+  margin-bottom: 2.5rem;
+}
+
+/* ---------------------------------------------------------------
+   4. BOTONES
+   Estilo propio construido sobre las clases de Bootstrap.
+   --------------------------------------------------------------- */
+.btn {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: var(--radio-chico);
+  padding-inline: 1.4rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-primary {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--color-primario-oscuro);
+  border-color: var(--color-primario-oscuro);
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-media);
+}
+
+.btn-outline-primary {
+  color: var(--color-primario);
+  border-color: var(--color-primario);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: #ffffff;
+}
+
+.btn-acento {
+  background-color: var(--color-acento);
+  border-color: var(--color-acento);
+  color: var(--color-noche);
+}
+
+.btn-acento:hover,
+.btn-acento:focus {
+  background-color: #0fb6d1;
+  border-color: #0fb6d1;
+  color: var(--color-noche);
+  transform: translateY(-2px);
+}
+
+/* ---------------------------------------------------------------
+   5. TARJETAS
+   --------------------------------------------------------------- */
+.card {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  box-shadow: var(--sombra-suave);
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-media);
+}
+
+/* ---------------------------------------------------------------
+   6. BARRA DE NAVEGACIÓN
+   --------------------------------------------------------------- */
+.navbar {
+  background-color: var(--color-noche);
+  padding-block: 0.75rem;
+}
+
+.navbar-brand img {
+  height: 38px;
+  width: auto;
+}
+
+.navbar .nav-link {
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
+  padding-inline: 0.85rem;
+  border-radius: var(--radio-chico);
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+  color: #ffffff;
+}
+
+.navbar .nav-link.active {
+  color: #ffffff;
+  background-color: var(--color-noche-suave);
+  box-shadow: inset 0 -3px 0 var(--color-acento);
+}
+
+/* ---------------------------------------------------------------
+   7. PIE DE PÁGINA
+   --------------------------------------------------------------- */
+.footer {
+  background-color: var(--color-noche);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.footer a {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+}
+
+.footer a:hover,
+.footer a:focus {
+  color: var(--color-acento);
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------
+   8. MÓDULOS BLOQUEADOS (páginas de sprints futuros)
+   --------------------------------------------------------------- */
+.locked-module {
+  max-width: 860px;
+  margin: 40px auto;
+  text-align: center;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-grande);
+  padding: 48px;
+  box-shadow: var(--sombra-suave);
+}
+
+.locked-icon {
+  font-size: 4rem;
+}
+
+.locked-card {
+  margin-top: 28px;
+  text-align: left;
+  background: var(--color-superficie);
+  border: 1px dashed var(--color-borde);
+  border-radius: var(--radio-medio);
+  padding: 24px;
+}
