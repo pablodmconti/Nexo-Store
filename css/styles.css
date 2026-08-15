@@ -210,6 +210,51 @@ p {
   box-shadow: inset 0 -3px 0 var(--color-acento);
 }
 
+.navbar-brand,
+.navbar-brand:hover,
+.navbar-brand:focus {
+  color: #ffffff;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+}
+
+.marca-acento {
+  color: var(--color-acento);
+}
+
+.btn-carrito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radio-chico);
+  padding: 0.35rem 0.7rem;
+}
+
+.btn-carrito:hover,
+.btn-carrito:focus {
+  color: var(--color-noche);
+  background-color: var(--color-acento);
+  border-color: var(--color-acento);
+}
+
+.badge-carrito {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  padding-inline: 5px;
+  border-radius: 999px;
+  background-color: var(--color-acento);
+  color: var(--color-noche);
+  font-family: var(--fuente-titulos);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 20px;
+}
+
 /* ---------------------------------------------------------------
    7. PIE DE PÁGINA
    --------------------------------------------------------------- */
