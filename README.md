@@ -83,8 +83,9 @@ Nexo-Store/
   menú responsive y marcado visual de la página actual.
 - Sección principal (hero) con `h1`, propuesta de valor, descripción, imagen, botón
   principal hacia el catálogo, botón secundario y datos destacados.
-- Cuatro productos destacados escritos directamente en HTML, con imagen, categoría, nombre,
-  descripción, precio, disponibilidad y botón hacia la ficha del producto.
+- Cuatro productos destacados escritos directamente en HTML (cantidad indicada en la
+  actividad del proyecto base), con imagen, categoría, nombre, descripción, precio,
+  disponibilidad y botón hacia la ficha del producto.
 - Sección de beneficios con cuatro ítems, cada uno con ícono SVG propio, título y texto.
 - Pie de página con logotipo, navegación, contacto, redes simuladas, año y aclaración de
   proyecto académico.
@@ -96,6 +97,19 @@ Nexo-Store/
   foco visible, etiquetas accesibles en botones y menú, y disponibilidad indicada con
   texto además de color.
 - Páginas de los próximos sprints enlazadas y con su cartel de funcionalidad en desarrollo.
+
+## Pruebas realizadas antes de la entrega
+
+- `index.html` carga sin errores en la consola del navegador.
+- Los seis enlaces del navbar, el logotipo y los botones del hero dirigen a páginas existentes.
+- No hay archivos ni imágenes faltantes: los recursos locales están en `assets/`.
+- El menú hamburguesa se abre y se cierra correctamente en pantallas chicas.
+- Todas las imágenes tienen atributo `alt` y las decorativas usan `alt=""` con `aria-hidden`.
+- Las tarjetas se reorganizan en 1, 2 y 4 columnas según el ancho de pantalla.
+- No existe desplazamiento horizontal en 375, 768 ni 1366 píxeles.
+- Las páginas de los próximos sprints conservan su cartel de funcionalidad en desarrollo.
+- La navegación puede recorrerse con el teclado y el foco siempre queda visible.
+- El historial del repositorio contiene commits descriptivos distribuidos durante el sprint.
 
 ## Funcionalidades pendientes
 
