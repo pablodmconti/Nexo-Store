@@ -99,65 +99,115 @@
                 </div>
             </div>
         </section>
-        <section class="container py-5">
-            <div class="section-heading">
-                <div><span class="eyebrow">Sprint 1</span>
-                    <h2 class="fw-bold">Productos destacados estáticos</h2>
-                </div><span class="badge text-bg-light border">Sin JavaScript</span>
-            </div>
-            <div class="student-task">
-                <div class="student-task-number">1</div>
-                <div>
-                    <h3 class="h5">Actividad</h3>
-                    <p class="mb-0">Construir entre tres y cuatro tarjetas con Bootstrap. En esta etapa no deben
-                        generarse dinámicamente.</p>
+        <section class="seccion" id="destacados">
+            <div class="container">
+                <div class="encabezado-seccion">
+                    <span class="etiqueta-seccion">Selección de la semana</span>
+                    <h2>Productos destacados</h2>
+                    <p class="texto-suave mb-0">Seis equipos probados por el equipo de Nivel 99 antes de llegar a la
+                        tienda. Todos incluyen garantía escrita y configuración inicial sin costo.</p>
                 </div>
-            </div>
-            <div class="row g-4 mt-1">
-                <div class="col-md-6 col-xl-3">
-                    <article class="placeholder-product">
-                        <div class="placeholder-image">Imagen del producto</div>
-                        <div class="p-3"><span class="eyebrow">Categoría</span>
-                            <h3 class="h5 mt-2">Producto de ejemplo</h3>
-                            <p class="text-secondary small">Descripción a sustituir por el equipo.</p>
-                            <div class="d-flex justify-content-between align-items-center"><strong>$ 0</strong><button
-                                    class="btn btn-primary btn-sm" disabled>Ver producto</button></div>
+                <div class="row g-4">
+                <article class="col-md-6 col-xl-4">
+                    <div class="card h-100 tarjeta-producto">
+                        <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Teclado mecánico compacto con retroiluminación azul">
+                        <div class="card-body d-flex flex-column">
+                            <span class="etiqueta-seccion">Periféricos</span>
+                            <h3 class="h5 card-title">Teclado mecánico TKL Aurora</h3>
+                            <p class="card-text texto-suave small">Switches lineales, doble amortiguación y retroiluminación azul regulable.</p>
+                            <p class="disponibilidad disponible">En stock</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                <span class="precio">$ 4.290</span>
+                                <a class="btn btn-primary btn-sm" href="producto.html"
+                                    aria-label="Ver el producto Teclado mecánico TKL Aurora">Ver producto</a>
+                            </div>
                         </div>
-                    </article>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <article class="placeholder-product">
-                        <div class="placeholder-image">Imagen del producto</div>
-                        <div class="p-3"><span class="eyebrow">Categoría</span>
-                            <h3 class="h5 mt-2">Producto de ejemplo</h3>
-                            <p class="text-secondary small">Descripción a sustituir por el equipo.</p>
-                            <div class="d-flex justify-content-between align-items-center"><strong>$ 0</strong><button
-                                    class="btn btn-primary btn-sm" disabled>Ver producto</button></div>
+                    </div>
+                </article>
+                <article class="col-md-6 col-xl-4">
+                    <div class="card h-100 tarjeta-producto">
+                        <img src="https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Mouse gamer inalámbrico apoyado sobre un escritorio">
+                        <div class="card-body d-flex flex-column">
+                            <span class="etiqueta-seccion">Periféricos</span>
+                            <h3 class="h5 card-title">Mouse inalámbrico Vortex 60g</h3>
+                            <p class="card-text texto-suave small">Sensor de 26.000 DPI, 70 horas de batería y solo 60 gramos de peso.</p>
+                            <p class="disponibilidad disponible">En stock</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                <span class="precio">$ 3.150</span>
+                                <a class="btn btn-primary btn-sm" href="producto.html"
+                                    aria-label="Ver el producto Mouse inalámbrico Vortex 60g">Ver producto</a>
+                            </div>
                         </div>
-                    </article>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <article class="placeholder-product">
-                        <div class="placeholder-image">Imagen del producto</div>
-                        <div class="p-3"><span class="eyebrow">Categoría</span>
-                            <h3 class="h5 mt-2">Producto de ejemplo</h3>
-                            <p class="text-secondary small">Descripción a sustituir por el equipo.</p>
-                            <div class="d-flex justify-content-between align-items-center"><strong>$ 0</strong><button
-                                    class="btn btn-primary btn-sm" disabled>Ver producto</button></div>
+                    </div>
+                </article>
+                <article class="col-md-6 col-xl-4">
+                    <div class="card h-100 tarjeta-producto">
+                        <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Monitor de escritorio encendido sobre una mesa de trabajo">
+                        <div class="card-body d-flex flex-column">
+                            <span class="etiqueta-seccion">Monitores</span>
+                            <h3 class="h5 card-title">Monitor Nova 27" QHD 165 Hz</h3>
+                            <p class="card-text texto-suave small">Panel IPS de 2560 x 1440, 1 ms de respuesta y soporte con altura regulable.</p>
+                            <p class="disponibilidad limitado">Últimas 3 unidades</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                <span class="precio">$ 21.900</span>
+                                <a class="btn btn-primary btn-sm" href="producto.html"
+                                    aria-label="Ver el producto Monitor Nova 27" QHD 165 Hz">Ver producto</a>
+                            </div>
                         </div>
-                    </article>
-                </div>
-                <div class="col-md-6 col-xl-3">
-                    <article class="placeholder-product">
-                        <div class="placeholder-image">Imagen del producto</div>
-                        <div class="p-3"><span class="eyebrow">Categoría</span>
-                            <h3 class="h5 mt-2">Producto de ejemplo</h3>
-                            <p class="text-secondary small">Descripción a sustituir por el equipo.</p>
-                            <div class="d-flex justify-content-between align-items-center"><strong>$ 0</strong><button
-                                    class="btn btn-primary btn-sm" disabled>Ver producto</button></div>
+                    </div>
+                </article>
+                <article class="col-md-6 col-xl-4">
+                    <div class="card h-100 tarjeta-producto">
+                        <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Auriculares over ear apoyados sobre un soporte">
+                        <div class="card-body d-flex flex-column">
+                            <span class="etiqueta-seccion">Audio y streaming</span>
+                            <h3 class="h5 card-title">Auriculares Echo 7.1</h3>
+                            <p class="card-text texto-suave small">Sonido envolvente por software, micrófono desmontable y almohadillas de memoria.</p>
+                            <p class="disponibilidad disponible">En stock</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                <span class="precio">$ 5.480</span>
+                                <a class="btn btn-primary btn-sm" href="producto.html"
+                                    aria-label="Ver el producto Auriculares Echo 7.1">Ver producto</a>
+                            </div>
                         </div>
-                    </article>
+                    </div>
+                </article>
+                <article class="col-md-6 col-xl-4">
+                    <div class="card h-100 tarjeta-producto">
+                        <img src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Micrófono de condensador con brazo articulado">
+                        <div class="card-body d-flex flex-column">
+                            <span class="etiqueta-seccion">Audio y streaming</span>
+                            <h3 class="h5 card-title">Micrófono USB Stream One</h3>
+                            <p class="card-text texto-suave small">Cápsula cardioide, monitoreo sin latencia y brazo articulado incluido.</p>
+                            <p class="disponibilidad limitado">Reposición en 5 días</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                <span class="precio">$ 4.950</span>
+                                <a class="btn btn-primary btn-sm" href="producto.html"
+                                    aria-label="Ver el producto Micrófono USB Stream One">Ver producto</a>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                <article class="col-md-6 col-xl-4">
+                    <div class="card h-100 tarjeta-producto">
+                        <img src="https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Silla gamer ergonómica frente a un escritorio">
+                        <div class="card-body d-flex flex-column">
+                            <span class="etiqueta-seccion">Mobiliario gamer</span>
+                            <h3 class="h5 card-title">Silla ergonómica Rush Pro</h3>
+                            <p class="card-text texto-suave small">Soporte lumbar ajustable, apoyabrazos 4D y tapizado transpirable.</p>
+                            <p class="disponibilidad disponible">En stock</p>
+                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                <span class="precio">$ 15.700</span>
+                                <a class="btn btn-primary btn-sm" href="producto.html"
+                                    aria-label="Ver el producto Silla ergonómica Rush Pro">Ver producto</a>
+                            </div>
+                        </div>
+                    </div>
+                </article>
                 </div>
+                <p class="mt-4 mb-0">
+                    <a class="btn btn-outline-primary" href="catalogo.html">Ver todos los productos</a>
+                </p>
             </div>
         </section>
         <section class="benefits py-5">
