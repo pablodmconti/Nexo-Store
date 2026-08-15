@@ -493,3 +493,118 @@ p {
   border-top: 1px solid rgba(255, 255, 255, 0.14);
   font-size: 0.85rem;
 }
+
+/* ---------------------------------------------------------------
+   13. ACCESIBILIDAD
+   --------------------------------------------------------------- */
+.salto-contenido {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 1100;
+  background-color: var(--color-acento);
+  color: var(--color-noche);
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 var(--radio-chico) 0;
+}
+
+.salto-contenido:focus {
+  left: 0;
+}
+
+a:focus-visible,
+button:focus-visible,
+.nav-link:focus-visible,
+.navbar-toggler:focus-visible {
+  outline: 3px solid var(--color-acento);
+  outline-offset: 3px;
+  border-radius: var(--radio-chico);
+}
+
+.navbar .nav-link:focus-visible {
+  color: #ffffff;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* ---------------------------------------------------------------
+   14. DISEÑO RESPONSIVE
+   Puntos de control: 1366 px (escritorio), 768 px (tablet)
+   y 375 px (teléfono).
+   --------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+  :root {
+    --espacio-seccion: 3.25rem;
+  }
+
+  .navbar-collapse {
+    padding-top: 0.75rem;
+  }
+
+  .navbar .nav-link {
+    padding-inline: 0.5rem;
+  }
+
+  .hero-figura img {
+    height: 340px;
+  }
+
+  .hero-destacado {
+    position: static;
+    max-width: none;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .hero {
+    text-align: left;
+  }
+
+  .hero-figura img {
+    height: 260px;
+  }
+
+  .lista-datos li {
+    border-left-width: 2px;
+    padding-left: 0.6rem;
+  }
+
+  .lista-datos strong {
+    font-size: 1.15rem;
+  }
+
+  .lista-datos span {
+    font-size: 0.75rem;
+  }
+
+  .tarjeta-producto .card-img-top {
+    height: 190px;
+  }
+
+  .tarjeta-producto .card-title {
+    min-height: 0;
+  }
+
+  .locked-module {
+    padding: 28px 20px;
+    margin: 24px auto;
+  }
+}
+
+@media (max-width: 400px) {
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .btn-lg {
+    width: 100%;
+  }
+
+  .tarjeta-beneficio {
+    padding: 1.25rem;
+  }
+}
