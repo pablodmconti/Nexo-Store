@@ -4,14 +4,22 @@
    Estudiante: Pablo Montaña Conti
    ---------------------------------------------------------------------
    Organización del archivo:
-   1. Variables de la identidad visual
-   2. Estilos base del documento
-   3. Tipografía
-   4. Botones
-   5. Tarjetas
-   6. Barra de navegación
-   7. Pie de página
-   8. Módulos bloqueados (sprints futuros)
+    1. Variables de la identidad visual
+    2. Estilos base del documento
+    3. Tipografía
+    4. Botones
+    5. Tarjetas
+    6. Barra de navegación
+    7. Pie de página
+    8. Módulos bloqueados (sprints futuros)
+    9. Sección principal (hero)
+   10. Tarjetas de productos destacados
+   11. Sección de beneficios
+   12. Contenido del pie de página
+   13. Accesibilidad
+   14. Diseño responsive
+   15. Ventana modal
+   16. Avisos de los próximos sprints
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -65,11 +73,8 @@ body {
 }
 
 .seccion {
-  padding-block: var(--espacio-seccion);
-}
-
-.seccion-clara {
-  background-color: var(--color-superficie);
+  padding-top: var(--espacio-seccion);
+  padding-bottom: var(--espacio-seccion);
 }
 
 /* ---------------------------------------------------------------
@@ -118,7 +123,8 @@ p {
   font-weight: 600;
   letter-spacing: 0.03em;
   border-radius: var(--radio-chico);
-  padding-inline: 1.4rem;
+  padding-left: 1.4rem;
+  padding-right: 1.4rem;
   transition: transform 0.15s ease, box-shadow 0.15s ease,
     background-color 0.15s ease, color 0.15s ease;
 }
@@ -184,7 +190,8 @@ p {
    --------------------------------------------------------------- */
 .navbar {
   background-color: var(--color-noche);
-  padding-block: 0.75rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .navbar-brand img {
@@ -195,7 +202,8 @@ p {
 .navbar .nav-link {
   color: rgba(255, 255, 255, 0.78);
   font-weight: 500;
-  padding-inline: 0.85rem;
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
   border-radius: var(--radio-chico);
 }
 
@@ -234,8 +242,7 @@ p {
 
 .btn-carrito:hover,
 .btn-carrito:focus {
-  color: var(--color-noche);
-  background-color: var(--color-acento);
+  background-color: var(--color-noche-suave);
   border-color: var(--color-acento);
 }
 
@@ -245,7 +252,8 @@ p {
   right: -8px;
   min-width: 20px;
   height: 20px;
-  padding-inline: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
   border-radius: 999px;
   background-color: var(--color-acento);
   color: var(--color-noche);
@@ -306,11 +314,12 @@ p {
    --------------------------------------------------------------- */
 .hero {
   background: linear-gradient(160deg, var(--color-primario-claro) 0%, #ffffff 55%, var(--color-superficie) 100%);
-  padding-block: var(--espacio-seccion);
+  padding-top: var(--espacio-seccion);
+  padding-bottom: var(--espacio-seccion);
 }
 
 .hero h1 {
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-size: 3.4rem;
   line-height: 1.1;
 }
 
@@ -513,16 +522,16 @@ p {
   left: 0;
 }
 
-a:focus-visible,
-button:focus-visible,
-.nav-link:focus-visible,
-.navbar-toggler:focus-visible {
+a:focus,
+button:focus,
+.nav-link:focus,
+.navbar-toggler:focus {
   outline: 3px solid var(--color-acento);
   outline-offset: 3px;
   border-radius: var(--radio-chico);
 }
 
-.navbar .nav-link:focus-visible {
+.navbar .nav-link:focus {
   color: #ffffff;
 }
 
@@ -545,7 +554,12 @@ img {
   }
 
   .navbar .nav-link {
-    padding-inline: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .hero h1 {
+    font-size: 2.8rem;
   }
 
   .hero-figura img {
@@ -562,6 +576,10 @@ img {
 @media (max-width: 767.98px) {
   .hero {
     text-align: left;
+  }
+
+  .hero h1 {
+    font-size: 2.2rem;
   }
 
   .hero-figura img {
@@ -647,19 +665,10 @@ img {
 }
 
 .lista-pendientes {
-  columns: 2;
-  column-gap: 2rem;
   margin-bottom: 0;
   color: var(--color-texto-suave);
 }
 
 .lista-pendientes li {
   margin-bottom: 0.4rem;
-  break-inside: avoid;
-}
-
-@media (max-width: 575.98px) {
-  .lista-pendientes {
-    columns: 1;
-  }
 }

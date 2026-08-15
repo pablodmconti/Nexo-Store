@@ -37,8 +37,8 @@ asesoramiento antes que el precio más bajo del mercado.
 | Tecnología | Uso en el Sprint 1 |
 | --- | --- |
 | HTML5 | Estructura semántica de todas las páginas |
-| CSS3 | Identidad visual, variables, Flexbox y media queries |
-| Bootstrap 5.3 (CDN) | Grilla, navbar, cards, botones, modal y toast |
+| CSS3 | Identidad visual, variables, modelo de caja, Flexbox y media queries |
+| Bootstrap 5.3 (CDN) | Grilla de 12 columnas, navbar, cards, botones, modal y toast |
 | JavaScript | Solo comportamiento básico de la interfaz (`js/base.js`) |
 | Google Fonts | Tipografías Chakra Petch e Inter |
 | Git y GitHub | Control de versiones y publicación de los avances |
@@ -61,7 +61,7 @@ Nexo-Store/
 │   └── pages/          Reservada para los próximos sprints
 ├── assets/
 │   ├── img/            Imágenes propias y placeholder de producto
-│   ├── icons/          Íconos SVG de la sección de beneficios
+│   ├── icons/          Íconos SVG de la sección de beneficios y del carrito
 │   └── logo/           Logotipo e isotipo de Nivel 99
 ├── README.md
 └── .gitignore
@@ -109,7 +109,9 @@ Nexo-Store/
 - No existe desplazamiento horizontal en 375, 768 ni 1366 píxeles.
 - Las páginas de los próximos sprints conservan su cartel de funcionalidad en desarrollo.
 - La navegación puede recorrerse con el teclado y el foco siempre queda visible.
-- El historial del repositorio contiene commits descriptivos distribuidos durante el sprint.
+- El contraste de todas las combinaciones de color del sitio supera la relación 4.5:1 (WCAG AA).
+- El historial del repositorio contiene commits con mensajes descriptivos, uno por cada
+  bloque de trabajo del sprint.
 
 ## Funcionalidades pendientes
 
@@ -135,6 +137,10 @@ Nexo-Store/
   seis páginas para que el sistema se perciba como un único producto.
 - **Íconos y logotipo en SVG.** Se almacenan en `assets/` porque escalan sin perder
   calidad y no dependen de librerías externas de íconos.
+- **Alcance técnico acotado al curso.** El sitio se resolvió con los recursos trabajados en
+  las semanas 1 a 4: HTML semántico, selectores, herencia, especificidad, modelo de caja,
+  `box-sizing`, `position`, pseudo-clases, `::before` y los componentes de Bootstrap
+  (contenedores, grilla de 12 columnas, utilidades, botones, cards, navbar y formularios).
 
 ## Limitaciones conocidas
 

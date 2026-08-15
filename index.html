@@ -40,13 +40,8 @@
                     <div class="d-flex align-items-center gap-2 pb-2 pb-lg-0">
                         <button class="btn btn-carrito position-relative" type="button" id="btnCartPlaceholder"
                             aria-label="Ver el carrito de compras: 0 productos">
-                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-                                focusable="false">
-                                <circle cx="9" cy="20" r="1.6"></circle>
-                                <circle cx="18" cy="20" r="1.6"></circle>
-                                <path d="M2 3h3l2.6 12h11L21 7H6"></path>
-                            </svg>
+                            <img src="assets/icons/carrito.svg" alt="" width="22" height="22"
+                                aria-hidden="true">
                             <span class="badge-carrito">0</span>
                         </button>
                         <button class="btn btn-acento btn-sm" type="button" id="btnLoginPlaceholder">Ingresar</button>
@@ -109,70 +104,78 @@
                         tienda. Todos incluyen garantía escrita y configuración inicial sin costo.</p>
                 </div>
                 <div class="row g-4">
-                <article class="col-md-6 col-xl-3">
-                    <div class="card h-100 tarjeta-producto">
-                        <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Teclado mecánico compacto con retroiluminación azul">
-                        <div class="card-body d-flex flex-column">
-                            <span class="etiqueta-seccion">Periféricos</span>
-                            <h3 class="h5 card-title">Teclado mecánico TKL Aurora</h3>
-                            <p class="card-text texto-suave small">Switches lineales, doble amortiguación y retroiluminación azul regulable.</p>
-                            <p class="disponibilidad disponible">En stock</p>
-                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                <span class="precio">$ 4.290</span>
-                                <a class="btn btn-primary btn-sm" href="producto.html"
-                                    aria-label="Ver el producto Teclado mecánico TKL Aurora">Ver producto</a>
+                    <article class="col-md-6 col-xl-3">
+                        <div class="card h-100 tarjeta-producto">
+                            <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+                                class="card-img-top" alt="Teclado mecánico compacto con retroiluminación azul">
+                            <div class="card-body d-flex flex-column">
+                                <span class="etiqueta-seccion">Periféricos</span>
+                                <h3 class="h5 card-title">Teclado mecánico TKL Aurora</h3>
+                                <p class="card-text texto-suave small">Switches lineales, doble amortiguación y
+                                    retroiluminación azul regulable.</p>
+                                <p class="disponibilidad disponible">En stock</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                    <span class="precio">$ 4.290</span>
+                                    <a class="btn btn-primary btn-sm" href="producto.html"
+                                        aria-label="Ver el producto Teclado mecánico TKL Aurora">Ver producto</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </article>
-                <article class="col-md-6 col-xl-3">
-                    <div class="card h-100 tarjeta-producto">
-                        <img src="https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Mouse gamer inalámbrico apoyado sobre un escritorio">
-                        <div class="card-body d-flex flex-column">
-                            <span class="etiqueta-seccion">Periféricos</span>
-                            <h3 class="h5 card-title">Mouse inalámbrico Vortex 60g</h3>
-                            <p class="card-text texto-suave small">Sensor de 26.000 DPI, 70 horas de batería y solo 60 gramos de peso.</p>
-                            <p class="disponibilidad disponible">En stock</p>
-                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                <span class="precio">$ 3.150</span>
-                                <a class="btn btn-primary btn-sm" href="producto.html"
-                                    aria-label="Ver el producto Mouse inalámbrico Vortex 60g">Ver producto</a>
+                    </article>
+                    <article class="col-md-6 col-xl-3">
+                        <div class="card h-100 tarjeta-producto">
+                            <img src="https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=800&q=80"
+                                class="card-img-top" alt="Mouse gamer inalámbrico apoyado sobre un escritorio">
+                            <div class="card-body d-flex flex-column">
+                                <span class="etiqueta-seccion">Periféricos</span>
+                                <h3 class="h5 card-title">Mouse inalámbrico Vortex 60g</h3>
+                                <p class="card-text texto-suave small">Sensor de 26.000 DPI, 70 horas de batería y
+                                    solo 60 gramos de peso.</p>
+                                <p class="disponibilidad disponible">En stock</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                    <span class="precio">$ 3.150</span>
+                                    <a class="btn btn-primary btn-sm" href="producto.html"
+                                        aria-label="Ver el producto Mouse inalámbrico Vortex 60g">Ver producto</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </article>
-                <article class="col-md-6 col-xl-3">
-                    <div class="card h-100 tarjeta-producto">
-                        <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Monitor de escritorio encendido sobre una mesa de trabajo">
-                        <div class="card-body d-flex flex-column">
-                            <span class="etiqueta-seccion">Monitores</span>
-                            <h3 class="h5 card-title">Monitor Nova 27" QHD 165 Hz</h3>
-                            <p class="card-text texto-suave small">Panel IPS de 2560 x 1440, 1 ms de respuesta y soporte con altura regulable.</p>
-                            <p class="disponibilidad limitado">Últimas 3 unidades</p>
-                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                <span class="precio">$ 21.900</span>
-                                <a class="btn btn-primary btn-sm" href="producto.html"
-                                    aria-label="Ver el producto Monitor Nova 27" QHD 165 Hz">Ver producto</a>
+                    </article>
+                    <article class="col-md-6 col-xl-3">
+                        <div class="card h-100 tarjeta-producto">
+                            <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80"
+                                class="card-img-top" alt="Monitor de escritorio encendido sobre una mesa de trabajo">
+                            <div class="card-body d-flex flex-column">
+                                <span class="etiqueta-seccion">Monitores</span>
+                                <h3 class="h5 card-title">Monitor Nova 27" QHD 165 Hz</h3>
+                                <p class="card-text texto-suave small">Panel IPS de 2560 x 1440, 1 ms de respuesta y
+                                    soporte con altura regulable.</p>
+                                <p class="disponibilidad limitado">Últimas 3 unidades</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                    <span class="precio">$ 21.900</span>
+                                    <a class="btn btn-primary btn-sm" href="producto.html"
+                                        aria-label="Ver el producto Monitor Nova 27 pulgadas QHD 165 Hz">Ver producto</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </article>
-                <article class="col-md-6 col-xl-3">
-                    <div class="card h-100 tarjeta-producto">
-                        <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Auriculares over ear apoyados sobre un soporte">
-                        <div class="card-body d-flex flex-column">
-                            <span class="etiqueta-seccion">Audio y streaming</span>
-                            <h3 class="h5 card-title">Auriculares Echo 7.1</h3>
-                            <p class="card-text texto-suave small">Sonido envolvente por software, micrófono desmontable y almohadillas de memoria.</p>
-                            <p class="disponibilidad disponible">En stock</p>
-                            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                <span class="precio">$ 5.480</span>
-                                <a class="btn btn-primary btn-sm" href="producto.html"
-                                    aria-label="Ver el producto Auriculares Echo 7.1">Ver producto</a>
+                    </article>
+                    <article class="col-md-6 col-xl-3">
+                        <div class="card h-100 tarjeta-producto">
+                            <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
+                                class="card-img-top" alt="Auriculares over ear apoyados sobre un soporte">
+                            <div class="card-body d-flex flex-column">
+                                <span class="etiqueta-seccion">Audio y streaming</span>
+                                <h3 class="h5 card-title">Auriculares Echo 7.1</h3>
+                                <p class="card-text texto-suave small">Sonido envolvente por software, micrófono
+                                    desmontable y almohadillas de memoria.</p>
+                                <p class="disponibilidad disponible">En stock</p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                                    <span class="precio">$ 5.480</span>
+                                    <a class="btn btn-primary btn-sm" href="producto.html"
+                                        aria-label="Ver el producto Auriculares Echo 7.1">Ver producto</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
                 </div>
                 <p class="mt-4 mb-0">
                     <a class="btn btn-outline-primary" href="catalogo.html">Ver todos los productos</a>
@@ -192,28 +195,32 @@
                         <div class="tarjeta-beneficio h-100">
                             <img src="assets/icons/envio.svg" alt="" width="48" height="48" aria-hidden="true">
                             <h3 class="h5 mt-3">Envíos a todo el país</h3>
-                            <p class="mb-0">Entrega en 24 horas en Artigas y de 48 a 72 horas en demás localidades mediante Correo Uruguayo.</p>
+                            <p class="mb-0">Entrega en 24 horas en Artigas y de 48 a 72 horas en demás localidades
+                                mediante Correo Uruguayo.</p>
                         </div>
                     </article>
                     <article class="col-md-6 col-xl-3">
                         <div class="tarjeta-beneficio h-100">
                             <img src="assets/icons/garantia.svg" alt="" width="48" height="48" aria-hidden="true">
                             <h3 class="h5 mt-3">Garantía escrita de 12 meses</h3>
-                            <p class="mb-0">Todos los productos incluyen comprobante y cobertura por defectos de fábrica.</p>
+                            <p class="mb-0">Todos los productos incluyen comprobante y cobertura por defectos de
+                                fábrica.</p>
                         </div>
                     </article>
                     <article class="col-md-6 col-xl-3">
                         <div class="tarjeta-beneficio h-100">
                             <img src="assets/icons/soporte.svg" alt="" width="48" height="48" aria-hidden="true">
                             <h3 class="h5 mt-3">Soporte técnico real</h3>
-                            <p class="mb-0">Te ayudamos a elegir, armar y configurar tu setup por WhatsApp o de forma presencial.</p>
+                            <p class="mb-0">Te ayudamos a elegir, armar y configurar tu setup por WhatsApp o de forma
+                                presencial.</p>
                         </div>
                     </article>
                     <article class="col-md-6 col-xl-3">
                         <div class="tarjeta-beneficio h-100">
                             <img src="assets/icons/cambios.svg" alt="" width="48" height="48" aria-hidden="true">
                             <h3 class="h5 mt-3">Cambios sin vueltas</h3>
-                            <p class="mb-0">Contás con diez días corridos para cambiar el producto si no se adapta a tu escritorio.</p>
+                            <p class="mb-0">Contás con diez días corridos para cambiar el producto si no se adapta a
+                                tu escritorio.</p>
                         </div>
                     </article>
                 </div>
