@@ -631,3 +631,35 @@ img {
   color: var(--color-texto-suave);
   font-size: 0.95rem;
 }
+
+/* ---------------------------------------------------------------
+   16. AVISOS DE LAS PÁGINAS DE PRÓXIMOS SPRINTS
+   --------------------------------------------------------------- */
+.pastilla-sprint {
+  display: inline-block;
+  background-color: var(--color-primario-claro);
+  color: var(--color-primario-oscuro);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+}
+
+.lista-pendientes {
+  columns: 2;
+  column-gap: 2rem;
+  margin-bottom: 0;
+  color: var(--color-texto-suave);
+}
+
+.lista-pendientes li {
+  margin-bottom: 0.4rem;
+  break-inside: avoid;
+}
+
+@media (max-width: 575.98px) {
+  .lista-pendientes {
+    columns: 1;
+  }
+}
