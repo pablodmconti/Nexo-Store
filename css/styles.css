@@ -300,3 +300,83 @@ p {
   border-radius: var(--radio-medio);
   padding: 24px;
 }
+
+/* ---------------------------------------------------------------
+   9. SECCIÓN PRINCIPAL (HERO)
+   --------------------------------------------------------------- */
+.hero {
+  background: linear-gradient(160deg, var(--color-primario-claro) 0%, #ffffff 55%, var(--color-superficie) 100%);
+  padding-block: var(--espacio-seccion);
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.1;
+}
+
+.pastilla-hero {
+  display: inline-block;
+  background-color: var(--color-noche);
+  color: #ffffff;
+  font-family: var(--fuente-titulos);
+  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+}
+
+.lista-datos {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.lista-datos li {
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid var(--color-acento);
+  padding-left: 0.85rem;
+}
+
+.lista-datos strong {
+  font-family: var(--fuente-titulos);
+  font-size: 1.5rem;
+  color: var(--color-primario);
+}
+
+.lista-datos span {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+.hero-figura {
+  position: relative;
+  margin: 0;
+}
+
+.hero-figura img {
+  width: 100%;
+  height: 430px;
+  object-fit: cover;
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra-fuerte);
+}
+
+.hero-destacado {
+  position: absolute;
+  left: -24px;
+  bottom: -28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background-color: #ffffff;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  box-shadow: var(--sombra-media);
+  padding: 1rem 1.25rem;
+  max-width: 260px;
+}
+
+.hero-destacado strong {
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+}
