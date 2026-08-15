@@ -452,3 +452,44 @@ p {
   color: rgba(255, 255, 255, 0.78);
   line-height: 1.6;
 }
+
+/* ---------------------------------------------------------------
+   12. CONTENIDO DEL PIE DE PÁGINA
+   --------------------------------------------------------------- */
+.logo-footer {
+  background-color: #ffffff;
+  border-radius: var(--radio-chico);
+  padding: 0.5rem 0.75rem;
+  max-width: 100%;
+  height: auto;
+}
+
+.titulo-footer {
+  font-family: var(--fuente-titulos);
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 1rem;
+}
+
+.lista-footer {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+  font-size: 0.92rem;
+}
+
+.lista-footer li {
+  margin-bottom: 0.5rem;
+}
+
+.nota-footer {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 0.75rem;
+}
+
+.linea-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 0.85rem;
+}
