@@ -13,7 +13,7 @@ Entrega correspondiente al **Sprint 1 · Interfaz web e identidad visual**.
 Nivel 99 es una tienda uruguaya especializada en equipamiento para escritorios gamer.
 Vende periféricos, monitores, audio, componentes y mobiliario, y su diferencial es el
 asesoramiento personal: cada compra la sigue una persona del equipo, con garantía escrita
-de doce meses y entrega en 24 horas en Montevideo.
+de doce meses y entrega en 24 horas en Artigas.
 
 El estilo de comunicación es cercano, directo y en segunda persona del singular rioplatense.
 
