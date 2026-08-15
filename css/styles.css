@@ -608,3 +608,26 @@ img {
     padding: 1.25rem;
   }
 }
+
+/* ---------------------------------------------------------------
+   15. VENTANA MODAL "CÓMO COMPRAR"
+   --------------------------------------------------------------- */
+.pasos-compra {
+  padding-left: 1.2rem;
+  margin-bottom: 1.25rem;
+}
+
+.pasos-compra li {
+  margin-bottom: 0.85rem;
+}
+
+.pasos-compra strong {
+  display: block;
+  font-family: var(--fuente-titulos);
+  color: var(--color-primario);
+}
+
+.pasos-compra span {
+  color: var(--color-texto-suave);
+  font-size: 0.95rem;
+}

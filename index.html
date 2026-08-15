@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang='es'>
+<html lang="es">
 
 <head>
     <meta charset="utf-8">
@@ -15,7 +15,7 @@
     <title>Nivel 99 | Inicio</title>
 </head>
 
-<body class='d-flex flex-column min-vh-100' data-page='inicio'>
+<body class="d-flex flex-column min-vh-100" data-page="inicio">
     <a class="salto-contenido" href="#contenido">Saltar al contenido principal</a>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm" aria-label="Navegación principal">
@@ -251,38 +251,39 @@
                 </div>
             </div>
         </section>
-        <div class="modal fade" id="projectInfoModal" tabindex="-1">
+        <div class="modal fade" id="projectInfoModal" tabindex="-1" aria-labelledby="tituloModalCompra"
+            aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="modal-title fs-5">Roadmap</h2><button class="btn-close"
-                            data-bs-dismiss="modal"></button>
+                        <h2 class="modal-title fs-5" id="tituloModalCompra">Cómo comprar en Nivel 99</h2>
+                        <button class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar la ventana"></button>
                     </div>
                     <div class="modal-body">
-                        <p>El proyecto se desarrollará progresivamente en cuatro sprints.</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="sprint-summary"><strong>Sprint 1 · Semanas 1 a 4</strong><span>Inicio,
-                                        identidad visual, HTML, CSS, Bootstrap y diseño responsive</span></div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="sprint-summary"><strong>Sprint 2 · Semanas 5 a 8</strong><span>Catálogo
-                                        dinámico, detalle de producto, carrito y LocalStorage</span></div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="sprint-summary"><strong>Sprint 3 · Semanas 9 a 12</strong><span>Firebase,
-                                        autenticación, perfil, pedidos y administración inicial</span></div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="sprint-summary"><strong>Sprint 4 · Semanas 13 a 15</strong><span>Seguridad,
-                                        roles, pruebas, accesibilidad, despliegue y presentación</span></div>
-                            </div>
-                        </div>
+                        <p>Comprar en Nivel 99 lleva cuatro pasos y siempre te atiende una persona del equipo.</p>
+                        <ol class="pasos-compra">
+                            <li>
+                                <strong>Elegís tu equipo</strong>
+                                <span>Mirá los productos destacados o escribinos para armar un combo a medida.</span>
+                            </li>
+                            <li>
+                                <strong>Confirmás el pedido</strong>
+                                <span>Te enviamos el detalle con precio final, formas de pago y plazo de entrega.</span>
+                            </li>
+                            <li>
+                                <strong>Recibís el envío</strong>
+                                <span>Entregamos en 24 horas en Montevideo y de 48 a 72 horas en el interior.</span>
+                            </li>
+                            <li>
+                                <strong>Quedás cubierto</strong>
+                                <span>Doce meses de garantía escrita y diez días para cambiar el producto.</span>
+                            </li>
+                        </ol>
+                        <p class="texto-suave mb-0"><small>La compra en línea se habilitará en las próximas versiones
+                                del sitio. Por ahora el pedido se coordina por correo o teléfono.</small></p>
                     </div>
                 </div>
             </div>
-        </div>
-        </div>
         </div>
     </main>
     <footer class="footer mt-auto">
@@ -331,9 +332,11 @@
         </div>
     </footer>
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="appToast" class="toast">
-            <div class="toast-header"><strong class="me-auto">Nexo Store</strong><button class="btn-close"
-                    data-bs-dismiss="toast"></button></div>
+        <div id="appToast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Nivel 99</strong>
+                <button class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar el aviso"></button>
+            </div>
             <div class="toast-body" id="toastMessage"></div>
         </div>
     </div>
