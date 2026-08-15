@@ -385,7 +385,7 @@ p {
    10. TARJETAS DE PRODUCTOS DESTACADOS
    --------------------------------------------------------------- */
 .tarjeta-producto .card-img-top {
-  height: 220px;
+  height: 200px;
   object-fit: cover;
   background-color: var(--color-superficie);
 }

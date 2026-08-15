@@ -83,7 +83,7 @@ Nexo-Store/
   menú responsive y marcado visual de la página actual.
 - Sección principal (hero) con `h1`, propuesta de valor, descripción, imagen, botón
   principal hacia el catálogo, botón secundario y datos destacados.
-- Seis productos destacados escritos directamente en HTML, con imagen, categoría, nombre,
+- Cuatro productos destacados escritos directamente en HTML, con imagen, categoría, nombre,
   descripción, precio, disponibilidad y botón hacia la ficha del producto.
 - Sección de beneficios con cuatro ítems, cada uno con ícono SVG propio, título y texto.
 - Pie de página con logotipo, navegación, contacto, redes simuladas, año y aclaración de
