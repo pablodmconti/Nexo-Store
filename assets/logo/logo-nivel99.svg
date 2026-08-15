@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" width="260" height="64" role="img" aria-label="Nivel 99">
+  <title>Nivel 99</title>
+  <rect x="2" y="8" width="48" height="48" rx="14" fill="#0B6FD4"/>
+  <path d="M14 44 L26 20 L38 44" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="26" cy="46" r="3.5" fill="#22D3EE"/>
+  <text x="64" y="34" font-family="'Chakra Petch','Segoe UI',sans-serif" font-size="24" font-weight="700" fill="#0A1A2B" letter-spacing="1">NIVEL</text>
+  <text x="152" y="34" font-family="'Chakra Petch','Segoe UI',sans-serif" font-size="24" font-weight="700" fill="#0B6FD4" letter-spacing="1">99</text>
+  <text x="64" y="50" font-family="'Inter','Segoe UI',sans-serif" font-size="10" fill="#5A6B7F" letter-spacing="2.5">GAMING SETUP STORE</text>
+</svg>

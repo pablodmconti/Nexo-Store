@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Envios">
+  <title>Envios</title>
+  <rect x="3" y="14" width="26" height="19" rx="3" fill="none" stroke="#22D3EE" stroke-width="3"/>
+  <path d="M29 20h8l8 8v5h-16z" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="13" cy="37" r="4" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+  <circle cx="36" cy="37" r="4" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+</svg>
