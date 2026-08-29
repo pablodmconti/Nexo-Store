@@ -11,3 +11,6 @@ desktop.ini
 *.log
 *.tmp
 *~
+
+# Respaldo local del catalogo del Sprint 1 (la version original esta en el historial de git)
+*.bak

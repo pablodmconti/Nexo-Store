@@ -1,7 +1,8 @@
 # Nivel 99 · Gaming Setup Store
 
 Proyecto integrador de **Desarrollo Web** (CFE | ANEP) desarrollado sobre la base *Nexo Store*.
-Entrega correspondiente al **Sprint 1 · Interfaz web e identidad visual**.
+Entrega correspondiente al **Sprint 2 · Catálogo, detalle de producto y carrito**
+(el Sprint 1, interfaz web e identidad visual, ya está integrado).
 
 - **Estudiante:** Pablo Montaña Conti
 - **Curso:** Desarrollo Web · 2.º semestre · Año lectivo 2026
@@ -48,15 +49,17 @@ asesoramiento antes que el precio más bajo del mercado.
 ```
 Nexo-Store/
 ├── index.html          Página de inicio personalizada
-├── catalogo.html       Bloqueada · Sprint 2
-├── producto.html       Bloqueada · Sprint 2
-├── carrito.html        Bloqueada · Sprint 2
+├── catalogo.html       Catálogo dinámico generado desde JavaScript
+├── producto.html       En desarrollo · Sprint 2 (semana del 6/9)
+├── carrito.html        En desarrollo · Sprint 2 (semana del 13/9)
 ├── perfil.html         Bloqueada · Sprint 3
 ├── admin.html          Bloqueada · Sprint 3
 ├── css/
 │   └── styles.css      Hoja de estilos organizada en 16 secciones comentadas
 ├── js/
 │   ├── base.js         Navegación activa y avisos de funcionalidades futuras
+│   ├── productos.js    Arreglo de objetos con los productos de la tienda
+│   ├── catalogo.js     Recorre el arreglo y genera las tarjetas del catálogo
 │   ├── modules/        Reservada para los próximos sprints
 │   └── pages/          Reservada para los próximos sprints
 ├── assets/
@@ -74,6 +77,52 @@ Nexo-Store/
 3. Iniciar la extensión **Live Server** sobre `index.html` (o abrir el archivo directamente en el navegador).
 4. Se requiere conexión a internet, ya que Bootstrap, las tipografías y las fotografías de
    los productos se cargan desde servicios externos (CDN, Google Fonts y Unsplash).
+
+## Funcionalidades desarrolladas en el Sprint 2
+
+### Semana del 23/8 · Productos y catálogo dinámico
+
+- **Los productos dejaron de estar escritos en el HTML.** Ahora viven en el arreglo
+  `productos` de `js/productos.js`. Cada producto es un objeto con las propiedades
+  `id`, `nombre`, `descripcion`, `categoria`, `precio`, `stock`, `imagen` e `imagenAlt`.
+- **Doce productos cargados**, dos por cada una de las seis categorías de la tienda.
+- **Las tarjetas se generan desde JavaScript.** `js/catalogo.js` recorre el arreglo con
+  `forEach`, arma cada tarjeta con `document.createElement` y la inserta dentro del
+  contenedor `#grillaCatalogo` de `catalogo.html`, que en el HTML queda vacío.
+- **Cada tarjeta muestra** imagen, categoría, nombre, descripción, estado de stock,
+  precio formateado con `Intl.NumberFormat` y un botón hacia el detalle del producto.
+- **El stock se traduce a un mensaje.** 0 unidades muestra "Sin stock", cinco o menos
+  muestra "Últimas N unidades" y el resto "En stock · N unidades", cada uno con su color.
+- **Contador de productos** sobre la grilla, actualizado desde el largo del arreglo.
+- **Respaldo de imágenes.** Si una fotografía de Unsplash no carga, la tarjeta cambia
+  automáticamente a `assets/img/producto-placeholder.svg` y nunca se ve rota.
+- `catalogo.html` pasó de ser la plantilla bloqueada del proyecto base a una página con
+  la identidad Nivel 99: mismo navbar, footer, toast, tipografías y paleta que el inicio.
+
+### Cómo está organizado el código JavaScript
+
+| Archivo | Responsabilidad |
+| --- | --- |
+| `js/base.js` | Comportamiento común a todas las páginas: navegación activa, toast y modal |
+| `js/productos.js` | Únicamente los datos: el arreglo de productos de la tienda |
+| `js/catalogo.js` | Lógica del catálogo: recorrer el arreglo y generar las tarjetas |
+
+La idea es que los datos, la lógica de cada página y el comportamiento común queden
+separados, para que el detalle de producto y el carrito de las próximas semanas puedan
+reutilizar `js/productos.js` sin repetir la información.
+
+### Información guardada en LocalStorage
+
+Todavía ninguna. El carrito y su persistencia en LocalStorage corresponden a la semana
+del 13/9, y se documentarán en esta misma sección cuando estén desarrollados.
+
+### Pendiente dentro del Sprint 2
+
+| Semana | Pendiente |
+| --- | --- |
+| 30/8 | Búsqueda por nombre, filtro por categoría, mensaje cuando no hay coincidencias |
+| 6/9 | Detalle dinámico del producto con `URLSearchParams` sobre `producto.html?id=` |
+| 13/9 | Carrito: agregar, modificar y eliminar productos, totales y LocalStorage |
 
 ## Funcionalidades desarrolladas en el Sprint 1
 
@@ -117,7 +166,7 @@ Nexo-Store/
 
 | Sprint | Pendiente |
 | --- | --- |
-| Sprint 2 | Catálogo dinámico, búsqueda, filtros, ordenamiento, ficha de producto, carrito y LocalStorage |
+| Sprint 2 | Búsqueda, filtros, ficha dinámica de producto, carrito y LocalStorage |
 | Sprint 3 | Firebase Authentication, Cloud Firestore, perfil privado, pedidos y panel administrativo |
 | Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
 
@@ -146,7 +195,8 @@ Nexo-Store/
 
 - Las fotografías de los productos se cargan desde Unsplash, por lo que requieren conexión
   a internet. En `assets/img/producto-placeholder.svg` hay una imagen local de reemplazo.
-- Los productos destacados son estáticos: todavía no se generan desde JavaScript.
+- Los cuatro productos destacados del inicio siguen escritos en HTML; el catálogo, en
+  cambio, ya se genera por completo desde JavaScript.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
 - El botón de ingreso y el indicador del carrito solo muestran un aviso del sprint en el
   que serán desarrollados.

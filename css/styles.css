@@ -429,6 +429,27 @@ p {
   color: #a35a00;
 }
 
+.disponibilidad.agotado {
+  color: #8b1a1a;
+}
+
+/* ---------------------------------------------------------------
+   10 bis. CATÁLOGO DINÁMICO (Sprint 2)
+   --------------------------------------------------------------- */
+.contador-catalogo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-texto-suave);
+  margin-bottom: 1.5rem;
+}
+
+.aviso-proxima-semana {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  border-left: 3px solid var(--color-acento);
+  padding-left: 0.75rem;
+}
+
 /* ---------------------------------------------------------------
    11. SECCIÓN DE BENEFICIOS
    --------------------------------------------------------------- */
