@@ -3,9 +3,12 @@
    js/productos.js - Origen de datos del catálogo (Sprint 2 · 23/8)
    ---------------------------------------------------------------------
    Los productos dejan de estar escritos a mano en el HTML y pasan a
-   vivir en este arreglo de objetos. Cualquier página del sitio que
+   vivir en este array de objetos. Cualquier página del sitio que
    necesite productos (catálogo, detalle y carrito) lee de acá, de modo
    que la información queda en un solo lugar.
+
+   Es un array de objetos: la estructura que vimos en la Semana 5 como
+   "nuestra base de datos" mientras no usemos Firestore.
 
    Cada producto es un objeto con las siguientes propiedades:
      id          identificador único, se usa en la URL del detalle

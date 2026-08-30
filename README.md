@@ -82,22 +82,45 @@ Nexo-Store/
 
 ### Semana del 23/8 · Productos y catálogo dinámico
 
-- **Los productos dejaron de estar escritos en el HTML.** Ahora viven en el arreglo
-  `productos` de `js/productos.js`. Cada producto es un objeto con las propiedades
-  `id`, `nombre`, `descripcion`, `categoria`, `precio`, `stock`, `imagen` e `imagenAlt`.
+- **Los productos dejaron de estar escritos en el HTML.** Ahora viven en el array de
+  objetos `productos` de `js/productos.js`, la estructura que la Semana 5 presenta como
+  "nuestra base de datos" mientras no se use Firestore. Cada producto es un objeto con
+  las propiedades `id`, `nombre`, `descripcion`, `categoria`, `precio`, `stock`,
+  `imagen` e `imagenAlt`.
 - **Doce productos cargados**, dos por cada una de las seis categorías de la tienda.
-- **Las tarjetas se generan desde JavaScript.** `js/catalogo.js` recorre el arreglo con
-  `forEach`, arma cada tarjeta con `document.createElement` y la inserta dentro del
-  contenedor `#grillaCatalogo` de `catalogo.html`, que en el HTML queda vacío.
+- **Las tarjetas se generan desde JavaScript.** La función `mostrarProductos(productos)`
+  de `js/catalogo.js` vacía el contenedor `#catalogo`, recorre el array con `forEach()` y
+  arma cada tarjeta con `innerHTML` y template literals, tal como se plantea en la
+  Semana 6. En `catalogo.html` no hay ninguna tarjeta escrita a mano.
 - **Cada tarjeta muestra** imagen, categoría, nombre, descripción, estado de stock,
-  precio formateado con `Intl.NumberFormat` y un botón hacia el detalle del producto.
-- **El stock se traduce a un mensaje.** 0 unidades muestra "Sin stock", cinco o menos
-  muestra "Últimas N unidades" y el resto "En stock · N unidades", cada uno con su color.
-- **Contador de productos** sobre la grilla, actualizado desde el largo del arreglo.
-- **Respaldo de imágenes.** Si una fotografía de Unsplash no carga, la tarjeta cambia
-  automáticamente a `assets/img/producto-placeholder.svg` y nunca se ve rota.
+  precio y un botón hacia el detalle del producto.
+- **El stock se traduce a un mensaje** con `if / else if / else`: 0 unidades muestra
+  "Sin stock", cinco o menos "Últimas N unidades" y el resto "En stock · N unidades",
+  cada uno con su color.
+- **Contador de productos** sobre la grilla, tomado de `productos.length`.
+- `mostrarProductos()` recibe el array por parámetro en lugar de leer la variable global,
+  para poder reutilizarla la próxima semana con los resultados de la búsqueda y los filtros.
 - `catalogo.html` pasó de ser la plantilla bloqueada del proyecto base a una página con
   la identidad Nivel 99: mismo navbar, footer, toast, tipografías y paleta que el inicio.
+
+### Contenidos del curso aplicados
+
+| Semana | Contenido | Dónde se usa |
+| --- | --- | --- |
+| 5 | Arrays de objetos | `js/productos.js` |
+| 5 | `const` y `let` | Todo el JavaScript del catálogo |
+| 5 | Funciones con parámetros y `return` | `formatearPrecio()`, `mostrarProductos()`, `mostrarContador()` |
+| 5 | Funciones flecha | Callback de `forEach()` |
+| 5 | Template literals | Armado del HTML de cada tarjeta |
+| 5 | `if / else if / else` y `===` | Cálculo del estado de stock |
+| 5 | `forEach()` | Recorrido del array de productos |
+| 6 | `querySelector()` | Contenedor de la grilla y del contador |
+| 6 | `innerHTML` | Inserción de las tarjetas |
+| 6 | `textContent` | Texto del contador |
+
+Queda fuera del temario una sola línea: `precio.toLocaleString("es-UY")` dentro de
+`formatearPrecio()`, que agrega el punto de miles (`21900` se muestra como `$ 21.900`).
+Sin esa llamada el precio se vería como `$ 21900`.
 
 ### Cómo está organizado el código JavaScript
 
