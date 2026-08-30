@@ -450,6 +450,36 @@ p {
   padding-left: 0.75rem;
 }
 
+.filtros-catalogo {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.filtros-catalogo .form-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-tinta);
+}
+
+.filtros-catalogo .form-control:focus,
+.filtros-catalogo .form-select:focus {
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 0.2rem rgba(11, 111, 212, 0.2);
+}
+
+.sin-resultados {
+  background-color: var(--color-superficie);
+  border: 1px dashed var(--color-borde);
+  border-radius: var(--radio-medio);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--color-texto-suave);
+  margin-bottom: 0;
+}
+
 /* ---------------------------------------------------------------
    11. SECCIÓN DE BENEFICIOS
    --------------------------------------------------------------- */

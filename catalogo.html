@@ -58,12 +58,29 @@
                     <p class="texto-suave mb-0">Periféricos, monitores, audio, componentes, mobiliario y accesorios.
                         Todos los equipos incluyen garantía escrita de doce meses y configuración inicial sin costo.</p>
                 </div>
+                <form class="filtros-catalogo row g-3 align-items-end" id="formFiltros" role="search"
+                    aria-label="Buscar y filtrar productos">
+                    <div class="col-md-6">
+                        <label class="form-label" for="buscador">Buscar por nombre</label>
+                        <input class="form-control" type="search" id="buscador" autocomplete="off"
+                            placeholder="Teclado, monitor, silla…">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="filtroCategoria">Categoría</label>
+                        <select class="form-select" id="filtroCategoria">
+                            <option value="Todas">Todas las categorías</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button class="btn btn-outline-primary" type="button" id="btnLimpiar">Limpiar</button>
+                    </div>
+                </form>
                 <p class="contador-catalogo" id="contadorCatalogo" role="status" aria-live="polite">Cargando productos…</p>
                 <div class="row g-4" id="catalogo">
                     <!-- Las tarjetas se generan desde js/catalogo.js a partir del array de js/productos.js -->
                 </div>
-                <p class="aviso-proxima-semana mt-4 mb-0">La búsqueda por nombre y el filtro por categoría se
-                    incorporan en la próxima entrega del Sprint 2.</p>
+                <p class="aviso-proxima-semana mt-4 mb-0">La ficha con el detalle de cada producto se incorpora
+                    en la próxima entrega del Sprint 2.</p>
             </div>
         </section>
     </main>

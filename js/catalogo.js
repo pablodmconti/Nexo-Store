@@ -1,19 +1,25 @@
 /* =====================================================================
    NIVEL 99 · Gaming Setup Store
-   js/catalogo.js - Catálogo dinámico (Sprint 2 · 23/8)
+   js/catalogo.js - Catálogo dinámico (Sprint 2 · 23/8 y 30/8)
    ---------------------------------------------------------------------
-   Recorre el array "productos" definido en js/productos.js y genera una
-   tarjeta por cada uno dentro de catalogo.html. Las tarjetas ya no
-   están escritas en el HTML: el HTML solo aporta el contenedor vacío.
+   Genera las tarjetas del catálogo a partir del array "productos" de
+   js/productos.js, y permite buscarlas por nombre y filtrarlas por
+   categoría sin recargar la página.
 
    Contenidos de clase utilizados:
-     Semana 5 · const, funciones, funciones flecha, template literals,
-               if / else if / else, arrays de objetos, forEach()
-     Semana 6 · querySelector(), innerHTML, textContent,
-               la función mostrarProductos()
+     Semana 5 · const y let, funciones, funciones flecha, template
+               literals, if / else, ===, push(), includes(),
+               arrays de objetos, forEach(), filter()
+     Semana 6 · querySelector(), innerHTML, textContent, value,
+               mostrarProductos(), addEventListener(), preventDefault(),
+               toLowerCase() + includes() para buscar
 
    Depende de que js/productos.js se cargue antes que este archivo.
    ===================================================================== */
+
+/* ---------------------------------------------------------------
+   1. MOSTRAR PRODUCTOS
+   --------------------------------------------------------------- */
 
 /* Devuelve el precio con el formato de la tienda: 21900 -> "$ 21.900" */
 function formatearPrecio(precio) {
@@ -21,9 +27,8 @@ function formatearPrecio(precio) {
 }
 
 /* Genera todas las tarjetas del catálogo a partir de un array de productos.
-   Recibe el array por parámetro (y no lo toma directamente de la variable
-   global) para poder reutilizar la misma función cuando, en la próxima
-   semana, haya que mostrar solo los productos buscados o filtrados. */
+   Recibe el array por parámetro, así la misma función sirve tanto para
+   mostrar el catálogo completo como el resultado de una búsqueda. */
 function mostrarProductos(productos) {
   const contenedor = document.querySelector("#catalogo");
   contenedor.innerHTML = "";
@@ -65,13 +70,114 @@ function mostrarProductos(productos) {
   });
 }
 
+/* Reemplaza las tarjetas por un aviso cuando la búsqueda no encuentra nada */
+function mostrarSinResultados() {
+  const contenedor = document.querySelector("#catalogo");
+
+  contenedor.innerHTML = `
+    <div class="col-12">
+      <p class="sin-resultados">No se encontraron productos con esa búsqueda o esa categoría.
+      Probá con otro nombre o volvé a ver todo el catálogo con el botón Limpiar.</p>
+    </div>
+  `;
+}
+
 /* Muestra arriba de la grilla cuántos productos se están viendo */
 function mostrarContador(cantidad) {
   const contador = document.querySelector("#contadorCatalogo");
-  contador.textContent = `${cantidad} productos en el catálogo`;
+  contador.textContent = `Mostrando ${cantidad} de ${productos.length} productos`;
 }
 
-/* Este archivo se carga al final del <body>, así que el HTML ya existe
-   cuando se ejecutan estas dos líneas. */
+/* ---------------------------------------------------------------
+   2. BÚSQUEDA Y FILTROS
+   --------------------------------------------------------------- */
+
+/* Completa el selector con las categorías que realmente existen en el
+   array, para que la lista nunca quede desactualizada. Se recorre el
+   array y se usa includes() para no repetir una categoría ya agregada. */
+function cargarCategorias() {
+  const selector = document.querySelector("#filtroCategoria");
+  const categorias = [];
+
+  productos.forEach((producto) => {
+    if (!categorias.includes(producto.categoria)) {
+      categorias.push(producto.categoria);
+    }
+  });
+
+  categorias.forEach((categoria) => {
+    selector.innerHTML += `<option value="${categoria}">${categoria}</option>`;
+  });
+}
+
+/* Aplica la búsqueda y el filtro sobre el catálogo completo.
+   Las dos condiciones se encadenan: cada filter() recibe el resultado
+   del anterior, así se pueden combinar. filter() devuelve siempre un
+   array nuevo, por lo que el array "productos" nunca se modifica. */
+function aplicarFiltros() {
+  const texto = document.querySelector("#buscador").value;
+  const categoria = document.querySelector("#filtroCategoria").value;
+
+  let resultado = productos;
+
+  /* Búsqueda por nombre, sin distinguir mayúsculas de minúsculas */
+  resultado = resultado.filter((producto) =>
+    producto.nombre.toLowerCase().includes(texto.toLowerCase())
+  );
+
+  /* Filtro por categoría, salvo que esté elegida la opción "Todas" */
+  if (categoria !== "Todas") {
+    resultado = resultado.filter((producto) => producto.categoria === categoria);
+  }
+
+  if (resultado.length === 0) {
+    mostrarSinResultados();
+  } else {
+    mostrarProductos(resultado);
+  }
+
+  mostrarContador(resultado.length);
+}
+
+/* Deja los controles como al principio y vuelve a mostrar todo */
+function limpiarFiltros() {
+  document.querySelector("#buscador").value = "";
+  document.querySelector("#filtroCategoria").value = "Todas";
+  aplicarFiltros();
+}
+
+/* ---------------------------------------------------------------
+   3. EVENTOS
+   --------------------------------------------------------------- */
+
+/* input: se dispara con cada tecla, así el catálogo se filtra mientras
+   se escribe, sin necesidad de apretar ningún botón */
+document.querySelector("#buscador").addEventListener("input", () => {
+  aplicarFiltros();
+});
+
+/* change: se dispara al elegir otra opción del selector */
+document.querySelector("#filtroCategoria").addEventListener("change", () => {
+  aplicarFiltros();
+});
+
+/* click: vuelve al catálogo completo */
+document.querySelector("#btnLimpiar").addEventListener("click", () => {
+  limpiarFiltros();
+});
+
+/* submit: si se aprieta Enter dentro del formulario, el navegador
+   recargaría la página. preventDefault() lo evita. */
+document.querySelector("#formFiltros").addEventListener("submit", (evento) => {
+  evento.preventDefault();
+  aplicarFiltros();
+});
+
+/* ---------------------------------------------------------------
+   4. ARRANQUE
+   ---------------------------------------------------------------
+   Este archivo se carga al final del <body>, así que el HTML ya existe
+   cuando se ejecutan estas líneas. */
+cargarCategorias();
 mostrarProductos(productos);
 mostrarContador(productos.length);

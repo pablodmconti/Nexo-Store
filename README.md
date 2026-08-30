@@ -103,6 +103,27 @@ Nexo-Store/
 - `catalogo.html` pasó de ser la plantilla bloqueada del proyecto base a una página con
   la identidad Nivel 99: mismo navbar, footer, toast, tipografías y paleta que el inicio.
 
+### Semana del 30/8 · Búsqueda, filtros y eventos
+
+- **Buscador por nombre.** El texto escrito en el campo se compara contra el nombre de
+  cada producto con `filter()`, `toLowerCase()` e `includes()`, de modo que no distingue
+  mayúsculas de minúsculas ni exige escribir el nombre completo.
+- **Filtro por categoría.** El selector se completa solo: `cargarCategorias()` recorre el
+  array y usa `includes()` para agregar cada categoría una sola vez, así la lista nunca
+  queda desactualizada si se agrega un producto nuevo.
+- **Búsqueda y filtro combinados.** Las dos condiciones se encadenan sobre los mismos
+  datos: cada `filter()` recibe el resultado del anterior. Como `filter()` siempre
+  devuelve un array nuevo, el array `productos` original nunca se modifica.
+- **Mensaje cuando no hay coincidencias.** Si el resultado tiene largo 0, las tarjetas se
+  reemplazan por un aviso que explica qué hacer.
+- **Botón Limpiar.** Vacía el buscador, vuelve el selector a "Todas" y muestra de nuevo
+  el catálogo completo.
+- **Contador dinámico.** Pasa a indicar cuántos productos se están viendo sobre el total
+  ("Mostrando 3 de 12 productos").
+- **Eventos utilizados:** `input` en el buscador para filtrar mientras se escribe,
+  `change` en el selector, `click` en el botón Limpiar y `submit` en el formulario con
+  `preventDefault()` para que al apretar Enter la página no se recargue.
+
 ### Contenidos del curso aplicados
 
 | Semana | Contenido | Dónde se usa |
@@ -114,9 +135,15 @@ Nexo-Store/
 | 5 | Template literals | Armado del HTML de cada tarjeta |
 | 5 | `if / else if / else` y `===` | Cálculo del estado de stock |
 | 5 | `forEach()` | Recorrido del array de productos |
-| 6 | `querySelector()` | Contenedor de la grilla y del contador |
-| 6 | `innerHTML` | Inserción de las tarjetas |
+| 5 | `push()` e `includes()` | Armado de la lista de categorías sin repetir |
+| 5 | `filter()` | Búsqueda por nombre y filtro por categoría |
+| 6 | `querySelector()` | Contenedor de la grilla, contador y controles |
+| 6 | `innerHTML` | Inserción de las tarjetas y del mensaje sin resultados |
 | 6 | `textContent` | Texto del contador |
+| 6 | `.value` | Lectura del buscador y del selector |
+| 6 | `toLowerCase()` + `includes()` | Comparación del texto buscado |
+| 6 | `addEventListener()` | Eventos `input`, `change`, `click` y `submit` |
+| 6 | `preventDefault()` | Evitar que Enter recargue la página |
 
 Queda fuera del temario una sola línea: `precio.toLocaleString("es-UY")` dentro de
 `formatearPrecio()`, que agrega el punto de miles (`21900` se muestra como `$ 21.900`).
@@ -127,8 +154,8 @@ Sin esa llamada el precio se vería como `$ 21900`.
 | Archivo | Responsabilidad |
 | --- | --- |
 | `js/base.js` | Comportamiento común a todas las páginas: navegación activa, toast y modal |
-| `js/productos.js` | Únicamente los datos: el arreglo de productos de la tienda |
-| `js/catalogo.js` | Lógica del catálogo: recorrer el arreglo y generar las tarjetas |
+| `js/productos.js` | Únicamente los datos: el array de productos de la tienda |
+| `js/catalogo.js` | Lógica del catálogo: mostrar las tarjetas, buscar y filtrar |
 
 La idea es que los datos, la lógica de cada página y el comportamiento común queden
 separados, para que el detalle de producto y el carrito de las próximas semanas puedan
@@ -143,7 +170,6 @@ del 13/9, y se documentarán en esta misma sección cuando estén desarrollados.
 
 | Semana | Pendiente |
 | --- | --- |
-| 30/8 | Búsqueda por nombre, filtro por categoría, mensaje cuando no hay coincidencias |
 | 6/9 | Detalle dinámico del producto con `URLSearchParams` sobre `producto.html?id=` |
 | 13/9 | Carrito: agregar, modificar y eliminar productos, totales y LocalStorage |
 
