@@ -481,6 +481,39 @@ p {
 }
 
 /* ---------------------------------------------------------------
+   10 ter. FICHA DEL PRODUCTO (Sprint 2)
+   --------------------------------------------------------------- */
+.volver-catalogo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.imagen-detalle {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  border-radius: var(--radio-medio);
+  background-color: var(--color-superficie);
+  box-shadow: var(--sombra-suave);
+}
+
+.precio-detalle {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 767px) {
+  .imagen-detalle {
+    height: 260px;
+  }
+
+  .precio-detalle {
+    font-size: 1.8rem;
+  }
+}
+
+/* ---------------------------------------------------------------
    11. SECCIÓN DE BENEFICIOS
    --------------------------------------------------------------- */
 .beneficios {

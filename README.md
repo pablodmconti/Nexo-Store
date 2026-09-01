@@ -50,7 +50,7 @@ asesoramiento antes que el precio más bajo del mercado.
 Nexo-Store/
 ├── index.html          Página de inicio personalizada
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
-├── producto.html       En desarrollo · Sprint 2 (semana del 6/9)
+├── producto.html       Ficha dinámica, la misma página para todos los productos
 ├── carrito.html        En desarrollo · Sprint 2 (semana del 13/9)
 ├── perfil.html         Bloqueada · Sprint 3
 ├── admin.html          Bloqueada · Sprint 3
@@ -59,7 +59,8 @@ Nexo-Store/
 ├── js/
 │   ├── base.js         Navegación activa y avisos de funcionalidades futuras
 │   ├── productos.js    Arreglo de objetos con los productos de la tienda
-│   ├── catalogo.js     Recorre el arreglo y genera las tarjetas del catálogo
+│   ├── catalogo.js     Tarjetas del catálogo, búsqueda y filtro por categoría
+│   ├── producto.js     Detalle del producto recibido por la URL
 │   ├── modules/        Reservada para los próximos sprints
 │   └── pages/          Reservada para los próximos sprints
 ├── assets/
@@ -124,6 +125,27 @@ Nexo-Store/
   `change` en el selector, `click` en el botón Limpiar y `submit` en el formulario con
   `preventDefault()` para que al apretar Enter la página no se recargue.
 
+### Semana del 6/9 · Detalle dinámico del producto
+
+- **Una sola página para los doce productos.** `producto.html` no cambia: lo que cambia es
+  el identificador que recibe en la URL (`producto.html?id=p9`). No existe un archivo HTML
+  por producto.
+- **El HTML define la estructura, JavaScript la completa.** La ficha está escrita con
+  elementos vacíos (`#productoNombre`, `#productoPrecio`, `#productoStock`, etc.) que
+  `js/producto.js` rellena con `textContent`.
+- **Lectura del parámetro.** `window.location.search` da la parte `?id=p9` de la dirección,
+  `URLSearchParams` la convierte en algo legible y `get("id")` devuelve el valor.
+- **Búsqueda del producto.** `find()` localiza en el array el objeto cuyo `id` coincide.
+  Como los identificadores son texto (`"p9"`), la comparación se hace con `===` sin
+  necesidad de convertir tipos.
+- **Producto inexistente.** `find()` devuelve `undefined` si ningún producto coincide, así
+  que un `if / else` decide entre mostrar la ficha o el aviso de error. El aviso cubre
+  tanto un `id` inválido (`?id=p99`) como abrir la página sin ningún parámetro.
+- **Estado de stock.** Se reutiliza el mismo criterio de las tarjetas y, si el producto está
+  agotado, el botón de compra queda deshabilitado.
+- **Los enlaces ya venían del catálogo.** Cada tarjeta genera su propio
+  `producto.html?id=${producto.id}` desde la semana del 23/8.
+
 ### Contenidos del curso aplicados
 
 | Semana | Contenido | Dónde se usa |
@@ -144,6 +166,11 @@ Nexo-Store/
 | 6 | `toLowerCase()` + `includes()` | Comparación del texto buscado |
 | 6 | `addEventListener()` | Eventos `input`, `change`, `click` y `submit` |
 | 6 | `preventDefault()` | Evitar que Enter recargue la página |
+| 6 | `classList` | Mostrar u ocultar la ficha y el aviso de error |
+| 5 y 7 | `find()` | Localizar el producto por su identificador |
+| 7 | `window.location.search` | Obtener los parámetros de la URL actual |
+| 7 | `URLSearchParams` y `get()` | Leer el valor del parámetro `id` |
+| 7 | Estructura HTML vacía completada por JS | Ficha de `producto.html` |
 
 Queda fuera del temario una sola línea: `precio.toLocaleString("es-UY")` dentro de
 `formatearPrecio()`, que agrega el punto de miles (`21900` se muestra como `$ 21.900`).
@@ -156,10 +183,11 @@ Sin esa llamada el precio se vería como `$ 21900`.
 | `js/base.js` | Comportamiento común a todas las páginas: navegación activa, toast y modal |
 | `js/productos.js` | Únicamente los datos: el array de productos de la tienda |
 | `js/catalogo.js` | Lógica del catálogo: mostrar las tarjetas, buscar y filtrar |
+| `js/producto.js` | Lógica de la ficha: leer el id de la URL y mostrar ese producto |
 
 La idea es que los datos, la lógica de cada página y el comportamiento común queden
-separados, para que el detalle de producto y el carrito de las próximas semanas puedan
-reutilizar `js/productos.js` sin repetir la información.
+separados. `js/productos.js` se carga antes que `catalogo.js` y que `producto.js`, porque
+las dos páginas leen el mismo array y así la información no se repite en ningún lado.
 
 ### Información guardada en LocalStorage
 
@@ -170,7 +198,6 @@ del 13/9, y se documentarán en esta misma sección cuando estén desarrollados.
 
 | Semana | Pendiente |
 | --- | --- |
-| 6/9 | Detalle dinámico del producto con `URLSearchParams` sobre `producto.html?id=` |
 | 13/9 | Carrito: agregar, modificar y eliminar productos, totales y LocalStorage |
 
 ## Funcionalidades desarrolladas en el Sprint 1
@@ -215,7 +242,7 @@ del 13/9, y se documentarán en esta misma sección cuando estén desarrollados.
 
 | Sprint | Pendiente |
 | --- | --- |
-| Sprint 2 | Búsqueda, filtros, ficha dinámica de producto, carrito y LocalStorage |
+| Sprint 2 | Carrito de compras y persistencia con LocalStorage |
 | Sprint 3 | Firebase Authentication, Cloud Firestore, perfil privado, pedidos y panel administrativo |
 | Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
 
