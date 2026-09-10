@@ -15,8 +15,8 @@
 
    Contenidos de clase utilizados:
      Semana 5 · const y let, funciones, funciones flecha, template
-               literals, if / else, ===, arrays de objetos, forEach(),
-               find(), filter(), reduce()
+               literals, if / else, ===, >=, arrays de objetos,
+               forEach(), find(), filter(), reduce()
      Semana 6 · querySelector(), querySelectorAll(), innerHTML,
                textContent, classList, addEventListener()
      Semana 8 · localStorage, JSON.stringify() y JSON.parse(),
@@ -49,17 +49,44 @@ function calcularTotal() {
   }, 0);
 }
 
+/* Costo de envío simulado, con las mismas condiciones que anuncia la
+   portada: gratis a partir de cierto monto y con costo fijo por debajo.
+   Todavía no hay envíos reales; esto solo completa el resumen. */
+const MONTO_ENVIO_GRATIS = 2000;
+const COSTO_ENVIO = 290;
+
+function calcularEnvio(subtotal) {
+  let envio = COSTO_ENVIO;
+
+  if (subtotal >= MONTO_ENVIO_GRATIS) {
+    envio = 0;
+  }
+
+  return envio;
+}
+
 /* ---------------------------------------------------------------
    2. MOSTRAR EL CARRITO
    --------------------------------------------------------------- */
 
-/* Actualiza el panel lateral con las unidades y el total */
+/* Actualiza el panel lateral con las unidades, el envío y el total */
 function mostrarResumen() {
   const carrito = obtenerCarrito();
+  const subtotal = calcularTotal();
+  const envio = calcularEnvio(subtotal);
 
   document.querySelector("#resumenProductos").textContent = carrito.length;
   document.querySelector("#resumenUnidades").textContent = contarUnidades();
-  document.querySelector("#resumenTotal").textContent = formatearPrecio(calcularTotal());
+  document.querySelector("#resumenSubtotal").textContent = formatearPrecio(subtotal);
+
+  /* Cuando el envío es gratis conviene decirlo con palabras, no con "$ 0" */
+  if (envio === 0) {
+    document.querySelector("#resumenEnvio").textContent = "Gratis";
+  } else {
+    document.querySelector("#resumenEnvio").textContent = formatearPrecio(envio);
+  }
+
+  document.querySelector("#resumenTotal").textContent = formatearPrecio(subtotal + envio);
 }
 
 /* Dibuja una fila por cada producto del carrito.

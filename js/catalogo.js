@@ -3,14 +3,14 @@
    js/catalogo.js - Catálogo dinámico (Sprint 2 · 23/8, 30/8 y 13/9)
    ---------------------------------------------------------------------
    Genera las tarjetas del catálogo a partir del array "productos" de
-   js/productos.js, permite buscarlas por nombre y filtrarlas por
-   categoría sin recargar la página, y agregar cualquiera de ellas al
-   carrito desde la propia tarjeta.
+   js/productos.js, permite buscarlas por nombre, filtrarlas por
+   categoría y ordenarlas sin recargar la página, y agregar cualquiera
+   de ellas al carrito desde la propia tarjeta.
 
    Contenidos de clase utilizados:
      Semana 5 · const y let, funciones, funciones flecha, template
                literals, if / else, ===, push(), includes(),
-               arrays de objetos, forEach(), filter()
+               arrays de objetos, forEach(), filter(), sort()
      Semana 6 · querySelector(), innerHTML, textContent, value,
                mostrarProductos(), addEventListener(), preventDefault(),
                toLowerCase() + includes() para buscar
@@ -121,7 +121,36 @@ function cargarCategorias() {
   });
 }
 
-/* Aplica la búsqueda y el filtro sobre el catálogo completo.
+/* Ordena la lista según lo elegido en el selector.
+   Importante: sort() modifica el array que recibe, por eso acá se le
+   pasa siempre el resultado de filter(), que es un array nuevo. El
+   array "productos" original nunca se toca y conserva su orden. */
+function ordenarProductos(lista) {
+  const criterio = document.querySelector("#ordenCatalogo").value;
+
+  if (criterio === "precioMenor") {
+    lista.sort((a, b) => a.precio - b.precio);
+  } else if (criterio === "precioMayor") {
+    lista.sort((a, b) => b.precio - a.precio);
+  } else if (criterio === "nombre") {
+    /* Para textos no sirve la resta: se comparan con los mismos
+       operadores de comparación que usamos con números. La función
+       devuelve -1 si a va antes, 1 si va después y 0 si son iguales. */
+    lista.sort((a, b) => {
+      if (a.nombre < b.nombre) {
+        return -1;
+      } else if (a.nombre > b.nombre) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+  }
+
+  return lista;
+}
+
+/* Aplica la búsqueda, el filtro y el orden sobre el catálogo completo.
    Las dos condiciones se encadenan: cada filter() recibe el resultado
    del anterior, así se pueden combinar. filter() devuelve siempre un
    array nuevo, por lo que el array "productos" nunca se modifica. */
@@ -141,6 +170,9 @@ function aplicarFiltros() {
     resultado = resultado.filter((producto) => producto.categoria === categoria);
   }
 
+  /* El orden se aplica al final, sobre lo que quedó filtrado */
+  resultado = ordenarProductos(resultado);
+
   if (resultado.length === 0) {
     mostrarSinResultados();
   } else {
@@ -154,6 +186,7 @@ function aplicarFiltros() {
 function limpiarFiltros() {
   document.querySelector("#buscador").value = "";
   document.querySelector("#filtroCategoria").value = "Todas";
+  document.querySelector("#ordenCatalogo").value = "destacados";
   aplicarFiltros();
 }
 
@@ -167,8 +200,12 @@ document.querySelector("#buscador").addEventListener("input", () => {
   aplicarFiltros();
 });
 
-/* change: se dispara al elegir otra opción del selector */
+/* change: se dispara al elegir otra opción de cualquiera de los dos selectores */
 document.querySelector("#filtroCategoria").addEventListener("change", () => {
+  aplicarFiltros();
+});
+
+document.querySelector("#ordenCatalogo").addEventListener("change", () => {
   aplicarFiltros();
 });
 

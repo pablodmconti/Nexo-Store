@@ -124,6 +124,10 @@ Nexo-Store/
   el catálogo completo.
 - **Contador dinámico.** Pasa a indicar cuántos productos se están viendo sobre el total
   ("Mostrando 3 de 12 productos").
+- **Orden del catálogo** (opcional de la consigna). Un tercer selector permite ordenar por
+  nombre de la A a la Z, por precio de menor a mayor y de mayor a menor, con `sort()`.
+  Como `sort()` modifica el array que recibe, siempre se aplica sobre el resultado de
+  `filter()`, que es un array nuevo: el array `productos` conserva su orden original.
 - **Eventos utilizados:** `input` en el buscador para filtrar mientras se escribe,
   `change` en el selector, `click` en el botón Limpiar y `submit` en el formulario con
   `preventDefault()` para que al apretar Enter la página no se recargue.
@@ -182,6 +186,10 @@ Nexo-Store/
   un mensaje con un botón hacia el catálogo.
 - **Contador en la barra de navegación.** El número del ícono del carrito se actualiza en
   todas las páginas y ahora ese ícono lleva a `carrito.html`.
+- **Costo de envío simulado** (opcional de la consigna). El resumen separa subtotal, envío
+  y total. El envío es gratis a partir de $ 2.000 y cuesta $ 290 por debajo de ese monto,
+  las mismas condiciones que anuncia la portada. Cuando es gratis se muestra la palabra
+  "Gratis" en lugar de "$ 0".
 - **La compra todavía no es real.** El botón "Confirmar compra" avisa que el pago y los
   pedidos corresponden al Sprint 3.
 - **Funciones compartidas.** `formatearPrecio()` y el texto del stock estaban repetidos en
@@ -217,6 +225,8 @@ Nexo-Store/
 | 5 | `forEach()` | Recorrido del array de productos |
 | 5 | `push()` e `includes()` | Armado de la lista de categorías sin repetir |
 | 5 | `filter()` | Búsqueda por nombre y filtro por categoría |
+| 5 | `sort()` con función de comparación | Orden por nombre y por precio |
+| 5 | Operadores de comparación | Orden alfabético y condición del envío gratis |
 | 6 | `querySelector()` | Contenedor de la grilla, contador y controles |
 | 6 | `innerHTML` | Inserción de las tarjetas y del mensaje sin resultados |
 | 6 | `textContent` | Texto del contador |
@@ -267,6 +277,15 @@ las dos páginas leen el mismo array y así la información no se repite en ning
 Es lo único que se guarda en el navegador. No se almacenan datos personales ni información
 de pago: los pedidos reales y las cuentas de usuario corresponden al Sprint 3, con Firebase.
 
+### Opcionales de la consigna incorporados
+
+| Opcional | Dónde |
+| --- | --- |
+| Mostrar la cantidad de resultados encontrados | Contador del catálogo |
+| Ordenar productos por nombre o precio | Selector "Ordenar por" del catálogo |
+| Mensajes mediante toast en lugar de `alert()` | Todos los avisos del sitio |
+| Costo de envío simulado en el resumen del carrito | Panel de resumen |
+
 ### Pendiente dentro del Sprint 2
 
 Las cuatro entregas semanales están completas. Queda la semana de cierre: pulido general,
@@ -310,6 +329,10 @@ validaciones y repaso integrador del sprint.
 - El historial del repositorio contiene commits con mensajes descriptivos, uno por cada
   bloque de trabajo del sprint.
 - El catálogo se genera desde JavaScript y la búsqueda y el filtro funcionan combinados.
+- El orden por nombre y por precio funciona junto con la búsqueda y el filtro, y el botón
+  Limpiar lo devuelve al orden original.
+- El resumen del carrito separa subtotal, envío y total, y el envío pasa a "Gratis" al
+  superar los $ 2.000.
 - El detalle abre el producto correcto según el `id` de la URL y avisa si el `id` no existe.
 - Se agregan productos al carrito desde el catálogo y desde la ficha.
 - Un producto ya agregado suma cantidad en lugar de repetirse.
