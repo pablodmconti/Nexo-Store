@@ -35,13 +35,14 @@ asesoramiento antes que el precio más bajo del mercado.
 
 ## Tecnologías utilizadas
 
-| Tecnología | Uso en el Sprint 1 |
+| Tecnología | Uso en el proyecto |
 | --- | --- |
 | HTML5 | Estructura semántica de todas las páginas |
 | CSS3 | Identidad visual, variables, modelo de caja, Flexbox y media queries |
 | Bootstrap 5.3 (CDN) | Grilla de 12 columnas, navbar, cards, botones, modal y toast |
-| JavaScript | Solo comportamiento básico de la interfaz (`js/base.js`) |
+| JavaScript | Catálogo, búsqueda y filtros, ficha del producto y carrito |
 | Google Fonts | Tipografías Chakra Petch e Inter |
+| LocalStorage | Persistencia del carrito entre visitas, sin servidor |
 | Git y GitHub | Control de versiones y publicación de los avances |
 
 ## Estructura del proyecto
@@ -51,16 +52,17 @@ Nexo-Store/
 ├── index.html          Página de inicio personalizada
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
 ├── producto.html       Ficha dinámica, la misma página para todos los productos
-├── carrito.html        En desarrollo · Sprint 2 (semana del 13/9)
+├── carrito.html        Carrito de compras persistido en LocalStorage
 ├── perfil.html         Bloqueada · Sprint 3
 ├── admin.html          Bloqueada · Sprint 3
 ├── css/
-│   └── styles.css      Hoja de estilos organizada en 16 secciones comentadas
+│   └── styles.css      Hoja de estilos organizada en 17 secciones comentadas
 ├── js/
-│   ├── base.js         Navegación activa y avisos de funcionalidades futuras
+│   ├── base.js         Navegación, avisos y funciones compartidas (precio, stock, carrito)
 │   ├── productos.js    Arreglo de objetos con los productos de la tienda
 │   ├── catalogo.js     Tarjetas del catálogo, búsqueda y filtro por categoría
 │   ├── producto.js     Detalle del producto recibido por la URL
+│   ├── carrito.js      Página del carrito: cantidades, subtotales y total
 │   ├── modules/        Reservada para los próximos sprints
 │   └── pages/          Reservada para los próximos sprints
 ├── assets/
@@ -146,6 +148,46 @@ Nexo-Store/
 - **Los enlaces ya venían del catálogo.** Cada tarjeta genera su propio
   `producto.html?id=${producto.id}` desde la semana del 23/8.
 
+### Semana del 13/9 · Carrito y LocalStorage
+
+- **El carrito es un arreglo de objetos con lo mínimo indispensable:**
+  `[{ idProducto: "p1", cantidad: 2 }]`. No guarda nombre, precio ni imagen: esos datos se
+  buscan con `find()` en el array `productos` cada vez que hacen falta, así la información
+  no queda duplicada ni se desactualiza si un producto cambia de precio.
+- **Persistencia con LocalStorage.** `obtenerCarrito()` lee y `guardarCarrito()` escribe,
+  las dos funciones en `js/base.js`. Como LocalStorage solo guarda texto, el arreglo pasa
+  por `JSON.stringify()` al guardar y por `JSON.parse()` al leer. La primera visita todavía
+  no tiene nada guardado, así que `JSON.parse(null)` devuelve `null` y el `|| []` deja un
+  arreglo vacío listo para usar.
+- **Se agrega desde el catálogo o desde el detalle.** Cada tarjeta tiene su botón
+  "Agregar al carrito" y la ficha usa el suyo; ambos llaman a la misma función
+  `agregarAlCarrito(id)`. Si el producto ya estaba en el carrito suma una unidad, y si no,
+  entra como una entrada nueva.
+- **Control de stock.** El stock vive en `productos`, no en el carrito, así que antes de
+  sumar una unidad se comparan los dos arreglos. Al llegar al tope, el botón "+" de esa
+  fila queda deshabilitado y aparece un aviso; los productos agotados no se pueden agregar.
+- **Modificar y eliminar.** Cada fila tiene los botones "−", "+" y "Eliminar".
+  Bajar de una unidad quita el producto, porque dejarlo en cero no aporta nada.
+  `eliminarDelCarrito()` usa `filter()` para devolver el carrito sin ese producto.
+- **Subtotales y total.** `calcularSubtotal(producto, cantidad)` resuelve una fila y
+  `calcularTotal()` recorre el carrito con `reduce()` sumando todos los subtotales.
+- **Un mismo ciclo para cada acción:** acción del usuario → modificar el arreglo →
+  `guardarCarrito()` → `mostrarCarrito()`. De esa forma los datos, LocalStorage y la
+  pantalla nunca quedan desincronizados.
+- **Eventos en botones creados dinámicamente.** Los botones de cada fila no existen cuando
+  carga la página: se crean dentro del `forEach()`. Por eso los eventos se conectan después
+  de dibujar las filas y el identificador del producto viaja en el atributo `data-id`.
+- **Carrito vacío.** Si no hay nada agregado, la lista y el resumen se esconden y se muestra
+  un mensaje con un botón hacia el catálogo.
+- **Contador en la barra de navegación.** El número del ícono del carrito se actualiza en
+  todas las páginas y ahora ese ícono lleva a `carrito.html`.
+- **La compra todavía no es real.** El botón "Confirmar compra" avisa que el pago y los
+  pedidos corresponden al Sprint 3.
+- **Funciones compartidas.** `formatearPrecio()` y el texto del stock estaban repetidos en
+  `catalogo.js` y en `producto.js`. Al necesitarlos también el carrito, se movieron a
+  `js/base.js` (`formatearPrecio()` y `describirStock()`), que se carga en todas las
+  páginas: ahora el catálogo, la ficha y el carrito muestran siempre lo mismo.
+
 ### Contenidos del curso aplicados
 
 | Semana | Contenido | Dónde se usa |
@@ -170,7 +212,13 @@ Nexo-Store/
 | 5 y 7 | `find()` | Localizar el producto por su identificador |
 | 7 | `window.location.search` | Obtener los parámetros de la URL actual |
 | 7 | `URLSearchParams` y `get()` | Leer el valor del parámetro `id` |
-| 7 | Estructura HTML vacía completada por JS | Ficha de `producto.html` |
+| 7 | Estructura HTML vacía completada por JS | Ficha de `producto.html` y página del carrito |
+| 8 | `localStorage.setItem()` y `getItem()` | Guardar y leer el carrito |
+| 8 | `JSON.stringify()` y `JSON.parse()` | Convertir el arreglo del carrito en texto y al revés |
+| 8 | Valor por defecto con `\|\| []` | Primera visita, cuando todavía no hay nada guardado |
+| 8 | `reduce()` | `calcularTotal()` |
+| 8 | Eventos en botones creados dinámicamente | Botones "+", "−" y "Eliminar" de cada fila |
+| 8 | `data-id` y `dataset` | Saber sobre qué producto actuar al hacer clic |
 
 Queda fuera del temario una sola línea: `precio.toLocaleString("es-UY")` dentro de
 `formatearPrecio()`, que agrega el punto de miles (`21900` se muestra como `$ 21.900`).
@@ -180,10 +228,11 @@ Sin esa llamada el precio se vería como `$ 21900`.
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `js/base.js` | Comportamiento común a todas las páginas: navegación activa, toast y modal |
+| `js/base.js` | Comportamiento común: navegación, avisos, formato de precio, estado de stock y el carrito guardado en LocalStorage |
 | `js/productos.js` | Únicamente los datos: el array de productos de la tienda |
 | `js/catalogo.js` | Lógica del catálogo: mostrar las tarjetas, buscar y filtrar |
 | `js/producto.js` | Lógica de la ficha: leer el id de la URL y mostrar ese producto |
+| `js/carrito.js` | Lógica del carrito: dibujar las filas, cambiar cantidades y calcular totales |
 
 La idea es que los datos, la lógica de cada página y el comportamiento común queden
 separados. `js/productos.js` se carga antes que `catalogo.js` y que `producto.js`, porque
@@ -191,14 +240,17 @@ las dos páginas leen el mismo array y así la información no se repite en ning
 
 ### Información guardada en LocalStorage
 
-Todavía ninguna. El carrito y su persistencia en LocalStorage corresponden a la semana
-del 13/9, y se documentarán en esta misma sección cuando estén desarrollados.
+| Clave | Contenido | Ejemplo |
+| --- | --- | --- |
+| `carritoNivel99` | Arreglo de objetos con el identificador de cada producto y su cantidad, convertido a texto con `JSON.stringify()` | `[{"idProducto":"p1","cantidad":2},{"idProducto":"p4","cantidad":1}]` |
+
+Es lo único que se guarda en el navegador. No se almacenan datos personales ni información
+de pago: los pedidos reales y las cuentas de usuario corresponden al Sprint 3, con Firebase.
 
 ### Pendiente dentro del Sprint 2
 
-| Semana | Pendiente |
-| --- | --- |
-| 13/9 | Carrito: agregar, modificar y eliminar productos, totales y LocalStorage |
+Las cuatro entregas semanales están completas. Queda la semana de cierre: pulido general,
+validaciones y repaso integrador del sprint.
 
 ## Funcionalidades desarrolladas en el Sprint 1
 
@@ -237,12 +289,22 @@ del 13/9, y se documentarán en esta misma sección cuando estén desarrollados.
 - El contraste de todas las combinaciones de color del sitio supera la relación 4.5:1 (WCAG AA).
 - El historial del repositorio contiene commits con mensajes descriptivos, uno por cada
   bloque de trabajo del sprint.
+- El catálogo se genera desde JavaScript y la búsqueda y el filtro funcionan combinados.
+- El detalle abre el producto correcto según el `id` de la URL y avisa si el `id` no existe.
+- Se agregan productos al carrito desde el catálogo y desde la ficha.
+- Un producto ya agregado suma cantidad en lugar de repetirse.
+- Los botones "+", "−" y "Eliminar" modifican el carrito y los subtotales y el total se
+  recalculan en el momento.
+- No se puede superar el stock: el botón "+" se deshabilita y aparece el aviso correspondiente.
+- El carrito y el contador de la barra se conservan al recargar la página.
+- Con el carrito vacío se muestra el mensaje y el botón hacia el catálogo.
+- No hay errores relevantes en la consola del navegador.
 
 ## Funcionalidades pendientes
 
 | Sprint | Pendiente |
 | --- | --- |
-| Sprint 2 | Carrito de compras y persistencia con LocalStorage |
+| Sprint 2 | Pulido general, validaciones y repaso integrador |
 | Sprint 3 | Firebase Authentication, Cloud Firestore, perfil privado, pedidos y panel administrativo |
 | Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
 
@@ -274,8 +336,12 @@ del 13/9, y se documentarán en esta misma sección cuando estén desarrollados.
 - Los cuatro productos destacados del inicio siguen escritos en HTML; el catálogo, en
   cambio, ya se genera por completo desde JavaScript.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
-- El botón de ingreso y el indicador del carrito solo muestran un aviso del sprint en el
-  que serán desarrollados.
+- El botón de ingreso todavía muestra solo un aviso del sprint en el que será desarrollado.
+- El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro
+  navegador, el carrito aparece vacío. Compartir el carrito entre dispositivos requiere
+  la cuenta de usuario del Sprint 3.
+- El stock se comprueba contra el array `productos`, que se reinicia con cada recarga: es
+  un control de la interfaz, no un descuento real de inventario.
 - Aún no hay usuarios de prueba, porque la autenticación corresponde al Sprint 3.
 
 ## Posibles mejoras futuras

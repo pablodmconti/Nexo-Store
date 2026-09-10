@@ -1,10 +1,11 @@
 /* =====================================================================
    NIVEL 99 · Gaming Setup Store
-   js/catalogo.js - Catálogo dinámico (Sprint 2 · 23/8 y 30/8)
+   js/catalogo.js - Catálogo dinámico (Sprint 2 · 23/8, 30/8 y 13/9)
    ---------------------------------------------------------------------
    Genera las tarjetas del catálogo a partir del array "productos" de
-   js/productos.js, y permite buscarlas por nombre y filtrarlas por
-   categoría sin recargar la página.
+   js/productos.js, permite buscarlas por nombre y filtrarlas por
+   categoría sin recargar la página, y agregar cualquiera de ellas al
+   carrito desde la propia tarjeta.
 
    Contenidos de clase utilizados:
      Semana 5 · const y let, funciones, funciones flecha, template
@@ -13,18 +14,16 @@
      Semana 6 · querySelector(), innerHTML, textContent, value,
                mostrarProductos(), addEventListener(), preventDefault(),
                toLowerCase() + includes() para buscar
+     Semana 8 · eventos en botones creados dinámicamente y data-id
 
-   Depende de que js/productos.js se cargue antes que este archivo.
+   Depende de que js/base.js y js/productos.js se carguen antes que
+   este archivo: de ahí salen formatearPrecio(), describirStock() y
+   agregarAlCarrito().
    ===================================================================== */
 
 /* ---------------------------------------------------------------
    1. MOSTRAR PRODUCTOS
    --------------------------------------------------------------- */
-
-/* Devuelve el precio con el formato de la tienda: 21900 -> "$ 21.900" */
-function formatearPrecio(precio) {
-  return "$ " + precio.toLocaleString("es-UY");
-}
 
 /* Genera todas las tarjetas del catálogo a partir de un array de productos.
    Recibe el array por parámetro, así la misma función sirve tanto para
@@ -34,19 +33,16 @@ function mostrarProductos(productos) {
   contenedor.innerHTML = "";
 
   productos.forEach((producto) => {
-    /* El stock se traduce a un mensaje y a una clase de color */
-    let textoStock = "";
-    let claseStock = "";
+    /* El mensaje y el color del stock los arma describirStock(), en base.js */
+    const disponibilidad = describirStock(producto.stock);
+
+    /* Un producto agotado se muestra igual, pero sin poder agregarse */
+    let textoBoton = "Agregar al carrito";
+    let botonDeshabilitado = "";
 
     if (producto.stock === 0) {
-      textoStock = "Sin stock";
-      claseStock = "agotado";
-    } else if (producto.stock <= 5) {
-      textoStock = `Últimas ${producto.stock} unidades`;
-      claseStock = "limitado";
-    } else {
-      textoStock = `En stock · ${producto.stock} unidades`;
-      claseStock = "disponible";
+      textoBoton = "Sin stock";
+      botonDeshabilitado = "disabled";
     }
 
     contenedor.innerHTML += `
@@ -57,16 +53,31 @@ function mostrarProductos(productos) {
             <span class="etiqueta-seccion">${producto.categoria}</span>
             <h3 class="h5 card-title">${producto.nombre}</h3>
             <p class="card-text texto-suave small">${producto.descripcion}</p>
-            <p class="disponibilidad ${claseStock}">${textoStock}</p>
-            <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-              <span class="precio">${formatearPrecio(producto.precio)}</span>
-              <a class="btn btn-primary btn-sm" href="producto.html?id=${producto.id}"
-                 aria-label="Ver el producto ${producto.nombre}">Ver producto</a>
+            <p class="disponibilidad ${disponibilidad.clase}">${disponibilidad.texto}</p>
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <span class="precio">${formatearPrecio(producto.precio)}</span>
+                <a class="btn btn-outline-primary btn-sm" href="producto.html?id=${producto.id}"
+                   aria-label="Ver el producto ${producto.nombre}">Ver producto</a>
+              </div>
+              <button class="btn btn-primary btn-sm w-100 btn-agregar" type="button"
+                      data-id="${producto.id}" ${botonDeshabilitado}
+                      aria-label="Agregar ${producto.nombre} al carrito">${textoBoton}</button>
             </div>
           </div>
         </div>
       </article>
     `;
+  });
+
+  /* Los botones no existían cuando se cargó la página: se crearon
+     recién ahora, dentro del forEach. Por eso los eventos se conectan
+     después de dibujar las tarjetas. El id del producto viaja en el
+     atributo data-id de cada botón y se lee con dataset.id. */
+  document.querySelectorAll(".btn-agregar").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      agregarAlCarrito(boton.dataset.id);
+    });
   });
 }
 

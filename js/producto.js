@@ -1,6 +1,6 @@
 /* =====================================================================
    NIVEL 99 · Gaming Setup Store
-   js/producto.js - Detalle dinámico del producto (Sprint 2 · 6/9)
+   js/producto.js - Detalle dinámico del producto (Sprint 2 · 6/9 y 13/9)
    ---------------------------------------------------------------------
    producto.html es una sola página que sirve para todos los productos.
    El identificador del producto viaja en la URL (producto.html?id=p1),
@@ -13,14 +13,12 @@
      Semana 7 · window.location.search, URLSearchParams, get(),
                find() por id, estructura HTML vacía completada por JS,
                mensaje cuando el producto no existe
+     Semana 8 · agregar al carrito desde la ficha
 
-   Depende de que js/productos.js se cargue antes que este archivo.
+   Depende de que js/base.js y js/productos.js se carguen antes que
+   este archivo: de ahí salen formatearPrecio(), describirStock() y
+   agregarAlCarrito().
    ===================================================================== */
-
-/* Devuelve el precio con el formato de la tienda: 21900 -> "$ 21.900" */
-function formatearPrecio(precio) {
-  return "$ " + precio.toLocaleString("es-UY");
-}
 
 /* Completa la ficha con los datos del producto encontrado */
 function mostrarProducto(producto) {
@@ -35,20 +33,13 @@ function mostrarProducto(producto) {
   document.querySelector("#productoDescripcion").textContent = producto.descripcion;
   document.querySelector("#productoPrecio").textContent = formatearPrecio(producto.precio);
 
-  /* El stock se traduce a un mensaje y a una clase de color, igual que
-     en las tarjetas del catálogo */
+  /* El mensaje y el color del stock salen de describirStock(), en
+     base.js, así la ficha y las tarjetas del catálogo dicen lo mismo */
   const stock = document.querySelector("#productoStock");
+  const disponibilidad = describirStock(producto.stock);
 
-  if (producto.stock === 0) {
-    stock.textContent = "Sin stock";
-    stock.classList.add("agotado");
-  } else if (producto.stock <= 5) {
-    stock.textContent = `Últimas ${producto.stock} unidades`;
-    stock.classList.add("limitado");
-  } else {
-    stock.textContent = `En stock · ${producto.stock} unidades`;
-    stock.classList.add("disponible");
-  }
+  stock.textContent = disponibilidad.texto;
+  stock.classList.add(disponibilidad.clase);
 
   /* Si no hay stock, no tiene sentido dejar el botón de compra activo */
   if (producto.stock === 0) {
@@ -90,10 +81,14 @@ if (productoSeleccionado) {
 }
 
 /* ---------------------------------------------------------------
-   AVISO DEL CARRITO (se reemplaza en la entrega del 13/9)
-   --------------------------------------------------------------- */
-document.querySelector("#btnAgregarCarrito").addEventListener("click", () => {
-  document.querySelector("#toastMessage").textContent =
-    "El carrito de compras se desarrolla en la última entrega del Sprint 2.";
-  bootstrap.Toast.getOrCreateInstance(document.querySelector("#appToast")).show();
-});
+   AGREGAR AL CARRITO DESDE LA FICHA (13/9)
+   ---------------------------------------------------------------
+   El evento se conecta solamente si el producto existe: si el id de
+   la URL era incorrecto, la ficha ni siquiera se muestra.
+   agregarAlCarrito() está en base.js y se encarga del control de
+   stock, de guardar en LocalStorage y de avisar al usuario. */
+if (productoSeleccionado) {
+  document.querySelector("#btnAgregarCarrito").addEventListener("click", () => {
+    agregarAlCarrito(productoSeleccionado.id);
+  });
+}

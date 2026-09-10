@@ -20,6 +20,7 @@
    14. Diseño responsive
    15. Ventana modal
    16. Avisos de los próximos sprints
+   17. Carrito de compras
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -755,4 +756,173 @@ img {
 
 .lista-pendientes li {
   margin-bottom: 0.4rem;
+}
+
+/* ---------------------------------------------------------------
+   17. CARRITO DE COMPRAS (Sprint 2 · 13/9)
+   Las filas y el panel de resumen se dibujan desde js/carrito.js,
+   así que acá solo se define cómo se ven.
+   --------------------------------------------------------------- */
+.fila-carrito {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 1.25rem;
+  align-items: center;
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  box-shadow: var(--sombra-suave);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.imagen-carrito {
+  width: 120px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radio-chico);
+  background-color: var(--color-superficie);
+}
+
+.datos-carrito .etiqueta-seccion {
+  font-size: 0.7rem;
+  margin-bottom: 0.15rem;
+}
+
+.nombre-carrito {
+  margin-bottom: 0.35rem;
+}
+
+.datos-carrito .disponibilidad {
+  margin-bottom: 0.25rem;
+}
+
+.precio-unitario {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  margin-bottom: 0;
+}
+
+.acciones-carrito {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+/* Control de cantidad: los botones - y + con el número en el medio */
+.control-cantidad {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+}
+
+.btn-cantidad {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background-color: var(--color-superficie);
+  color: var(--color-primario);
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.btn-cantidad:hover:not(:disabled),
+.btn-cantidad:focus-visible {
+  background-color: var(--color-primario);
+  color: #ffffff;
+}
+
+.btn-cantidad:disabled {
+  color: var(--color-texto-suave);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.control-cantidad .cantidad {
+  min-width: 44px;
+  text-align: center;
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+}
+
+.subtotal-carrito {
+  font-size: 1.15rem;
+}
+
+.btn-eliminar {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8b1a1a;
+  text-decoration: underline;
+}
+
+.btn-eliminar:hover,
+.btn-eliminar:focus-visible {
+  color: #5f1010;
+}
+
+/* Panel lateral con las unidades y el total */
+.resumen-compra {
+  position: sticky;
+  top: 96px;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  padding: 1.5rem;
+}
+
+.resumen-compra h2 {
+  margin-bottom: 1.25rem;
+}
+
+.linea-resumen {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+}
+
+.total-resumen {
+  border-top: 1px solid var(--color-borde);
+  margin-top: 1rem;
+  padding-top: 1rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--color-primario);
+}
+
+.nota-resumen {
+  font-size: 0.8rem;
+  color: var(--color-texto-suave);
+  margin-top: 1rem;
+}
+
+@media (max-width: 575px) {
+  .fila-carrito {
+    grid-template-columns: 90px 1fr;
+  }
+
+  .imagen-carrito {
+    width: 90px;
+    height: 80px;
+  }
+
+  .acciones-carrito {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
 }
