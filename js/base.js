@@ -104,16 +104,10 @@ function contarUnidades() {
 /* Refresca el número del ícono del carrito de la barra superior */
 function actualizarContadorCarrito() {
   const contador = document.querySelector(".badge-carrito");
-  const boton = document.querySelector("#btnCartPlaceholder");
 
   if (!contador) return;
 
-  const unidades = contarUnidades();
-  contador.textContent = unidades;
-
-  if (boton) {
-    boton.setAttribute("aria-label", `Ver el carrito de compras: ${unidades} productos`);
-  }
+  contador.textContent = contarUnidades();
 }
 
 /* Agrega un producto al carrito, desde el catálogo o desde la ficha.
@@ -167,11 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* El número del carrito se muestra en todas las páginas */
   actualizarContadorCarrito();
-
-  /* El ícono del carrito ya lleva a la página del carrito */
-  document.querySelector("#btnCartPlaceholder")?.addEventListener("click", () => {
-    window.location.href = "carrito.html";
-  });
 
   /* Funcionalidad que todavía corresponde al Sprint 3 */
   document.querySelector("#btnLoginPlaceholder")?.addEventListener("click", () => {

@@ -53,13 +53,14 @@ Nexo-Store/
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
 ├── producto.html       Ficha dinámica, la misma página para todos los productos
 ├── carrito.html        Carrito de compras persistido en LocalStorage
-├── perfil.html         Bloqueada · Sprint 3
-├── admin.html          Bloqueada · Sprint 3
+├── perfil.html         Con la identidad del sitio y su aviso · Sprint 3
+├── admin.html          Con la identidad del sitio y su aviso · Sprint 3
 ├── css/
 │   └── styles.css      Hoja de estilos organizada en 17 secciones comentadas
 ├── js/
 │   ├── base.js         Navegación, avisos y funciones compartidas (precio, stock, carrito)
 │   ├── productos.js    Arreglo de objetos con los productos de la tienda
+│   ├── inicio.js       Productos destacados de la portada
 │   ├── catalogo.js     Tarjetas del catálogo, búsqueda y filtro por categoría
 │   ├── producto.js     Detalle del producto recibido por la URL
 │   ├── carrito.js      Página del carrito: cantidades, subtotales y total
@@ -188,6 +189,21 @@ Nexo-Store/
   `js/base.js` (`formatearPrecio()` y `describirStock()`), que se carga en todas las
   páginas: ahora el catálogo, la ficha y el carrito muestran siempre lo mismo.
 
+### Ajustes de coherencia hechos junto con esta entrega
+
+- **Los productos destacados de la portada se generan desde JavaScript.** Estaban escritos
+  a mano desde el Sprint 1, con el precio y el stock duplicados respecto de
+  `js/productos.js`. Ahora `js/inicio.js` los arma a partir del mismo arreglo, filtrando
+  por una lista de identificadores, y sus botones abren la ficha correcta
+  (`producto.html?id=`), cosa que antes no ocurría.
+- **`perfil.html` y `admin.html` adoptaron la identidad de Nivel 99.** Conservaban el
+  navbar, el pie y la marca de la plantilla original. Ahora comparten navbar, footer, toast
+  y tipografías con el resto del sitio y mantienen su aviso de *Funcionalidad en desarrollo*
+  del Sprint 3, como pide la consigna.
+- **El ícono del carrito es un enlace.** Antes era un botón que navegaba desde JavaScript;
+  ahora es un `<a href="carrito.html">`, que es lo que corresponde a un enlace y evita
+  resolver con JavaScript algo que ya resuelve el HTML.
+
 ### Contenidos del curso aplicados
 
 | Semana | Contenido | Dónde se usa |
@@ -220,9 +236,12 @@ Nexo-Store/
 | 8 | Eventos en botones creados dinámicamente | Botones "+", "−" y "Eliminar" de cada fila |
 | 8 | `data-id` y `dataset` | Saber sobre qué producto actuar al hacer clic |
 
-Queda fuera del temario una sola línea: `precio.toLocaleString("es-UY")` dentro de
-`formatearPrecio()`, que agrega el punto de miles (`21900` se muestra como `$ 21.900`).
-Sin esa llamada el precio se vería como `$ 21900`.
+Del código escrito en este sprint queda fuera del temario una sola línea:
+`precio.toLocaleString("es-UY")` dentro de `formatearPrecio()`, que agrega el punto de
+miles (`21900` se muestra como `$ 21.900`). Sin esa llamada el precio se vería como
+`$ 21900`. En `js/base.js` sobreviven además dos recursos que venían de la entrega del
+Sprint 1: `setAttribute("aria-current", "page")` para marcar la página actual y el
+encadenamiento opcional `?.` al conectar botones que no existen en todas las páginas.
 
 ### Cómo está organizado el código JavaScript
 
@@ -230,6 +249,7 @@ Sin esa llamada el precio se vería como `$ 21900`.
 | --- | --- |
 | `js/base.js` | Comportamiento común: navegación, avisos, formato de precio, estado de stock y el carrito guardado en LocalStorage |
 | `js/productos.js` | Únicamente los datos: el array de productos de la tienda |
+| `js/inicio.js` | Las cuatro tarjetas destacadas de la portada |
 | `js/catalogo.js` | Lógica del catálogo: mostrar las tarjetas, buscar y filtrar |
 | `js/producto.js` | Lógica de la ficha: leer el id de la URL y mostrar ese producto |
 | `js/carrito.js` | Lógica del carrito: dibujar las filas, cambiar cantidades y calcular totales |
@@ -298,6 +318,9 @@ validaciones y repaso integrador del sprint.
 - No se puede superar el stock: el botón "+" se deshabilita y aparece el aviso correspondiente.
 - El carrito y el contador de la barra se conservan al recargar la página.
 - Con el carrito vacío se muestra el mensaje y el botón hacia el catálogo.
+- Los cuatro destacados de la portada abren la ficha del producto que corresponde.
+- Las seis páginas comparten navbar, pie, toast y tipografías, y las del Sprint 3
+  conservan su aviso de funcionalidad en desarrollo.
 - No hay errores relevantes en la consola del navegador.
 
 ## Funcionalidades pendientes
@@ -333,8 +356,6 @@ validaciones y repaso integrador del sprint.
 
 - Las fotografías de los productos se cargan desde Unsplash, por lo que requieren conexión
   a internet. En `assets/img/producto-placeholder.svg` hay una imagen local de reemplazo.
-- Los cuatro productos destacados del inicio siguen escritos en HTML; el catálogo, en
-  cambio, ya se genera por completo desde JavaScript.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
 - El botón de ingreso todavía muestra solo un aviso del sprint en el que será desarrollado.
 - El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro

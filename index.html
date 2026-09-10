@@ -38,12 +38,12 @@
                         <li class="nav-item"><a class="nav-link" data-page="admin" href="admin.html">Administración</a></li>
                     </ul>
                     <div class="d-flex align-items-center gap-2 pb-2 pb-lg-0">
-                        <button class="btn btn-carrito position-relative" type="button" id="btnCartPlaceholder"
-                            aria-label="Ver el carrito de compras: 0 productos">
+                        <a class="btn btn-carrito position-relative" href="carrito.html"
+                            aria-label="Ver el carrito de compras">
                             <img src="assets/icons/carrito.svg" alt="" width="22" height="22"
                                 aria-hidden="true">
                             <span class="badge-carrito">0</span>
-                        </button>
+                        </a>
                         <button class="btn btn-acento btn-sm" type="button" id="btnLoginPlaceholder">Ingresar</button>
                     </div>
                 </div>
@@ -103,80 +103,9 @@
                     <p class="texto-suave mb-0">Cuatro equipos probados por el equipo de Nivel 99 antes de llegar a la
                         tienda. Todos incluyen garantía escrita y configuración inicial sin costo.</p>
                 </div>
-                <div class="row g-4">
-                    <article class="col-md-6 col-xl-3">
-                        <div class="card h-100 tarjeta-producto">
-                            <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
-                                class="card-img-top" alt="Teclado mecánico compacto con retroiluminación azul">
-                            <div class="card-body d-flex flex-column">
-                                <span class="etiqueta-seccion">Periféricos</span>
-                                <h3 class="h5 card-title">Teclado mecánico TKL Aurora</h3>
-                                <p class="card-text texto-suave small">Switches lineales, doble amortiguación y
-                                    retroiluminación azul regulable.</p>
-                                <p class="disponibilidad disponible">En stock</p>
-                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                    <span class="precio">$ 4.290</span>
-                                    <a class="btn btn-primary btn-sm" href="producto.html"
-                                        aria-label="Ver el producto Teclado mecánico TKL Aurora">Ver producto</a>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                    <article class="col-md-6 col-xl-3">
-                        <div class="card h-100 tarjeta-producto">
-                            <img src="https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=800&q=80"
-                                class="card-img-top" alt="Mouse gamer inalámbrico apoyado sobre un escritorio">
-                            <div class="card-body d-flex flex-column">
-                                <span class="etiqueta-seccion">Periféricos</span>
-                                <h3 class="h5 card-title">Mouse inalámbrico Vortex 60g</h3>
-                                <p class="card-text texto-suave small">Sensor de 26.000 DPI, 70 horas de batería y
-                                    solo 60 gramos de peso.</p>
-                                <p class="disponibilidad disponible">En stock</p>
-                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                    <span class="precio">$ 3.150</span>
-                                    <a class="btn btn-primary btn-sm" href="producto.html"
-                                        aria-label="Ver el producto Mouse inalámbrico Vortex 60g">Ver producto</a>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                    <article class="col-md-6 col-xl-3">
-                        <div class="card h-100 tarjeta-producto">
-                            <img src="https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80"
-                                class="card-img-top" alt="Monitor de escritorio encendido sobre una mesa de trabajo">
-                            <div class="card-body d-flex flex-column">
-                                <span class="etiqueta-seccion">Monitores</span>
-                                <h3 class="h5 card-title">Monitor Nova 27" QHD 165 Hz</h3>
-                                <p class="card-text texto-suave small">Panel IPS de 2560 x 1440, 1 ms de respuesta y
-                                    soporte con altura regulable.</p>
-                                <p class="disponibilidad limitado">Últimas 3 unidades</p>
-                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                    <span class="precio">$ 21.900</span>
-                                    <a class="btn btn-primary btn-sm" href="producto.html"
-                                        aria-label="Ver el producto Monitor Nova 27 pulgadas QHD 165 Hz">Ver producto</a>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                    <article class="col-md-6 col-xl-3">
-                        <div class="card h-100 tarjeta-producto">
-                            <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
-                                class="card-img-top" alt="Auriculares over ear apoyados sobre un soporte">
-                            <div class="card-body d-flex flex-column">
-                                <span class="etiqueta-seccion">Audio y streaming</span>
-                                <h3 class="h5 card-title">Auriculares Echo 7.1</h3>
-                                <p class="card-text texto-suave small">Sonido envolvente por software, micrófono
-                                    desmontable y almohadillas de memoria.</p>
-                                <p class="disponibilidad disponible">En stock</p>
-                                <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
-                                    <span class="precio">$ 5.480</span>
-                                    <a class="btn btn-primary btn-sm" href="producto.html"
-                                        aria-label="Ver el producto Auriculares Echo 7.1">Ver producto</a>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                </div>
+                <!-- Las cuatro tarjetas se generan desde js/inicio.js a partir
+                     del mismo arreglo que usa el catálogo -->
+                <div class="row g-4" id="grillaDestacados"></div>
                 <p class="mt-4 mb-0">
                     <a class="btn btn-outline-primary" href="catalogo.html">Ver todos los productos</a>
                 </p>
@@ -317,6 +246,8 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/base.js"></script>
+    <script src="js/productos.js"></script>
+    <script src="js/inicio.js"></script>
 </body>
 
 </html>
