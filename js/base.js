@@ -1,24 +1,3 @@
-/* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/base.js - Comportamiento común de todas las páginas
-   ---------------------------------------------------------------------
-   Sprint 1 · navegación activa y avisos de la interfaz.
-   Sprint 2 · 13/9 · funciones que usan el catálogo, la ficha y el
-              carrito, más el carrito guardado en LocalStorage.
-   Sprint 3 · 20/9 · se quita el aviso provisorio del botón Ingresar,
-              que ahora resuelve js/modules/navbar.js con Firebase.
-
-   Este archivo se carga en todas las páginas del sitio y antes que
-   los demás, así que lo que está acá está disponible para todos.
-
-   Contenidos de clase utilizados:
-     Semana 5 · const y let, funciones, if / else, ===, template
-               literals, objetos, arrays, forEach(), find(), push()
-     Semana 6 · querySelector(), textContent, addEventListener()
-     Semana 8 · localStorage.setItem(), localStorage.getItem(),
-               JSON.stringify(), JSON.parse(), valor por defecto || []
-   ===================================================================== */
-
 /* ---------------------------------------------------------------
    1. AVISOS DE LA INTERFAZ
    Un único lugar para mostrar mensajes, con el componente Toast de

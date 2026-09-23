@@ -1,26 +1,3 @@
-/* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/catalogo.js - Catálogo dinámico (Sprint 2 · 23/8, 30/8 y 13/9)
-   ---------------------------------------------------------------------
-   Genera las tarjetas del catálogo a partir del array "productos" de
-   js/productos.js, permite buscarlas por nombre, filtrarlas por
-   categoría y ordenarlas sin recargar la página, y agregar cualquiera
-   de ellas al carrito desde la propia tarjeta.
-
-   Contenidos de clase utilizados:
-     Semana 5 · const y let, funciones, funciones flecha, template
-               literals, if / else, ===, push(), includes(),
-               arrays de objetos, forEach(), filter(), sort()
-     Semana 6 · querySelector(), innerHTML, textContent, value,
-               mostrarProductos(), addEventListener(), preventDefault(),
-               toLowerCase() + includes() para buscar
-     Semana 8 · eventos en botones creados dinámicamente y data-id
-
-   Depende de que js/base.js y js/productos.js se carguen antes que
-   este archivo: de ahí salen formatearPrecio(), describirStock() y
-   agregarAlCarrito().
-   ===================================================================== */
-
 /* ---------------------------------------------------------------
    1. MOSTRAR PRODUCTOS
    --------------------------------------------------------------- */

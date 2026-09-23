@@ -1,16 +1,10 @@
 /* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/inicio.js - Productos destacados de la página de inicio
+Productos destacados de la página de inicio
    ---------------------------------------------------------------------
    Las cuatro tarjetas destacadas estaban escritas a mano en index.html
    desde el Sprint 1. Ahora se generan desde el mismo arreglo que usa el
    catálogo, así el precio, el stock y la descripción no quedan
    duplicados en dos lugares ni se desactualizan.
-
-   Contenidos de clase utilizados:
-     Semana 5 · const, funciones, funciones flecha, template literals,
-               arrays de objetos, filter(), includes(), forEach()
-     Semana 6 · querySelector(), innerHTML
 
    Depende de que js/base.js y js/productos.js se carguen antes que
    este archivo: de ahí salen formatearPrecio() y describirStock().

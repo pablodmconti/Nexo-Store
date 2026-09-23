@@ -1,9 +1,6 @@
 /* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/modules/auth.js - Registro, inicio y cierre de sesión
+Registro, inicio y cierre de sesión
    ---------------------------------------------------------------------
-   Sprint 3 · 20/9
-
    Reúne las operaciones de Firebase Authentication. Las páginas
    (login.js, perfil.js, navbar.js) llaman a estas funciones y se
    ocupan solamente de mostrar el resultado.
@@ -11,11 +8,6 @@
    La sesión la guarda Firebase: no se usa LocalStorage para "simular"
    que alguien está logueado. Al recargar, onAuthStateChanged() vuelve
    a avisar quién es el usuario.
-
-   Contenidos de clase utilizados:
-     Semana 9 · createUserWithEmailAndPassword(), updateProfile(),
-                signInWithEmailAndPassword(), signOut(), async / await,
-                objetos como "diccionario" de mensajes
    ===================================================================== */
 
 import { auth } from "../firebase/config.js";

@@ -1,8 +1,6 @@
 /* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/pages/perfil.js - Página privada perfil.html
+Página privada perfil.html
    ---------------------------------------------------------------------
-   Sprint 3 · 20/9
 
    La página arranca mostrando solo "Comprobando tu sesión…". Recién
    cuando onAuthStateChanged() confirma que hay un usuario se
@@ -12,11 +10,6 @@
    Los datos salen de dos lugares:
      Authentication → uid y correo (siempre están)
      Firestore      → nombre, rol y fecha de registro (usuarios/{uid})
-
-   Contenidos de clase utilizados:
-     Semana 6  · querySelector(), textContent, classList
-     Semana 9  · onAuthStateChanged(), uid, email, displayName
-     Semana 10 · getDoc() (en usuarios.js), async / await, try / catch
    ===================================================================== */
 
 import { auth } from "../firebase/config.js";

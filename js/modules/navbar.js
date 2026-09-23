@@ -1,8 +1,6 @@
 /* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/modules/navbar.js - Barra de navegación según la sesión
+   Barra de navegación según la sesión
    ---------------------------------------------------------------------
-   Sprint 3 · 20/9
 
    Se carga en TODAS las páginas (con type="module"). Escucha el
    estado real de la sesión y cambia el navbar:
@@ -10,10 +8,6 @@
      Sin sesión  → botón "Ingresar"
      Con sesión  → enlace "Mi perfil" y menú con el nombre y
                    "Cerrar sesión"
-
-   Contenidos de clase utilizados:
-     Semana 6 · querySelector(), classList, textContent, eventos
-     Semana 9 · onAuthStateChanged(), displayName, signOut()
    ===================================================================== */
 
 import { auth } from "../firebase/config.js";

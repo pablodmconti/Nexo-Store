@@ -1,26 +1,3 @@
-/* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/productos.js - Origen de datos del catálogo (Sprint 2 · 23/8)
-   ---------------------------------------------------------------------
-   Los productos dejan de estar escritos a mano en el HTML y pasan a
-   vivir en este array de objetos. Cualquier página del sitio que
-   necesite productos (catálogo, detalle y carrito) lee de acá, de modo
-   que la información queda en un solo lugar.
-
-   Es un array de objetos: la estructura que vimos en la Semana 5 como
-   "nuestra base de datos" mientras no usemos Firestore.
-
-   Cada producto es un objeto con las siguientes propiedades:
-     id          identificador único, se usa en la URL del detalle
-     nombre      título visible del producto
-     descripcion texto corto para la tarjeta
-     categoria   una de las seis categorías de la tienda
-     precio      número en pesos uruguayos, sin símbolo ni puntos
-     stock       unidades disponibles (0 significa agotado)
-     imagen      URL de la fotografía
-     imagenAlt   texto alternativo de la fotografía
-   ===================================================================== */
-
 const productos = [
   {
     id: "p1",

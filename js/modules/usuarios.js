@@ -1,9 +1,7 @@
 /* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/modules/usuarios.js - Datos de los usuarios en Cloud Firestore
+Datos de los usuarios en Cloud Firestore
    ---------------------------------------------------------------------
-   Sprint 3 · 20/9
-
+  
    Authentication guarda el correo y la contraseña. Todo lo demás
    (nombre, rol, fecha de registro) vive en Firestore, en la colección
    "usuarios", con un documento por persona cuyo id es su uid:
@@ -15,10 +13,6 @@
        └─ fechaRegistro: 20 de setiembre de 2026, 18:30
 
    Este archivo SOLO habla con la base de datos: no toca el HTML.
-
-   Contenidos de clase utilizados:
-     Semana 9  · doc(), setDoc(), rol inicial "cliente"
-     Semana 10 · getDoc(), exists(), data(), async / await
    ===================================================================== */
 
 import { db } from "../firebase/config.js";

@@ -1,25 +1,3 @@
-/* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/producto.js - Detalle dinámico del producto (Sprint 2 · 6/9 y 13/9)
-   ---------------------------------------------------------------------
-   producto.html es una sola página que sirve para todos los productos.
-   El identificador del producto viaja en la URL (producto.html?id=p1),
-   se lee con URLSearchParams, se busca el objeto en el array con find()
-   y el DOM se completa con esa información.
-
-   Contenidos de clase utilizados:
-     Semana 5 · const y let, funciones, if / else, ===, find()
-     Semana 6 · querySelector(), textContent, classList
-     Semana 7 · window.location.search, URLSearchParams, get(),
-               find() por id, estructura HTML vacía completada por JS,
-               mensaje cuando el producto no existe
-     Semana 8 · agregar al carrito desde la ficha
-
-   Depende de que js/base.js y js/productos.js se carguen antes que
-   este archivo: de ahí salen formatearPrecio(), describirStock() y
-   agregarAlCarrito().
-   ===================================================================== */
-
 /* Completa la ficha con los datos del producto encontrado */
 function mostrarProducto(producto) {
   /* Imagen y texto alternativo */

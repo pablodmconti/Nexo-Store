@@ -1,19 +1,11 @@
 /* =====================================================================
-   NIVEL 99 · Gaming Setup Store
-   js/pages/login.js - Página login.html (ingresar y crear cuenta)
+Página login.html (ingresar y crear cuenta)
    ---------------------------------------------------------------------
-   Sprint 3 · 20/9
 
    Esta página se ocupa de la parte visible: leer los formularios,
    validar los campos, deshabilitar el botón mientras Firebase
    responde y mostrar los mensajes. Las operaciones con Firebase
    están en js/modules/auth.js.
-
-   Contenidos de clase utilizados:
-     Semana 5 · funciones, if / else, trim(), length, includes()
-     Semana 6 · querySelector(), classList, textContent, evento submit,
-                preventDefault()
-     Semana 9 · onAuthStateChanged(), async / await, try / catch
    ===================================================================== */
 
 import { auth } from "../firebase/config.js";
