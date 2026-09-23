@@ -21,6 +21,7 @@
    15. Ventana modal
    16. Avisos de los próximos sprints
    17. Carrito de compras
+   18. Cuenta de usuario: login, perfil y navbar (Sprint 3)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -924,5 +925,136 @@ img {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------
+   18. CUENTA DE USUARIO (Sprint 3 · 20/9)
+   Menú de la cuenta en el navbar, página login.html y perfil.html.
+   --------------------------------------------------------------- */
+
+/* Botón con el nombre del usuario en el navbar */
+.btn-usuario {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radio-chico);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-usuario:hover,
+.btn-usuario:focus,
+.btn-usuario.show {
+  color: #ffffff;
+  background-color: var(--color-noche-suave);
+  border-color: var(--color-acento);
+}
+
+/* Tarjeta central de login.html */
+.tarjeta-auth {
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra-suave);
+  padding: 2.5rem;
+}
+
+.nav-auth {
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-chico);
+  padding: 0.3rem;
+}
+
+.nav-auth .nav-link {
+  color: var(--color-texto-suave);
+  font-weight: 600;
+  border-radius: var(--radio-chico);
+}
+
+.nav-auth .nav-link.active {
+  background-color: var(--color-primario);
+  color: #ffffff;
+}
+
+.nota-auth {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--color-texto-suave);
+}
+
+/* Mientras se comprueba la sesión */
+.estado-carga {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+/* Tarjeta de datos de perfil.html */
+.tarjeta-perfil {
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  box-shadow: var(--sombra-suave);
+  padding: 2rem;
+}
+
+.avatar-usuario {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background-color: var(--color-noche);
+  color: var(--color-acento);
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.pastilla-rol {
+  display: inline-block;
+  background-color: var(--color-primario-claro);
+  color: var(--color-primario-oscuro);
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+}
+
+.datos-perfil {
+  margin: 1.5rem 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.datos-perfil dt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-texto-suave);
+}
+
+.datos-perfil dd {
+  margin-bottom: 0.9rem;
+}
+
+.uid-perfil {
+  font-family: monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+@media (max-width: 575px) {
+  .tarjeta-auth,
+  .tarjeta-perfil {
+    padding: 1.5rem;
   }
 }
