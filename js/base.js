@@ -5,6 +5,8 @@
    Sprint 1 · navegación activa y avisos de la interfaz.
    Sprint 2 · 13/9 · funciones que usan el catálogo, la ficha y el
               carrito, más el carrito guardado en LocalStorage.
+   Sprint 3 · 20/9 · se quita el aviso provisorio del botón Ingresar,
+              que ahora resuelve js/modules/navbar.js con Firebase.
 
    Este archivo se carga en todas las páginas del sitio y antes que
    los demás, así que lo que está acá está disponible para todos.
@@ -162,10 +164,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /* El número del carrito se muestra en todas las páginas */
   actualizarContadorCarrito();
 
-  /* Funcionalidad que todavía corresponde al Sprint 3 */
-  document.querySelector("#btnLoginPlaceholder")?.addEventListener("click", () => {
-    mostrarAviso("El inicio de sesión será desarrollado en el Sprint 3.");
-  });
+  /* El botón "Ingresar" y el menú de la cuenta los maneja
+     js/modules/navbar.js desde el Sprint 3 (20/9). */
 
   /* Modal informativo de la página de inicio */
   document.querySelector("#btnProjectInfo")?.addEventListener("click", () => {
