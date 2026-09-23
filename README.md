@@ -1,8 +1,9 @@
 # Nivel 99 · Gaming Setup Store
 
 Proyecto integrador de **Desarrollo Web** (CFE | ANEP) desarrollado sobre la base *Nexo Store*.
-Entrega correspondiente al **Sprint 2 · Catálogo, detalle de producto y carrito**
-(el Sprint 1, interfaz web e identidad visual, ya está integrado).
+Entrega correspondiente al **Sprint 3 · Firebase, autenticación, pedidos y administración**
+(en curso; el Sprint 1, interfaz e identidad visual, y el Sprint 2, catálogo, detalle y
+carrito, ya están integrados).
 
 - **Estudiante:** Pablo Montaña Conti
 - **Curso:** Desarrollo Web · 2.º semestre · Año lectivo 2026
@@ -43,6 +44,8 @@ asesoramiento antes que el precio más bajo del mercado.
 | JavaScript | Catálogo, búsqueda y filtros, ficha del producto y carrito |
 | Google Fonts | Tipografías Chakra Petch e Inter |
 | LocalStorage | Persistencia del carrito entre visitas, sin servidor |
+| Firebase Authentication | Registro, inicio y cierre de sesión con correo y contraseña (Sprint 3) |
+| Cloud Firestore | Datos de cada usuario: nombre, correo, rol y fecha de registro (Sprint 3) |
 | Git y GitHub | Control de versiones y publicación de los avances |
 
 ## Estructura del proyecto
@@ -53,7 +56,8 @@ Nexo-Store/
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
 ├── producto.html       Ficha dinámica, la misma página para todos los productos
 ├── carrito.html        Carrito de compras persistido en LocalStorage
-├── perfil.html         Con la identidad del sitio y su aviso · Sprint 3
+├── login.html          Ingresar y crear cuenta con Firebase Authentication · Sprint 3
+├── perfil.html         Página privada con los datos del usuario autenticado · Sprint 3
 ├── admin.html          Con la identidad del sitio y su aviso · Sprint 3
 ├── css/
 │   └── styles.css      Hoja de estilos organizada en 17 secciones comentadas
@@ -64,8 +68,15 @@ Nexo-Store/
 │   ├── catalogo.js     Tarjetas del catálogo, búsqueda y filtro por categoría
 │   ├── producto.js     Detalle del producto recibido por la URL
 │   ├── carrito.js      Página del carrito: cantidades, subtotales y total
-│   ├── modules/        Reservada para los próximos sprints
-│   └── pages/          Reservada para los próximos sprints
+│   ├── firebase/
+│   │   └── config.js   Única inicialización de Firebase (exporta auth y db)
+│   ├── modules/
+│   │   ├── auth.js     Registro, inicio y cierre de sesión, mensajes de error
+│   │   ├── usuarios.js Documento usuarios/{uid} en Firestore
+│   │   └── navbar.js   Navbar según la sesión (se carga en todas las páginas)
+│   └── pages/
+│       ├── login.js    Formularios de login.html: validación y estados de carga
+│       └── perfil.js   Protección de perfil.html y datos del usuario
 ├── assets/
 │   ├── img/            Imágenes propias y placeholder de producto
 │   ├── icons/          Íconos SVG de la sección de beneficios y del carrito
@@ -78,9 +89,96 @@ Nexo-Store/
 
 1. Clonar el repositorio: `git clone https://github.com/pablodmconti/Nexo-Store.git`
 2. Abrir la carpeta en Visual Studio Code.
-3. Iniciar la extensión **Live Server** sobre `index.html` (o abrir el archivo directamente en el navegador).
-4. Se requiere conexión a internet, ya que Bootstrap, las tipografías y las fotografías de
-   los productos se cargan desde servicios externos (CDN, Google Fonts y Unsplash).
+3. Iniciar la extensión **Live Server** sobre `index.html`. Desde el Sprint 3 es obligatorio:
+   los archivos de Firebase son módulos (`type="module"`) y el navegador no los ejecuta
+   si la página se abre directamente como archivo (`file://`).
+4. Se requiere conexión a internet, ya que Bootstrap, las tipografías, las fotografías de
+   los productos y Firebase se cargan desde servicios externos.
+
+## Funcionalidades desarrolladas en el Sprint 3
+
+### Semana del 20/9 · Firebase y autenticación de usuarios
+
+- **Proyecto en Firebase.** Se creó el proyecto `login-nexostore`, se registró la
+  aplicación web y se habilitó el proveedor *Correo electrónico/Contraseña* en
+  Authentication. También se creó la base de datos de Cloud Firestore.
+- **Una sola configuración.** `js/firebase/config.js` es el único archivo que llama a
+  `initializeApp()`. Exporta `auth` (Authentication) y `db` (Firestore) y el resto del
+  proyecto los importa: ninguna página vuelve a inicializar Firebase.
+- **Nueva página `login.html`.** Tiene dos pestañas de Bootstrap, *Ingresar* y *Crear
+  cuenta*, con la misma identidad que el resto del sitio.
+- **Registro con validaciones.** Antes de llamar a Firebase se comprueba que el nombre
+  tenga al menos 2 letras, que el correo tenga la forma `nombre@correo.com`, que la
+  contraseña tenga al menos 6 caracteres y que las dos contraseñas coincidan. Cada error
+  aparece debajo de su campo con las clases `is-invalid` e `invalid-feedback` de Bootstrap.
+- **Documento del usuario en Firestore.** Al registrarse se crea `usuarios/{uid}` con
+  `nombre`, `correo`, `rol: "cliente"` y `fechaRegistro`. El nombre también se guarda en
+  la cuenta con `updateProfile()` para mostrarlo en el navbar.
+- **Mensajes comprensibles.** Los códigos de Firebase (`auth/invalid-credential`,
+  `auth/email-already-in-use`, `auth/network-request-failed`, etc.) se traducen a frases
+  en español con un objeto que funciona como diccionario.
+- **Estados de carga.** Mientras Firebase responde, el botón se deshabilita y cambia su
+  texto ("Ingresando…", "Creando la cuenta…"), así no se envía dos veces el formulario.
+- **Sesión persistente.** No se guarda nada "a mano": Firebase recuerda la sesión y
+  `onAuthStateChanged()` la vuelve a informar al recargar o al cambiar de página.
+- **Navbar según la sesión.** Sin sesión se ve el botón *Ingresar*; con sesión aparecen
+  el enlace *Mi perfil* y un menú con el nombre del usuario y *Cerrar sesión*.
+- **`perfil.html` protegida.** La página arranca mostrando solo "Comprobando tu sesión…".
+  Si no hay usuario redirige a `login.html` sin mostrar datos privados; si lo hay, muestra
+  nombre, correo, rol, fecha de registro e identificador de la cuenta. Si Firestore no
+  responde, muestra los datos básicos de Authentication y un aviso.
+- **Cierre de sesión** con `signOut()` desde el menú o desde el perfil; luego se vuelve al inicio.
+
+### Cómo se registran y autentican los usuarios
+
+1. En `login.html`, `js/pages/login.js` valida el formulario.
+2. Llama a `registrarUsuario()` de `js/modules/auth.js`, que ejecuta en orden:
+   `createUserWithEmailAndPassword()` → `updateProfile()` → `crearPerfilUsuario()`
+   (`js/modules/usuarios.js`, que hace el `setDoc()` en Firestore).
+3. Para ingresar se usa `iniciarSesion()`, que llama a `signInWithEmailAndPassword()`.
+4. En todas las páginas, `js/modules/navbar.js` escucha `onAuthStateChanged()` y
+   actualiza el navbar. En `perfil.html`, `js/pages/perfil.js` usa el mismo observador
+   para proteger la página y leer el documento con `getDoc()`.
+
+La contraseña nunca pasa por la base de datos del proyecto: la guarda y la valida
+Firebase Authentication.
+
+### Cómo está organizado el código JavaScript del Sprint 3
+
+Se separó la conexión, las operaciones con Firebase y la presentación, como pide la
+consigna (no mezclar autenticación, base de datos e interfaz en un único archivo):
+
+| Carpeta | Archivos | Responsabilidad |
+| --- | --- | --- |
+| `js/firebase/` | `config.js` | Conectar el proyecto con Firebase |
+| `js/modules/` | `auth.js`, `usuarios.js` | Hablar con Authentication y con Firestore, sin tocar el HTML |
+| `js/modules/` | `navbar.js` | Parte de la interfaz común a todas las páginas |
+| `js/pages/` | `login.js`, `perfil.js` | Lógica de cada página: leer formularios y mostrar resultados |
+
+Los archivos del Sprint 2 (`base.js`, `productos.js`, `catalogo.js`, etc.) quedan en `js/`
+y se migran a Firestore en la semana del 4/10.
+
+### Usuarios de prueba
+
+Cuentas creadas exclusivamente para evaluar el proyecto:
+
+| Rol | Correo | Contraseña |
+| --- | --- | --- |
+| Cliente | *(completar)* | *(completar)* |
+
+### Pruebas de la semana del 20/9
+
+- Firebase se inicializa sin errores en la consola.
+- Registro vacío o con datos inválidos: cada campo muestra su error y no se llama a Firebase.
+- Correo ya registrado y contraseña incorrecta: aparece el mensaje en español y el botón
+  vuelve a habilitarse.
+- Registro correcto: se crea el documento `usuarios/{uid}` y se llega al perfil con los datos.
+- Al recargar `perfil.html` la sesión sigue activa.
+- Abrir `perfil.html` sin sesión redirige a `login.html`.
+- Abrir `login.html` con sesión iniciada lleva directamente al perfil.
+- El navbar cambia en todas las páginas según la sesión.
+- Cerrar sesión vuelve al inicio y el navbar muestra otra vez *Ingresar*.
+- El catálogo, la ficha y el carrito siguen funcionando igual que en el Sprint 2.
 
 ## Funcionalidades desarrolladas en el Sprint 2
 
@@ -350,8 +448,9 @@ validaciones y repaso integrador del sprint.
 
 | Sprint | Pendiente |
 | --- | --- |
-| Sprint 2 | Pulido general, validaciones y repaso integrador |
-| Sprint 3 | Firebase Authentication, Cloud Firestore, perfil privado, pedidos y panel administrativo |
+| Sprint 3 · 4/10 | Productos almacenados en Cloud Firestore |
+| Sprint 3 · 11/10 | Confirmación de compra, pedidos, stock, historial y valoraciones en Firestore |
+| Sprint 3 | Roles y panel administrativo |
 | Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
 
 ## Decisiones de diseño adoptadas
@@ -380,13 +479,13 @@ validaciones y repaso integrador del sprint.
 - Las fotografías de los productos se cargan desde Unsplash, por lo que requieren conexión
   a internet. En `assets/img/producto-placeholder.svg` hay una imagen local de reemplazo.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
-- El botón de ingreso todavía muestra solo un aviso del sprint en el que será desarrollado.
+- La base de Firestore está en modo de prueba: las reglas de seguridad se configuran en el Sprint 4.
+- El rol de administrador todavía no se usa; todas las cuentas se registran como cliente.
 - El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro
   navegador, el carrito aparece vacío. Compartir el carrito entre dispositivos requiere
   la cuenta de usuario del Sprint 3.
 - El stock se comprueba contra el array `productos`, que se reinicia con cada recarga: es
   un control de la interfaz, no un descuento real de inventario.
-- Aún no hay usuarios de prueba, porque la autenticación corresponde al Sprint 3.
 
 ## Posibles mejoras futuras
 
