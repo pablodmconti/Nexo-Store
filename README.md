@@ -57,6 +57,7 @@ Nexo-Store/
 ├── producto.html       Ficha dinámica, la misma página para todos los productos
 ├── carrito.html        Carrito de compras persistido en LocalStorage
 ├── login.html          Ingresar y crear cuenta con Firebase Authentication · Sprint 3
+├── cargar-productos.html  Herramienta interna: carga inicial de la colección productos · Sprint 3
 ├── perfil.html         Página privada con los datos del usuario autenticado · Sprint 3
 ├── admin.html          Con la identidad del sitio y su aviso · Sprint 3
 ├── css/
@@ -73,8 +74,10 @@ Nexo-Store/
 │   ├── modules/
 │   │   ├── auth.js     Registro, inicio y cierre de sesión, mensajes de error
 │   │   ├── usuarios.js Documento usuarios/{uid} en Firestore
+│   │   ├── productos-firestore.js  Colección productos en Firestore
 │   │   └── navbar.js   Navbar según la sesión (se carga en todas las páginas)
 │   └── pages/
+│       ├── cargar-productos.js  Carga inicial de los productos en Firestore
 │       ├── login.js    Formularios de login.html: validación y estados de carga
 │       └── perfil.js   Protección de perfil.html y datos del usuario
 ├── assets/
@@ -128,6 +131,25 @@ Nexo-Store/
   nombre, correo, rol, fecha de registro e identificador de la cuenta. Si Firestore no
   responde, muestra los datos básicos de Authentication y un aviso.
 - **Cierre de sesión** con `signOut()` desde el menú o desde el perfil; luego se vuelve al inicio.
+
+### Semana del 4/10 · Productos almacenados en Cloud Firestore (en curso)
+
+- **Colección `productos`.** Cada producto es un documento cuyo id es el mismo que ya
+  usaba el sitio (`p1` a `p12`), por eso el id no se repite como campo adentro.
+- **Campos de cada producto:** `nombre`, `descripcion`, `categoria`, `precio`, `stock`,
+  `disponible`, `imagenes`, `imagenAlt` y `caracteristicas`, con la estructura de la
+  Semana 5 (arreglos `imagenes` y `caracteristicas`) y de la Semana 10 (`disponible`).
+- **`disponible` y `stock` son cosas distintas.** `stock` dice cuántas unidades hay;
+  `disponible` indica si el producto se puede vender (lo usará el panel administrativo
+  para desactivar un producto sin borrarlo).
+- **`imagenes` reemplaza a `imagen`.** Es un arreglo de rutas y la primera es la imagen
+  principal: las tarjetas, la ficha y el carrito usan `producto.imagenes[0]`.
+- **Carga inicial.** `cargar-productos.html` (no está enlazada en el menú) recorre el
+  arreglo de `js/productos.js` y guarda cada producto con `setDoc()`. Muestra el avance
+  producto por producto y avisa si alguno falla. Como `setDoc()` reemplaza el documento
+  si ya existe, se puede volver a ejecutar sin duplicar productos.
+- `js/productos.js` queda como respaldo y carga inicial, como permite la consigna. El
+  catálogo y la ficha pasarán a leer de Firestore en el siguiente paso.
 
 ### Cómo se registran y autentican los usuarios
 

@@ -22,6 +22,7 @@
    16. Avisos de los próximos sprints
    17. Carrito de compras
    18. Cuenta de usuario: login, perfil y navbar (Sprint 3)
+   19. Carga inicial de productos (Sprint 3)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -1057,4 +1058,32 @@ img {
   .tarjeta-perfil {
     padding: 1.5rem;
   }
+}
+
+/* ---------------------------------------------------------------
+   19. CARGA INICIAL DE PRODUCTOS (Sprint 3)
+   Página interna cargar-productos.html.
+   --------------------------------------------------------------- */
+.tarjeta-carga {
+  max-width: 640px;
+}
+
+.lista-carga {
+  margin: 1.5rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--color-texto-suave);
+}
+
+.lista-carga li {
+  margin-bottom: 0.3rem;
+}
+
+.lista-carga .carga-ok {
+  color: #146c43;
+}
+
+.lista-carga .carga-error {
+  color: #8b1a1a;
+  font-weight: 600;
 }
