@@ -2,7 +2,7 @@
 function mostrarProducto(producto) {
   /* Imagen y texto alternativo */
   const imagen = document.querySelector("#productoImagen");
-  imagen.src = producto.imagen;
+  imagen.src = producto.imagenes[0];
   imagen.alt = producto.imagenAlt;
 
   /* Textos de la ficha */

@@ -27,7 +27,7 @@ function mostrarDestacados() {
     contenedor.innerHTML += `
       <article class="col-md-6 col-xl-3">
         <div class="card h-100 tarjeta-producto">
-          <img src="${producto.imagen}" class="card-img-top" alt="${producto.imagenAlt}">
+          <img src="${producto.imagenes[0]}" class="card-img-top" alt="${producto.imagenAlt}">
           <div class="card-body d-flex flex-column">
             <span class="etiqueta-seccion">${producto.categoria}</span>
             <h3 class="h5 card-title">${producto.nombre}</h3>

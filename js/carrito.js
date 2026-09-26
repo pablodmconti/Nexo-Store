@@ -93,7 +93,7 @@ function mostrarCarrito() {
 
     contenedor.innerHTML += `
       <article class="fila-carrito">
-        <img class="imagen-carrito" src="${producto.imagen}" alt="${producto.imagenAlt}">
+        <img class="imagen-carrito" src="${producto.imagenes[0]}" alt="${producto.imagenAlt}">
         <div class="datos-carrito">
           <span class="etiqueta-seccion">${producto.categoria}</span>
           <h2 class="h6 nombre-carrito">${producto.nombre}</h2>
