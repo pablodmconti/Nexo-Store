@@ -1,3 +1,17 @@
+/* =====================================================================
+Carrito de compras
+   ---------------------------------------------------------------------
+   El carrito sigue guardado en LocalStorage con la forma
+   { idProducto, cantidad }. Desde el Sprint 3 el nombre, el precio, la
+   imagen y el stock de cada producto se toman de Cloud Firestore, así
+   el carrito muestra siempre la información actual de la tienda.
+   ===================================================================== */
+
+import { obtenerProductos } from "./modules/productos-firestore.js";
+
+/* Productos de la tienda, tal como llegan de Firestore */
+let productos = [];
+
 /* ---------------------------------------------------------------
    1. CÁLCULOS
    --------------------------------------------------------------- */
@@ -81,13 +95,20 @@ function mostrarCarrito() {
   carrito.forEach((item) => {
     /* find() vuelve a aparecer: es la forma de unir los dos arreglos */
     const producto = productos.find((p) => p.id === item.idProducto);
-    const disponibilidad = describirStock(producto.stock);
     const subtotal = calcularSubtotal(producto, item.cantidad);
 
-    /* El botón "+" se apaga cuando ya se llegó al tope del stock */
+    /* Si el administrador desactivó el producto, se avisa en la fila */
+    let disponibilidad = describirStock(producto.stock);
+
+    if (!producto.disponible) {
+      disponibilidad = { texto: "No disponible por el momento", clase: "agotado" };
+    }
+
+    /* El botón "+" se apaga cuando ya se llegó al tope del stock
+       o cuando el producto dejó de estar disponible */
     let sumarDeshabilitado = "";
 
-    if (item.cantidad >= producto.stock) {
+    if (!producto.disponible || item.cantidad >= producto.stock) {
       sumarDeshabilitado = "disabled";
     }
 
@@ -130,7 +151,9 @@ function aumentarCantidad(idProducto) {
   const carrito = obtenerCarrito();
   const item = carrito.find((i) => i.idProducto === idProducto);
 
-  if (item.cantidad < producto.stock) {
+  if (!producto.disponible) {
+    mostrarAviso(`${producto.nombre} no está disponible por el momento.`);
+  } else if (item.cantidad < producto.stock) {
     item.cantidad++;
     guardarCarrito(carrito);
     mostrarCarrito();
@@ -213,7 +236,45 @@ document.querySelector("#btnConfirmar").addEventListener("click", () => {
 /* ---------------------------------------------------------------
    5. ARRANQUE
    ---------------------------------------------------------------
-   Al entrar a la página se lee lo que haya quedado guardado en
-   LocalStorage, así el carrito sobrevive a recargar o cerrar la
-   pestaña. */
-mostrarCarrito();
+   Se lee lo que haya quedado guardado en LocalStorage y se piden a
+   Firestore los datos actuales de los productos. */
+
+/* Si un producto guardado en el carrito ya no existe en la tienda,
+   se lo quita para que no rompa los cálculos */
+function quitarProductosInexistentes() {
+  const carrito = obtenerCarrito();
+  const vigentes = carrito.filter((item) =>
+    productos.find((p) => p.id === item.idProducto)
+  );
+
+  if (vigentes.length < carrito.length) {
+    guardarCarrito(vigentes);
+    mostrarAviso("Quitamos del carrito productos que ya no están en la tienda.");
+  }
+}
+
+async function iniciarCarrito() {
+  const estado = document.querySelector("#estadoCarrito");
+
+  /* Con el carrito vacío no hace falta consultar nada */
+  if (obtenerCarrito().length === 0) {
+    mostrarCarrito();
+    return;
+  }
+
+  estado.innerHTML = htmlCargando("Cargando tu carrito…");
+
+  try {
+    productos = await obtenerProductos();
+  } catch (error) {
+    console.error("Error al cargar los productos del carrito:", error);
+    estado.innerHTML = htmlMensaje("No pudimos cargar los datos de tu carrito. Revisá tu conexión a internet y recargá la página. Tus productos siguen guardados.");
+    return;
+  }
+
+  estado.innerHTML = "";
+  quitarProductosInexistentes();
+  mostrarCarrito();
+}
+
+iniciarCarrito();
