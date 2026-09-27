@@ -1,3 +1,19 @@
+/* =====================================================================
+Catálogo de productos
+   ---------------------------------------------------------------------
+   Desde el Sprint 3 los productos se obtienen de la colección
+   "productos" de Cloud Firestore. Una vez que llegan, vuelven a ser un
+   array común, así que la búsqueda, el filtro y el orden del Sprint 2
+   funcionan sin cambios.
+   ===================================================================== */
+
+import { obtenerProductos } from "./modules/productos-firestore.js";
+import { agregarConValidacion } from "./modules/agregar-carrito.js";
+
+/* Productos que se pueden vender, tal como llegaron de Firestore.
+   Empieza vacío y se completa en iniciarCatalogo(). */
+let productos = [];
+
 /* ---------------------------------------------------------------
    1. MOSTRAR PRODUCTOS
    --------------------------------------------------------------- */
@@ -17,7 +33,7 @@ function mostrarProductos(productos) {
     let textoBoton = "Agregar al carrito";
     let botonDeshabilitado = "";
 
-    if (producto.stock === 0) {
+    if (producto.stock <= 0) {
       textoBoton = "Sin stock";
       botonDeshabilitado = "disabled";
     }
@@ -50,10 +66,12 @@ function mostrarProductos(productos) {
   /* Los botones no existían cuando se cargó la página: se crearon
      recién ahora, dentro del forEach. Por eso los eventos se conectan
      después de dibujar las tarjetas. El id del producto viaja en el
-     atributo data-id de cada botón y se lee con dataset.id. */
+     atributo data-id de cada botón y se lee con dataset.id.
+     agregarConValidacion() vuelve a consultar el producto en Firestore
+     antes de agregarlo, por si el stock cambió. */
   document.querySelectorAll(".btn-agregar").forEach((boton) => {
     boton.addEventListener("click", () => {
-      agregarAlCarrito(boton.dataset.id);
+      agregarConValidacion(boton.dataset.id, boton);
     });
   });
 }
@@ -122,6 +140,11 @@ function ordenarProductos(lista) {
         return 0;
       }
     });
+  } else {
+    /* "Orden de la tienda": p1, p2, p3... Firestore entrega los
+       documentos ordenados por id como TEXTO (p1, p10, p11, p2...),
+       por eso se compara el número que viene después de la "p". */
+    lista.sort((a, b) => Number(a.id.slice(1)) - Number(b.id.slice(1)));
   }
 
   return lista;
@@ -137,9 +160,13 @@ function aplicarFiltros() {
 
   let resultado = productos;
 
-  /* Búsqueda por nombre, sin distinguir mayúsculas de minúsculas */
+  /* Búsqueda por nombre o descripción, sin distinguir mayúsculas
+     de minúsculas: alcanza con que el texto aparezca en uno de los dos */
+  const buscado = texto.toLowerCase();
+
   resultado = resultado.filter((producto) =>
-    producto.nombre.toLowerCase().includes(texto.toLowerCase())
+    producto.nombre.toLowerCase().includes(buscado) ||
+    producto.descripcion.toLowerCase().includes(buscado)
   );
 
   /* Filtro por categoría, salvo que esté elegida la opción "Todas" */
@@ -199,10 +226,46 @@ document.querySelector("#formFiltros").addEventListener("submit", (evento) => {
 });
 
 /* ---------------------------------------------------------------
-   4. ARRANQUE
-   ---------------------------------------------------------------
-   Este archivo se carga al final del <body>, así que el HTML ya existe
-   cuando se ejecutan estas líneas. */
-cargarCategorias();
-mostrarProductos(productos);
-mostrarContador(productos.length);
+   4. ARRANQUE: PEDIR LOS PRODUCTOS A FIRESTORE
+   --------------------------------------------------------------- */
+
+/* Los controles de búsqueda no sirven hasta que llegan los productos */
+function habilitarFiltros(habilitar) {
+  document.querySelectorAll("#formFiltros input, #formFiltros select, #formFiltros button").forEach((control) => {
+    control.disabled = !habilitar;
+  });
+}
+
+async function iniciarCatalogo() {
+  const contenedor = document.querySelector("#catalogo");
+  const contador = document.querySelector("#contadorCatalogo");
+
+  /* Estado de carga: la grilla no queda en blanco mientras se espera */
+  habilitarFiltros(false);
+  contador.textContent = "Cargando productos…";
+  contenedor.innerHTML = htmlCargando("Cargando productos desde la tienda…");
+
+  try {
+    const todos = await obtenerProductos();
+
+    /* Solo se muestran los productos activos (disponible: true) */
+    productos = todos.filter((producto) => producto.disponible);
+  } catch (error) {
+    console.error("Error al cargar productos:", error);
+    contador.textContent = "";
+    contenedor.innerHTML = htmlMensaje("No pudimos cargar los productos. Revisá tu conexión a internet y recargá la página.");
+    return;
+  }
+
+  if (productos.length === 0) {
+    contador.textContent = "";
+    contenedor.innerHTML = htmlMensaje("Todavía no hay productos disponibles en la tienda. Volvé a visitarnos pronto.");
+    return;
+  }
+
+  cargarCategorias();
+  habilitarFiltros(true);
+  aplicarFiltros();
+}
+
+iniciarCatalogo();
