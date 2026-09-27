@@ -93,12 +93,12 @@ function actualizarContadorCarrito() {
 
 /* Agrega un producto al carrito, desde el catálogo o desde la ficha.
    Si el producto ya estaba, suma una unidad; si no, entra como nuevo.
-   El stock vive en el array "productos", así que hay que combinar los
-   dos arrays para saber si todavía queda disponibilidad. */
-function agregarAlCarrito(idProducto) {
-  const producto = productos.find((p) => p.id === idProducto);
+   Desde el Sprint 3 recibe el producto completo, recién consultado en
+   Firestore (ver js/modules/agregar-carrito.js), así el control se
+   hace con el stock y la disponibilidad actuales. */
+function agregarAlCarrito(producto) {
   const carrito = obtenerCarrito();
-  const item = carrito.find((i) => i.idProducto === idProducto);
+  const item = carrito.find((i) => i.idProducto === producto.id);
 
   /* Cuántas unidades de ese producto ya hay reservadas en el carrito */
   let cantidadEnCarrito = 0;
@@ -107,9 +107,12 @@ function agregarAlCarrito(idProducto) {
     cantidadEnCarrito = item.cantidad;
   }
 
-  /* Control de stock: no se puede vender más de lo que hay.
-     Si el producto está agotado, 0 >= 0 y tampoco deja agregar. */
-  if (cantidadEnCarrito >= producto.stock) {
+  /* 1. Un producto desactivado no se vende, aunque tenga stock.
+     2. Control de stock: no se puede vender más de lo que hay.
+        Si el producto está agotado, 0 >= 0 y tampoco deja agregar. */
+  if (!producto.disponible) {
+    mostrarAviso(`${producto.nombre} no está disponible por el momento.`);
+  } else if (cantidadEnCarrito >= producto.stock) {
     mostrarAviso(`No hay más stock disponible de ${producto.nombre}.`);
   } else {
     if (item) {
@@ -124,7 +127,33 @@ function agregarAlCarrito(idProducto) {
 }
 
 /* ---------------------------------------------------------------
-   4. ARRANQUE DE LA INTERFAZ
+   4. ESTADOS DE CARGA Y MENSAJES (Sprint 3)
+   Firestore demora un momento y puede fallar. Estas dos funciones
+   devuelven el HTML del aviso, para que el catálogo, el inicio, la
+   ficha y el carrito muestren los estados de la misma forma.
+   --------------------------------------------------------------- */
+
+/* Rueda de carga de Bootstrap con un texto debajo */
+function htmlCargando(texto) {
+  return `
+    <div class="col-12 estado-carga" role="status">
+      <div class="spinner-border text-primary" aria-hidden="true"></div>
+      <p class="texto-suave mt-3 mb-0">${texto}</p>
+    </div>
+  `;
+}
+
+/* Recuadro con un mensaje (sin productos, error de conexión...) */
+function htmlMensaje(texto) {
+  return `
+    <div class="col-12">
+      <p class="sin-resultados">${texto}</p>
+    </div>
+  `;
+}
+
+/* ---------------------------------------------------------------
+   5. ARRANQUE DE LA INTERFAZ
    --------------------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
   const paginaActual = document.body.dataset.page;
