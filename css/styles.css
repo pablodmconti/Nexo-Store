@@ -23,6 +23,7 @@
    17. Carrito de compras
    18. Cuenta de usuario: login, perfil y navbar (Sprint 3)
    19. Carga inicial de productos (Sprint 3)
+   20. Características en la ficha del producto (Sprint 3)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -1086,4 +1087,22 @@ img {
 .lista-carga .carga-error {
   color: #8b1a1a;
   font-weight: 600;
+}
+
+/* ---------------------------------------------------------------
+   20. CARACTERÍSTICAS EN LA FICHA DEL PRODUCTO (Sprint 3)
+   --------------------------------------------------------------- */
+.titulo-caracteristicas {
+  font-family: var(--fuente-titulos);
+  margin-bottom: 0.6rem;
+}
+
+.lista-caracteristicas {
+  margin-bottom: 1.75rem;
+  padding-left: 1.2rem;
+  color: var(--color-texto-suave);
+}
+
+.lista-caracteristicas li {
+  margin-bottom: 0.3rem;
 }
