@@ -61,20 +61,21 @@ Nexo-Store/
 ├── perfil.html         Página privada con los datos del usuario autenticado · Sprint 3
 ├── admin.html          Con la identidad del sitio y su aviso · Sprint 3
 ├── css/
-│   └── styles.css      Hoja de estilos organizada en 17 secciones comentadas
+│   └── styles.css      Hoja de estilos organizada en 20 secciones comentadas
 ├── js/
 │   ├── base.js         Navegación, avisos y funciones compartidas (precio, stock, carrito)
-│   ├── productos.js    Arreglo de objetos con los productos de la tienda
-│   ├── inicio.js       Productos destacados de la portada
-│   ├── catalogo.js     Tarjetas del catálogo, búsqueda y filtro por categoría
-│   ├── producto.js     Detalle del producto recibido por la URL
-│   ├── carrito.js      Página del carrito: cantidades, subtotales y total
+│   ├── productos.js    Carga inicial y respaldo de los productos (ya no es la fuente del catálogo)
+│   ├── inicio.js       Productos destacados de la portada, leídos de Firestore
+│   ├── catalogo.js     Catálogo desde Firestore: tarjetas, búsqueda, filtro y orden
+│   ├── producto.js     Ficha del producto: getDoc() con el id recibido por la URL
+│   ├── carrito.js      Carrito: cantidades, subtotales y total con datos de Firestore
 │   ├── firebase/
 │   │   └── config.js   Única inicialización de Firebase (exporta auth y db)
 │   ├── modules/
 │   │   ├── auth.js     Registro, inicio y cierre de sesión, mensajes de error
 │   │   ├── usuarios.js Documento usuarios/{uid} en Firestore
-│   │   ├── productos-firestore.js  Colección productos en Firestore
+│   │   ├── productos-firestore.js  Guardar, leer todos y leer uno de la colección productos
+│   │   ├── agregar-carrito.js  Vuelve a consultar stock y disponibilidad antes de agregar
 │   │   └── navbar.js   Navbar según la sesión (se carga en todas las páginas)
 │   └── pages/
 │       ├── cargar-productos.js  Carga inicial de los productos en Firestore
@@ -132,7 +133,9 @@ Nexo-Store/
   responde, muestra los datos básicos de Authentication y un aviso.
 - **Cierre de sesión** con `signOut()` desde el menú o desde el perfil; luego se vuelve al inicio.
 
-### Semana del 4/10 · Productos almacenados en Cloud Firestore (en curso)
+### Semana del 4/10 · Productos almacenados en Cloud Firestore
+
+#### Colección `productos` y carga inicial
 
 - **Colección `productos`.** Cada producto es un documento cuyo id es el mismo que ya
   usaba el sitio (`p1` a `p12`), por eso el id no se repite como campo adentro.
@@ -140,16 +143,84 @@ Nexo-Store/
   `disponible`, `imagenes`, `imagenAlt` y `caracteristicas`, con la estructura de la
   Semana 5 (arreglos `imagenes` y `caracteristicas`) y de la Semana 10 (`disponible`).
 - **`disponible` y `stock` son cosas distintas.** `stock` dice cuántas unidades hay;
-  `disponible` indica si el producto se puede vender (lo usará el panel administrativo
-  para desactivar un producto sin borrarlo).
+  `disponible` indica si el producto se puede vender. Un producto con `disponible: false`
+  no aparece en el catálogo ni en el inicio y no se puede agregar al carrito.
 - **`imagenes` reemplaza a `imagen`.** Es un arreglo de rutas y la primera es la imagen
   principal: las tarjetas, la ficha y el carrito usan `producto.imagenes[0]`.
 - **Carga inicial.** `cargar-productos.html` (no está enlazada en el menú) recorre el
   arreglo de `js/productos.js` y guarda cada producto con `setDoc()`. Muestra el avance
-  producto por producto y avisa si alguno falla. Como `setDoc()` reemplaza el documento
-  si ya existe, se puede volver a ejecutar sin duplicar productos.
-- `js/productos.js` queda como respaldo y carga inicial, como permite la consigna. El
-  catálogo y la ficha pasarán a leer de Firestore en el siguiente paso.
+  producto por producto y, si algo falla, el motivo y el código del error. Como
+  `setDoc()` reemplaza el documento si ya existe, se puede volver a ejecutar sin duplicar.
+
+#### Los productos se obtienen desde Firestore
+
+- **`js/productos.js` ya no es la fuente del catálogo.** Solo lo carga
+  `cargar-productos.html`; el inicio, el catálogo, la ficha y el carrito leen Firestore.
+- **Consultas en un solo archivo.** `js/modules/productos-firestore.js` tiene
+  `obtenerProductos()` (con `collection()` y `getDocs()`) y `obtenerProducto(id)` (con
+  `doc()` y `getDoc()`). Transforman el snapshot en el mismo array de objetos del
+  Sprint 2 con `{ id: documento.id, ...documento.data() }`.
+- **Las páginas pasaron a ser módulos** (`type="module"`) para poder importar esas
+  funciones. Las funciones comunes de `base.js` siguen disponibles igual que antes.
+- **Estados de carga.** Mientras Firestore responde, cada página muestra una rueda de
+  carga de Bootstrap con un texto ("Cargando productos…"), armada por `htmlCargando()`
+  de `base.js`. En el catálogo, los filtros quedan deshabilitados hasta que llegan los datos.
+- **Mensajes cuando no hay productos o falla la consulta.** Las funciones de consulta no
+  atrapan el error: lo dejan subir a la página, que lo atrapa con `try / catch`. Así se
+  distingue "no hay productos" (array vacío) de "falló la consulta" (error) y se muestra
+  el mensaje que corresponde con `htmlMensaje()`.
+
+#### Buscar, filtrar y ordenar
+
+- La búsqueda, el filtro por categoría y el orden del Sprint 2 funcionan sin cambios
+  sobre el array que llega de Firestore: `filter()`, `includes()` y `sort()` no saben de
+  dónde vinieron los datos.
+- La búsqueda ahora compara el texto con el **nombre o la descripción** del producto,
+  como pide el resultado final del proyecto (por ejemplo, "dpi" encuentra el mouse).
+- Las categorías del selector se arman con los productos recibidos, así una categoría
+  nueva cargada en Firestore aparece sola.
+- **Orden de la tienda.** Firestore entrega los documentos ordenados por id como texto
+  (`p1`, `p10`, `p11`, `p2`…). Para respetar el orden original se ordena por el número
+  que sigue a la "p".
+
+#### Ficha del producto
+
+- `producto.html` lee el `id` de la URL con `URLSearchParams` y pide ese único documento
+  con `getDoc()`. Si no hay `id` o el documento no existe, muestra el aviso de producto
+  inexistente; si falla la consulta, un mensaje de conexión.
+- Se agregó la lista de **características**, armada con `forEach()` sobre el arreglo
+  `caracteristicas`, y el nombre del producto en el título de la pestaña.
+- Un producto con `disponible: false` muestra "No disponible por el momento" y el botón
+  queda deshabilitado.
+
+#### Validar disponibilidad y stock antes de agregar al carrito
+
+- El stock puede cambiar desde que se cargó la página. Por eso, al tocar "Agregar al
+  carrito" en el catálogo o en la ficha, `js/modules/agregar-carrito.js` vuelve a pedir
+  el producto a Firestore con `obtenerProducto()` y recién entonces llama a
+  `agregarAlCarrito(producto)`.
+- `agregarAlCarrito()` (en `base.js`) ahora recibe el producto completo y revisa, en este
+  orden, que esté disponible y que la cantidad en el carrito no supere el stock actual.
+- Mientras se consulta, el botón muestra "Comprobando stock…" y queda deshabilitado.
+- En el carrito, el botón "+" también se deshabilita si el producto dejó de estar
+  disponible o si se llegó al stock. Si un producto guardado ya no existe en Firestore,
+  se quita del carrito con un aviso.
+
+#### Pruebas de la semana del 4/10
+
+- Con la colección vacía, el catálogo y el inicio muestran el mensaje de "no hay productos".
+- Sin conexión con Firestore, el catálogo, el inicio, la ficha y el carrito muestran un
+  mensaje de error comprensible, sin errores de JavaScript sin atrapar.
+- El catálogo muestra solo los productos disponibles y el contador los cuenta bien.
+- Buscar "dpi" encuentra el mouse por su descripción; el filtro por categoría y el orden
+  por nombre y por precio funcionan combinados.
+- La ficha abre el producto correcto, muestra sus características y avisa si el `id` no
+  existe o falta.
+- Si el stock baja en Firestore después de cargar la página, al agregar se usa el stock
+  nuevo y no se puede superar.
+- Un producto con `disponible: false` no aparece en el catálogo y en la ficha no se puede
+  agregar.
+- Los totales del carrito se calculan con los precios de Firestore.
 
 ### Cómo se registran y autentican los usuarios
 
@@ -173,12 +244,13 @@ consigna (no mezclar autenticación, base de datos e interfaz en un único archi
 | Carpeta | Archivos | Responsabilidad |
 | --- | --- | --- |
 | `js/firebase/` | `config.js` | Conectar el proyecto con Firebase |
-| `js/modules/` | `auth.js`, `usuarios.js` | Hablar con Authentication y con Firestore, sin tocar el HTML |
-| `js/modules/` | `navbar.js` | Parte de la interfaz común a todas las páginas |
-| `js/pages/` | `login.js`, `perfil.js` | Lógica de cada página: leer formularios y mostrar resultados |
+| `js/modules/` | `auth.js`, `usuarios.js`, `productos-firestore.js` | Hablar con Authentication y con Firestore, sin tocar el HTML |
+| `js/modules/` | `navbar.js`, `agregar-carrito.js` | Comportamiento común a varias páginas |
+| `js/pages/` | `login.js`, `perfil.js`, `cargar-productos.js` | Lógica de las páginas nuevas del Sprint 3 |
 
-Los archivos del Sprint 2 (`base.js`, `productos.js`, `catalogo.js`, etc.) quedan en `js/`
-y se migran a Firestore en la semana del 4/10.
+Los archivos de las páginas del Sprint 2 (`inicio.js`, `catalogo.js`, `producto.js` y
+`carrito.js`) conservan su lugar en `js/` para no cambiar la estructura del proyecto, pero
+desde la semana del 4/10 son módulos que leen los productos de Firestore.
 
 ### Usuarios de prueba
 
@@ -470,7 +542,6 @@ validaciones y repaso integrador del sprint.
 
 | Sprint | Pendiente |
 | --- | --- |
-| Sprint 3 · 4/10 | Productos almacenados en Cloud Firestore |
 | Sprint 3 · 11/10 | Confirmación de compra, pedidos, stock, historial y valoraciones en Firestore |
 | Sprint 3 | Roles y panel administrativo |
 | Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
@@ -506,8 +577,9 @@ validaciones y repaso integrador del sprint.
 - El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro
   navegador, el carrito aparece vacío. Compartir el carrito entre dispositivos requiere
   la cuenta de usuario del Sprint 3.
-- El stock se comprueba contra el array `productos`, que se reinicia con cada recarga: es
-  un control de la interfaz, no un descuento real de inventario.
+- El stock se comprueba contra Firestore al agregar al carrito, pero todavía no se
+  descuenta: el descuento real de inventario llega con la confirmación de compra (11/10).
+- Cada producto tiene por ahora una sola imagen en el arreglo `imagenes`.
 
 ## Posibles mejoras futuras
 
