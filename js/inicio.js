@@ -6,18 +6,19 @@ Productos destacados de la página de inicio
    catálogo, así el precio, el stock y la descripción no quedan
    duplicados en dos lugares ni se desactualizan.
 
-   Depende de que js/base.js y js/productos.js se carguen antes que
-   este archivo: de ahí salen formatearPrecio() y describirStock().
+   Desde el Sprint 3 los productos llegan de Cloud Firestore.
+   formatearPrecio(), describirStock(), htmlCargando() y htmlMensaje()
+   salen de js/base.js, que se carga antes que este archivo.
    ===================================================================== */
+
+import { obtenerProductos } from "./modules/productos-firestore.js";
 
 /* Los cuatro productos elegidos para la portada, uno por categoría */
 const idsDestacados = ["p1", "p2", "p3", "p5"];
 
-function mostrarDestacados() {
+/* Dibuja las tarjetas de los productos que recibe */
+function mostrarDestacados(destacados) {
   const contenedor = document.querySelector("#grillaDestacados");
-
-  /* Se queda solo con los productos cuyo id está en la lista de arriba */
-  const destacados = productos.filter((producto) => idsDestacados.includes(producto.id));
 
   contenedor.innerHTML = "";
 
@@ -45,5 +46,32 @@ function mostrarDestacados() {
   });
 }
 
-/* Este archivo se carga al final del <body>, así que el contenedor ya existe */
-mostrarDestacados();
+/* Pide los productos a Firestore y se queda con los destacados */
+async function iniciarDestacados() {
+  const contenedor = document.querySelector("#grillaDestacados");
+  contenedor.innerHTML = htmlCargando("Cargando productos destacados…");
+
+  let productos;
+
+  try {
+    productos = await obtenerProductos();
+  } catch (error) {
+    console.error("Error al cargar los destacados:", error);
+    contenedor.innerHTML = htmlMensaje("No pudimos cargar los productos destacados. Mientras tanto, podés recorrer el catálogo.");
+    return;
+  }
+
+  /* Solo los que están en la lista de arriba y siguen activos */
+  const destacados = productos.filter((producto) =>
+    idsDestacados.includes(producto.id) && producto.disponible
+  );
+
+  if (destacados.length === 0) {
+    contenedor.innerHTML = htmlMensaje("Pronto vas a encontrar acá nuestros productos destacados.");
+    return;
+  }
+
+  mostrarDestacados(destacados);
+}
+
+iniciarDestacados();
