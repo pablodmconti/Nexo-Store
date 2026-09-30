@@ -6,8 +6,15 @@ Ficha del producto
    id se pide a Firestore un único documento con getDoc().
    ===================================================================== */
 
+import { auth } from "./firebase/config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerProducto } from "./modules/productos-firestore.js";
 import { agregarConValidacion } from "./modules/agregar-carrito.js";
+import {
+  obtenerValoraciones,
+  guardarValoracion,
+  validarValoracion
+} from "./modules/valoraciones.js";
 
 const estadoProducto = document.querySelector("#estadoProducto");
 
@@ -103,6 +110,7 @@ async function iniciarFicha() {
   }
 
   mostrarProducto(producto);
+  iniciarOpiniones(producto.id);
 
   /* 5. Agregar al carrito: se vuelve a consultar el stock en el momento */
   const boton = document.querySelector("#btnAgregarCarrito");
@@ -110,5 +118,191 @@ async function iniciarFicha() {
     agregarConValidacion(producto.id, boton);
   });
 }
+
+/* ---------------------------------------------------------------
+   OPINIONES Y VALORACIONES 
+   --------------------------------------------------------------- */
+let idProductoActual = null;
+let usuarioActual = null;
+let valoraciones = [];
+
+const formOpinion = document.querySelector("#formOpinion");
+const mensajeOpinion = document.querySelector("#mensajeOpinion");
+
+/* "★★★★☆" para una puntuación de 4 */
+function estrellas(puntuacion) {
+  return "★".repeat(puntuacion) + "☆".repeat(5 - puntuacion);
+}
+
+/* Promedio y cantidad de opiniones, arriba del formulario */
+function mostrarResumenOpiniones() {
+  const resumen = document.querySelector("#resumenOpiniones");
+
+  if (valoraciones.length === 0) {
+    resumen.textContent = "Todavía no hay opiniones. ¡Sé la primera persona en opinar!";
+    return;
+  }
+
+  const suma = valoraciones.reduce((total, v) => total + v.puntuacion, 0);
+  const promedio = suma / valoraciones.length;
+
+  let palabra = "opiniones";
+
+  if (valoraciones.length === 1) {
+    palabra = "opinión";
+  }
+
+  resumen.textContent = `${estrellas(Math.round(promedio))} ${promedio.toFixed(1)} de 5 · ${valoraciones.length} ${palabra}`;
+}
+
+/* Dibuja cada opinión. El nombre y el comentario los escribió una
+   persona, así que se insertan con textContent y NO con innerHTML:
+   si alguien escribiera etiquetas HTML, se verían como texto y no
+   se ejecutarían. */
+function mostrarListaOpiniones() {
+  const lista = document.querySelector("#listaOpiniones");
+  lista.innerHTML = "";
+
+  valoraciones.forEach((valoracion) => {
+    const columna = document.createElement("div");
+    columna.className = "col-12";
+
+    const tarjeta = document.createElement("article");
+    tarjeta.className = "opinion";
+
+    const cabecera = document.createElement("p");
+    cabecera.className = "cabecera-opinion";
+
+    const nombre = document.createElement("strong");
+    nombre.textContent = valoracion.nombreUsuario;
+
+    const puntos = document.createElement("span");
+    puntos.className = "estrellas";
+    puntos.textContent = estrellas(valoracion.puntuacion);
+    puntos.setAttribute("aria-label", `${valoracion.puntuacion} de 5 estrellas`);
+
+    const fecha = document.createElement("span");
+    fecha.className = "texto-suave small";
+    fecha.textContent = valoracion.fecha.toDate().toLocaleDateString("es-UY");
+
+    const comentario = document.createElement("p");
+    comentario.className = "mb-0";
+    comentario.textContent = valoracion.comentario;
+
+    cabecera.append(nombre, puntos, fecha);
+    tarjeta.append(cabecera, comentario);
+    columna.append(tarjeta);
+    lista.append(columna);
+  });
+}
+
+/* Muestra el formulario o la invitación a ingresar según la sesión.
+   Si el usuario ya había opinado, el formulario trae su opinión
+   para que pueda editarla (hay una sola por persona y producto). */
+function actualizarFormularioOpinion() {
+  const sinSesion = document.querySelector("#opinionSinSesion");
+
+  if (!usuarioActual) {
+    formOpinion.classList.add("d-none");
+    sinSesion.classList.remove("d-none");
+    return;
+  }
+
+  sinSesion.classList.add("d-none");
+  formOpinion.classList.remove("d-none");
+
+  const miOpinion = valoraciones.find((v) => v.uid === usuarioActual.uid);
+
+  if (miOpinion) {
+    document.querySelector("#tituloFormOpinion").textContent = "Tu opinión";
+    document.querySelector("#opinionPuntuacion").value = miOpinion.puntuacion;
+    document.querySelector("#opinionComentario").value = miOpinion.comentario;
+    document.querySelector("#btnPublicarOpinion").textContent = "Actualizar mi opinión";
+  }
+}
+
+async function cargarOpiniones() {
+  const lista = document.querySelector("#listaOpiniones");
+  lista.innerHTML = htmlCargando("Cargando opiniones…");
+
+  try {
+    valoraciones = await obtenerValoraciones(idProductoActual);
+  } catch (error) {
+    console.error("Error al cargar las opiniones:", error);
+    lista.innerHTML = htmlMensaje("No pudimos cargar las opiniones en este momento.");
+    return;
+  }
+
+  mostrarResumenOpiniones();
+  mostrarListaOpiniones();
+  actualizarFormularioOpinion();
+}
+
+function iniciarOpiniones(idProducto) {
+  idProductoActual = idProducto;
+
+  /* El enlace de ingreso vuelve a esta misma ficha */
+  document.querySelector("#enlaceIngresarOpinion").href = `login.html?volver=producto.html?id=${idProducto}`;
+  document.querySelector("#seccionOpiniones").classList.remove("d-none");
+
+  cargarOpiniones();
+}
+
+function mostrarMensajeOpinion(texto, tipo) {
+  mensajeOpinion.textContent = texto;
+  mensajeOpinion.className = `alert alert-${tipo}`;
+}
+
+/* La sesión puede confirmarse antes o después de cargar las opiniones:
+   en los dos casos se actualiza el formulario */
+onAuthStateChanged(auth, (usuario) => {
+  usuarioActual = usuario;
+
+  if (idProductoActual) {
+    actualizarFormularioOpinion();
+  }
+});
+
+formOpinion.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+
+  if (!usuarioActual) {
+    mostrarMensajeOpinion("Tenés que iniciar sesión para opinar.", "warning");
+    return;
+  }
+
+  const puntuacion = Number(document.querySelector("#opinionPuntuacion").value);
+  const comentario = document.querySelector("#opinionComentario").value.trim();
+
+  /* Validación antes de ir a Firestore */
+  const problema = validarValoracion(puntuacion, comentario);
+
+  if (problema !== "") {
+    mostrarMensajeOpinion(problema, "warning");
+    return;
+  }
+
+  const boton = document.querySelector("#btnPublicarOpinion");
+  boton.disabled = true;
+  boton.textContent = "Publicando…";
+
+  try {
+    await guardarValoracion(usuarioActual, idProductoActual, puntuacion, comentario);
+    mostrarMensajeOpinion("¡Gracias! Tu opinión quedó publicada.", "success");
+    await cargarOpiniones();
+  } catch (error) {
+    console.error("Error al guardar la opinión:", error);
+    mostrarMensajeOpinion("No pudimos publicar tu opinión. Revisá tu conexión y volvé a intentar.", "danger");
+  }
+
+  boton.disabled = false;
+  const miOpinion = valoraciones.find((v) => v.uid === usuarioActual.uid);
+
+  if (miOpinion) {
+    boton.textContent = "Actualizar mi opinión";
+  } else {
+    boton.textContent = "Publicar opinión";
+  }
+});
 
 iniciarFicha();

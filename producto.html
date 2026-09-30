@@ -91,6 +91,51 @@
                     </div>
                 </div>
 
+                <!-- Opiniones del producto (semana del 11/10). js/producto.js la
+                     muestra junto con la ficha y la completa con Firestore -->
+                <section class="seccion-opiniones d-none" id="seccionOpiniones" aria-labelledby="tituloOpiniones">
+                    <div class="row g-5">
+                        <div class="col-lg-5">
+                            <h2 id="tituloOpiniones">Opiniones</h2>
+                            <p class="resumen-opiniones" id="resumenOpiniones"></p>
+
+                            <!-- Sin sesión: invitación a ingresar -->
+                            <p class="texto-suave d-none" id="opinionSinSesion">
+                                Para dejar tu opinión tenés que
+                                <a id="enlaceIngresarOpinion" href="login.html">iniciar sesión</a>.
+                            </p>
+
+                            <!-- Con sesión: formulario -->
+                            <form class="formulario-opinion d-none" id="formOpinion" novalidate>
+                                <h3 class="h6" id="tituloFormOpinion">Dejá tu opinión</h3>
+                                <div class="mb-3">
+                                    <label class="form-label" for="opinionPuntuacion">Puntuación</label>
+                                    <select class="form-select" id="opinionPuntuacion">
+                                        <option value="">Elegí de 1 a 5 estrellas</option>
+                                        <option value="5">★★★★★ · Excelente</option>
+                                        <option value="4">★★★★☆ · Muy bueno</option>
+                                        <option value="3">★★★☆☆ · Bueno</option>
+                                        <option value="2">★★☆☆☆ · Regular</option>
+                                        <option value="1">★☆☆☆☆ · Malo</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="opinionComentario">Comentario</label>
+                                    <textarea class="form-control" id="opinionComentario" rows="4" maxlength="500"
+                                        aria-describedby="ayudaComentario"
+                                        placeholder="¿Qué te pareció el producto?"></textarea>
+                                    <div class="form-text" id="ayudaComentario">Entre 10 y 500 caracteres.</div>
+                                </div>
+                                <div class="alert d-none" id="mensajeOpinion" role="alert"></div>
+                                <button class="btn btn-primary" type="submit" id="btnPublicarOpinion">Publicar opinión</button>
+                            </form>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="row g-3" id="listaOpiniones"></div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Se muestra cuando el id no corresponde a ningún producto -->
                 <div class="d-none" id="mensajeError">
                     <p class="sin-resultados">No encontramos el producto solicitado. Puede que el enlace sea
