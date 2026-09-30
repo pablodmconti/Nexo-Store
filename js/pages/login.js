@@ -24,11 +24,29 @@ const mensajeAuth = document.querySelector("#mensajeAuth");
 let procesando = false;
 
 /* ---------------------------------------------------------------
+   A DÓNDE IR DESPUÉS DE INGRESAR
+   ---------------------------------------------------------------
+   Si se llegó desde el carrito o desde una ficha, la dirección trae
+   ?volver=carrito.html (o producto.html?id=p1) y se vuelve ahí.
+   Solo se aceptan páginas del propio sitio: una dirección con ":" o
+   que empieza con "/" podría llevar a otro sitio, y se descarta. */
+function destinoDespuesDeIngresar() {
+  const parametros = new URLSearchParams(window.location.search);
+  const volver = parametros.get("volver");
+
+  if (volver && !volver.includes(":") && !volver.startsWith("/")) {
+    return volver;
+  }
+
+  return "perfil.html";
+}
+
+/* ---------------------------------------------------------------
    1. SI YA HAY UNA SESIÓN, NO TIENE SENTIDO QUEDARSE ACÁ
    --------------------------------------------------------------- */
 onAuthStateChanged(auth, (usuario) => {
   if (usuario && !procesando) {
-    window.location.href = "perfil.html";
+    window.location.href = destinoDespuesDeIngresar();
   }
 });
 
@@ -114,7 +132,7 @@ formIngresar.addEventListener("submit", async (evento) => {
 
   try {
     await iniciarSesion(correo, contrasena);
-    window.location.href = "perfil.html";
+    window.location.href = destinoDespuesDeIngresar();
   } catch (error) {
     procesando = false;
     mostrarMensaje(traducirError(error), "danger");
@@ -177,7 +195,7 @@ formRegistro.addEventListener("submit", async (evento) => {
 
   try {
     await registrarUsuario(nombre, correo, contrasena);
-    window.location.href = "perfil.html";
+    window.location.href = destinoDespuesDeIngresar();
   } catch (error) {
     procesando = false;
 
@@ -185,7 +203,7 @@ formRegistro.addEventListener("submit", async (evento) => {
        una sesión abierta: se lleva al perfil, que avisa que faltan
        los datos guardados. */
     if (auth.currentUser) {
-      window.location.href = "perfil.html";
+      window.location.href = destinoDespuesDeIngresar();
     } else {
       mostrarMensaje(traducirError(error), "danger");
       botonCargando(boton, false, "Creando la cuenta…", "Crear mi cuenta");

@@ -24,6 +24,7 @@
    18. Cuenta de usuario: login, perfil y navbar (Sprint 3)
    19. Carga inicial de productos (Sprint 3)
    20. Características en la ficha del producto (Sprint 3)
+   21. Compra confirmada, pedidos y opiniones (Sprint 3)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -1069,26 +1070,6 @@ img {
   max-width: 640px;
 }
 
-.lista-carga {
-  margin: 1.5rem 0 0;
-  padding-left: 1.25rem;
-  font-size: 0.9rem;
-  color: var(--color-texto-suave);
-}
-
-.lista-carga li {
-  margin-bottom: 0.3rem;
-}
-
-.lista-carga .carga-ok {
-  color: #146c43;
-}
-
-.lista-carga .carga-error {
-  color: #8b1a1a;
-  font-weight: 600;
-}
-
 /* ---------------------------------------------------------------
    20. CARACTERÍSTICAS EN LA FICHA DEL PRODUCTO (Sprint 3)
    --------------------------------------------------------------- */
@@ -1105,4 +1086,127 @@ img {
 
 .lista-caracteristicas li {
   margin-bottom: 0.3rem;
+}
+
+/* ---------------------------------------------------------------
+   21. COMPRA CONFIRMADA, PEDIDOS Y OPINIONES (Sprint 3 · 11/10)
+   --------------------------------------------------------------- */
+
+/* Pantalla final del carrito */
+.compra-confirmada {
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra-suave);
+  padding: 2.5rem 1.5rem;
+}
+
+.icono-confirmada {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #d1e7dd;
+  color: #146c43;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Historial de pedidos del perfil */
+.tarjeta-pedido {
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  box-shadow: var(--sombra-suave);
+  padding: 1.25rem 1.5rem;
+}
+
+.encabezado-pedido {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.estado-pedido {
+  background-color: var(--color-primario-claro);
+  color: var(--color-primario-oscuro);
+  font-family: var(--fuente-titulos);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+}
+
+.lista-pedido {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+
+.linea-pedido {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.total-pedido {
+  border-top: 1px solid var(--color-borde);
+  padding-top: 0.6rem;
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  color: var(--color-primario);
+}
+
+/* Opiniones de la ficha del producto */
+.seccion-opiniones {
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.resumen-opiniones {
+  font-weight: 600;
+  color: var(--color-texto-suave);
+}
+
+.formulario-opinion {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  padding: 1.5rem;
+}
+
+.opinion {
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  padding: 1rem 1.25rem;
+}
+
+.cabecera-opinion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Amarillo oscuro: contraste suficiente sobre fondo blanco */
+.estrellas {
+  color: #8a5a00;
+  letter-spacing: 0.08em;
 }

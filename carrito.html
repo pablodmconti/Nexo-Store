@@ -104,10 +104,27 @@
                             <button class="btn btn-primary w-100" type="button" id="btnConfirmar">
                                 Confirmar compra
                             </button>
+                            <!-- Avisos de la confirmación (sin sesión, sin stock, errores) -->
+                            <div class="d-none" id="mensajeCompra" role="alert"></div>
                             <p class="nota-resumen mb-0">Envío simulado: gratis a partir de $ 2.000 y $ 290 a
-                                todo el país por debajo de ese monto. Los pedidos y los medios de pago reales se
-                                incorporan en el Sprint 3.</p>
+                                todo el país por debajo de ese monto. Para confirmar la compra tenés que iniciar
+                                sesión; el pago se coordina con el equipo de Nivel 99.</p>
                         </aside>
+                    </div>
+                </div>
+
+                <!-- Se muestra cuando la compra se registró correctamente -->
+                <div class="d-none" id="compraConfirmada">
+                    <div class="compra-confirmada">
+                        <div class="icono-confirmada" aria-hidden="true">✓</div>
+                        <h2>¡Compra confirmada!</h2>
+                        <p class="texto-suave">Registramos tu pedido <strong>#<span id="numeroPedido"></span></strong>
+                            por un total de <strong id="totalPedido"></strong>. Te vamos a escribir para coordinar
+                            el pago y la entrega.</p>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <a class="btn btn-primary" href="perfil.html">Ver mis pedidos</a>
+                            <a class="btn btn-outline-primary" href="catalogo.html">Seguir comprando</a>
+                        </div>
                     </div>
                 </div>
 

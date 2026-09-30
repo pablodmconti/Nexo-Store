@@ -5,12 +5,19 @@ Carrito de compras
    { idProducto, cantidad }. Desde el Sprint 3 el nombre, el precio, la
    imagen y el stock de cada producto se toman de Cloud Firestore, así
    el carrito muestra siempre la información actual de la tienda.
+   Desde el 11/10 el botón "Confirmar compra" registra el pedido.
    ===================================================================== */
 
+import { auth } from "./firebase/config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerProductos } from "./modules/productos-firestore.js";
+import { confirmarPedido } from "./modules/pedidos.js";
 
 /* Productos de la tienda, tal como llegan de Firestore */
 let productos = [];
+
+/* Usuario autenticado (o null). Lo mantiene al día onAuthStateChanged() */
+let usuarioActual = null;
 
 /* ---------------------------------------------------------------
    1. CÁLCULOS
@@ -33,21 +40,7 @@ function calcularTotal() {
   }, 0);
 }
 
-/* Costo de envío simulado, con las mismas condiciones que anuncia la
-   portada: gratis a partir de cierto monto y con costo fijo por debajo.
-   Todavía no hay envíos reales; esto solo completa el resumen. */
-const MONTO_ENVIO_GRATIS = 2000;
-const COSTO_ENVIO = 290;
-
-function calcularEnvio(subtotal) {
-  let envio = COSTO_ENVIO;
-
-  if (subtotal >= MONTO_ENVIO_GRATIS) {
-    envio = 0;
-  }
-
-  return envio;
-}
+/* calcularEnvio() está en base.js: la usan este resumen y el pedido */
 
 /* ---------------------------------------------------------------
    2. MOSTRAR EL CARRITO
@@ -229,8 +222,105 @@ document.querySelector("#btnVaciar").addEventListener("click", () => {
   vaciarCarrito();
 });
 
-document.querySelector("#btnConfirmar").addEventListener("click", () => {
-  mostrarAviso("La compra es simulada: el pago real se desarrolla en el Sprint 3.");
+/* ---------------------------------------------------------------
+   CONFIRMAR LA COMPRA
+   --------------------------------------------------------------- */
+const btnConfirmar = document.querySelector("#btnConfirmar");
+const mensajeCompra = document.querySelector("#mensajeCompra");
+
+/* Muestra un mensaje dentro del panel de resumen.
+   tipo: "warning", "danger"... (colores de alerta de Bootstrap) */
+function mostrarMensajeCompra(html, tipo) {
+  mensajeCompra.innerHTML = html;
+  mensajeCompra.className = `alert alert-${tipo} mt-3 mb-0 small`;
+}
+
+function ocultarMensajeCompra() {
+  mensajeCompra.className = "d-none";
+}
+
+/* El botón cambia según haya o no una sesión */
+onAuthStateChanged(auth, (usuario) => {
+  usuarioActual = usuario;
+
+  if (usuario) {
+    btnConfirmar.textContent = "Confirmar compra";
+    ocultarMensajeCompra();
+  } else {
+    btnConfirmar.textContent = "Ingresá para comprar";
+  }
+});
+
+/* Pantalla final: la compra quedó registrada */
+function mostrarCompraConfirmada(resultado) {
+  document.querySelector("#carritoConProductos").classList.add("d-none");
+  document.querySelector("#carritoVacio").classList.add("d-none");
+
+  /* Los primeros 6 caracteres del id alcanzan como número de pedido */
+  document.querySelector("#numeroPedido").textContent = resultado.idPedido.slice(0, 6).toUpperCase();
+  document.querySelector("#totalPedido").textContent = formatearPrecio(resultado.total);
+  const confirmacion = document.querySelector("#compraConfirmada");
+  confirmacion.classList.remove("d-none");
+  confirmacion.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+btnConfirmar.addEventListener("click", async () => {
+  ocultarMensajeCompra();
+
+  /* 1. Sin sesión no hay compra: se ofrece ingresar y volver acá */
+  if (!usuarioActual) {
+    mostrarMensajeCompra(
+      `Para confirmar la compra tenés que iniciar sesión.
+       <a class="alert-link" href="login.html?volver=carrito.html">Ingresar o crear una cuenta</a>`,
+      "warning"
+    );
+    return;
+  }
+
+  btnConfirmar.disabled = true;
+  btnConfirmar.textContent = "Confirmando compra…";
+
+  let resultado;
+
+  try {
+    /* 2. pedidos.js revisa stock y disponibilidad actuales, calcula el
+          total, guarda el pedido y descuenta el stock en un solo lote */
+    resultado = await confirmarPedido(usuarioActual, obtenerCarrito());
+  } catch (error) {
+    console.error("Error al confirmar la compra:", error);
+    mostrarMensajeCompra("No pudimos registrar la compra. Revisá tu conexión y volvé a intentar: tu carrito sigue guardado.", "danger");
+    btnConfirmar.disabled = false;
+    btnConfirmar.textContent = "Confirmar compra";
+    return;
+  }
+
+  if (!resultado.confirmado) {
+    /* 3. Algo cambió en la tienda: se explica qué y se actualiza el
+          carrito con los datos nuevos. El carrito NO se vacía. */
+    let lista = "";
+
+    resultado.problemas.forEach((problema) => {
+      lista += `<li>${problema}</li>`;
+    });
+
+    mostrarMensajeCompra(`No pudimos confirmar la compra:<ul class="mb-0 mt-2">${lista}</ul>Ajustá el carrito y volvé a intentar.`, "warning");
+
+    try {
+      productos = await obtenerProductos();
+      quitarProductosInexistentes();
+      mostrarCarrito();
+    } catch (error) {
+      console.error("Error al actualizar el carrito:", error);
+    }
+
+    btnConfirmar.disabled = false;
+    btnConfirmar.textContent = "Confirmar compra";
+    return;
+  }
+
+  /* 4. Todo salió bien: recién ahora se vacía el carrito */
+  guardarCarrito([]);
+  mostrarCompraConfirmada(resultado);
 });
 
 /* ---------------------------------------------------------------

@@ -126,6 +126,23 @@ function agregarAlCarrito(producto) {
   }
 }
 
+/* Costo de envío simulado, con las mismas condiciones que anuncia la
+   portada: gratis a partir de cierto monto y con costo fijo por debajo.
+   Está acá (y no en carrito.js) porque lo usan el resumen del carrito
+   y el registro del pedido en js/modules/pedidos.js. */
+const MONTO_ENVIO_GRATIS = 2000;
+const COSTO_ENVIO = 290;
+
+function calcularEnvio(subtotal) {
+  let envio = COSTO_ENVIO;
+
+  if (subtotal >= MONTO_ENVIO_GRATIS) {
+    envio = 0;
+  }
+
+  return envio;
+}
+
 /* ---------------------------------------------------------------
    4. ESTADOS DE CARGA Y MENSAJES (Sprint 3)
    Firestore demora un momento y puede fallar. Estas dos funciones
@@ -173,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
   actualizarContadorCarrito();
 
   /* El botón "Ingresar" y el menú de la cuenta los maneja
-     js/modules/navbar.js desde el Sprint 3 (20/9). */
+     js/modules/navbar.js desde el Sprint 3. */
 
   /* Modal informativo de la página de inicio */
   document.querySelector("#btnProjectInfo")?.addEventListener("click", () => {
