@@ -26,24 +26,29 @@ import {
   doc,
   getDoc,
   getDocs,
-  setDoc
+  writeBatch
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-/* Guarda un producto en productos/{id}.
-   setDoc() crea el documento si no existe y lo reemplaza si ya
-   existe, por eso la carga inicial se puede repetir sin duplicar. */
-export async function guardarProducto(producto) {
-  await setDoc(doc(db, "productos", producto.id), {
-    nombre: producto.nombre,
-    descripcion: producto.descripcion,
-    categoria: producto.categoria,
-    precio: producto.precio,
-    stock: producto.stock,
-    disponible: producto.disponible,
-    imagenes: producto.imagenes,
-    imagenAlt: producto.imagenAlt,
-    caracteristicas: producto.caracteristicas
+/* ---------------------------------------------------------------
+   CARGA INICIAL CON UN LOTE (Semana 11)
+   ---------------------------------------------------------------
+   writeBatch() agrupa todas las escrituras y commit() las confirma
+   juntas: se guardan los 12 productos o ninguno.
+   Se usa el id que ya tiene cada producto (doc(db, "productos", id))
+   en lugar de addDoc(): si la carga se repite, actualiza los mismos
+   documentos y no crea duplicados.
+   --------------------------------------------------------------- */
+export async function cargarProductos(listaProductos) {
+  const lote = writeBatch(db);
+
+  listaProductos.forEach((producto) => {
+    /* Se separa el id (nombre del documento) del resto de los campos */
+    const { id, ...datosProducto } = producto;
+    const referencia = doc(db, "productos", id);
+    lote.set(referencia, datosProducto);
   });
+
+  await lote.commit();
 }
 
 /* ---------------------------------------------------------------

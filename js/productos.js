@@ -1,18 +1,18 @@
 /* =====================================================================
-Datos de los productos de la tienda
+Datos de los productos de la tienda (semilla)
    ---------------------------------------------------------------------
-   Desde el Sprint 3 este arreglo es la CARGA INICIAL de la colección
-   "productos" de Cloud Firestore (ver cargar-productos.html). Cada
-   producto tiene la estructura que vimos en la Semana 5 y la Semana 10:
+   Desde el Sprint 3 este arreglo ya NO es la fuente del catálogo: es la
+   semilla que cargar-productos.html sube a la colección "productos" de
+   Cloud Firestore con writeBatch().
 
-     disponible       true o false: si el producto se puede vender
-     imagenes         arreglo de rutas; la primera es la principal
-     caracteristicas  arreglo de textos para la ficha del producto
+   export permite importarlo desde otro archivo:
+     import { productos } from "../productos.js";
 
-   El id (p1, p2...) será el id del documento en Firestore.
+   Las imágenes viven en la carpeta del proyecto (assets/img/productos)
+   y en Firestore se guarda solo su ruta relativa, como texto.
    ===================================================================== */
 
-const productos = [
+export const productos = [
   {
     id: "p1",
     nombre: "Teclado mecánico TKL Aurora",
@@ -21,7 +21,7 @@ const productos = [
     precio: 4290,
     stock: 12,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/teclado-tkl-aurora.jpg"],
     imagenAlt: "Teclado mecánico compacto con retroiluminación azul",
     caracteristicas: [
       "Formato TKL de 87 teclas",
@@ -39,7 +39,7 @@ const productos = [
     precio: 3150,
     stock: 18,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/mouse-vortex.jpg"],
     imagenAlt: "Mouse gamer inalámbrico apoyado sobre un escritorio",
     caracteristicas: [
       "Sensor óptico de 26.000 DPI",
@@ -57,7 +57,7 @@ const productos = [
     precio: 21900,
     stock: 3,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/monitor-nova-27.jpg"],
     imagenAlt: "Monitor de escritorio encendido sobre una mesa de trabajo",
     caracteristicas: [
       "Panel IPS de 27 pulgadas",
@@ -75,7 +75,7 @@ const productos = [
     precio: 13500,
     stock: 7,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1547082299-de196ea013d6?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/monitor-nova-24.jpg"],
     imagenAlt: "Monitor de computadora sobre un escritorio con luz tenue",
     caracteristicas: [
       "Panel VA de 24 pulgadas",
@@ -92,7 +92,7 @@ const productos = [
     precio: 5480,
     stock: 15,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/auriculares-echo.jpg"],
     imagenAlt: "Auriculares over ear apoyados sobre un soporte",
     caracteristicas: [
       "Sonido envolvente 7.1 por software",
@@ -109,7 +109,7 @@ const productos = [
     precio: 4980,
     stock: 6,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/microfono-vox.jpg"],
     imagenAlt: "Micrófono de condensador montado en un brazo articulado",
     caracteristicas: [
       "Cápsula cardioide",
@@ -126,7 +126,7 @@ const productos = [
     precio: 32900,
     stock: 4,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1591405351990-4726e331f141?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/placa-video-titan.jpg"],
     imagenAlt: "Placa de video con dos ventiladores sobre una superficie oscura",
     caracteristicas: [
       "8 GB de memoria de video",
@@ -143,7 +143,7 @@ const productos = [
     precio: 3890,
     stock: 20,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/memoria-ram-pulse.jpg"],
     imagenAlt: "Módulos de memoria RAM instalados en una placa madre",
     caracteristicas: [
       "Kit de 2 módulos de 8 GB",
@@ -160,7 +160,7 @@ const productos = [
     precio: 18900,
     stock: 5,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/silla-nivel99-pro.jpg"],
     imagenAlt: "Silla gamer negra y azul frente a un escritorio",
     caracteristicas: [
       "Respaldo reclinable hasta 155°",
@@ -177,7 +177,7 @@ const productos = [
     precio: 12400,
     stock: 2,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1593062096033-9a26b09da705?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/escritorio-rift.jpg"],
     imagenAlt: "Escritorio amplio con monitor, teclado y luces led",
     caracteristicas: [
       "Superficie de 140 cm de ancho",
@@ -194,7 +194,7 @@ const productos = [
     precio: 990,
     stock: 30,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/alfombrilla-grid.jpg"],
     imagenAlt: "Alfombrilla extra grande cubriendo un escritorio con teclado y mouse",
     caracteristicas: [
       "Medidas de 90 x 40 cm",
@@ -211,7 +211,7 @@ const productos = [
     precio: 1450,
     stock: 0,
     disponible: true,
-    imagenes: ["https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=800&q=80"],
+    imagenes: ["assets/img/productos/soporte-halo.jpg"],
     imagenAlt: "Soporte iluminado con unos auriculares colgados",
     caracteristicas: [
       "Base de aluminio",
