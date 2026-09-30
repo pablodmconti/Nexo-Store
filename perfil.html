@@ -103,13 +103,11 @@
                             </article>
                         </div>
                         <div class="col-lg-7">
-                            <div class="locked-card mt-0">
-                                <span class="pastilla-sprint">Próximamente · Sprint 3</span>
-                                <h2 class="h5 mt-3">Historial de pedidos</h2>
-                                <p class="texto-suave">Cuando confirmes una compra desde el carrito, el pedido va a
-                                    aparecer acá con sus productos, el total, la fecha y el estado.</p>
-                                <a class="btn btn-primary" href="catalogo.html">Ir al catálogo</a>
-                            </div>
+                            <section aria-labelledby="tituloPedidos">
+                                <h2 class="h4 mb-3" id="tituloPedidos">Mis pedidos</h2>
+                                <!-- js/pages/perfil.js muestra acá solo los pedidos del usuario -->
+                                <div class="row g-3" id="listaPedidos"></div>
+                            </section>
                         </div>
                     </div>
                 </div>

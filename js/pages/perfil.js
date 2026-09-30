@@ -15,6 +15,7 @@ Página privada perfil.html
 import { auth } from "../firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerPerfilUsuario } from "../modules/usuarios.js";
+import { obtenerPedidosDeUsuario } from "../modules/pedidos.js";
 
 const perfilCargando = document.querySelector("#perfilCargando");
 const perfilContenido = document.querySelector("#perfilContenido");
@@ -56,6 +57,73 @@ function mostrarPerfil(usuario, datos) {
   perfilContenido.classList.remove("d-none");
 }
 
+/* ---------------------------------------------------------------
+   HISTORIAL DE PEDIDOS 
+   --------------------------------------------------------------- */
+const listaPedidos = document.querySelector("#listaPedidos");
+
+/* Arma la tarjeta de un pedido: fecha, estado, productos y total */
+function htmlPedido(pedido) {
+  let filas = "";
+
+  pedido.productos.forEach((item) => {
+    filas += `
+      <li class="linea-pedido">
+        <span>${item.nombre} <span class="texto-suave">× ${item.cantidad}</span></span>
+        <span>${formatearPrecio(item.subtotal)}</span>
+      </li>
+    `;
+  });
+
+  let envio = formatearPrecio(pedido.envio);
+
+  if (pedido.envio === 0) {
+    envio = "Gratis";
+  }
+
+  return `
+    <div class="col-12">
+      <article class="tarjeta-pedido">
+        <header class="encabezado-pedido">
+          <div>
+            <h3 class="h6 mb-1">Pedido #${pedido.id.slice(0, 6).toUpperCase()}</h3>
+            <p class="texto-suave small mb-0">${formatearFecha(pedido.fecha)}</p>
+          </div>
+          <span class="estado-pedido">${pedido.estado}</span>
+        </header>
+        <ul class="lista-pedido">${filas}</ul>
+        <p class="linea-pedido texto-suave small mb-1"><span>Envío</span><span>${envio}</span></p>
+        <p class="linea-pedido total-pedido mb-0"><span>Total</span><span>${formatearPrecio(pedido.total)}</span></p>
+      </article>
+    </div>
+  `;
+}
+
+async function cargarPedidos(uid) {
+  listaPedidos.innerHTML = htmlCargando("Cargando tus pedidos…");
+
+  let pedidos;
+
+  try {
+    pedidos = await obtenerPedidosDeUsuario(uid);
+  } catch (error) {
+    console.error("Error al cargar los pedidos:", error);
+    listaPedidos.innerHTML = htmlMensaje("No pudimos cargar tus pedidos. Revisá tu conexión y recargá la página.");
+    return;
+  }
+
+  if (pedidos.length === 0) {
+    listaPedidos.innerHTML = htmlMensaje("Todavía no hiciste ninguna compra. Cuando confirmes una desde el carrito, va a aparecer acá.");
+    return;
+  }
+
+  listaPedidos.innerHTML = "";
+
+  pedidos.forEach((pedido) => {
+    listaPedidos.innerHTML += htmlPedido(pedido);
+  });
+}
+
 onAuthStateChanged(auth, async (usuario) => {
   /* Sin sesión: afuera, antes de mostrar nada.
      Si la sesión se acaba de cerrar con el botón, navbar.js ya está
@@ -80,4 +148,7 @@ onAuthStateChanged(auth, async (usuario) => {
     mostrarAvisoPerfil("No pudimos cargar todos tus datos en este momento. Mostramos la información básica.");
     mostrarPerfil(usuario, null);
   }
+
+  /* Historial: solo los pedidos de ESTE usuario */
+  cargarPedidos(usuario.uid);
 });
