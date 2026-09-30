@@ -2,8 +2,8 @@
 
 Proyecto integrador de **Desarrollo Web** (CFE | ANEP) desarrollado sobre la base *Nexo Store*.
 Entrega correspondiente al **Sprint 3 · Firebase, autenticación, pedidos y administración**
-(en curso; el Sprint 1, interfaz e identidad visual, y el Sprint 2, catálogo, detalle y
-carrito, ya están integrados).
+(el Sprint 1, interfaz e identidad visual, y el Sprint 2, catálogo, detalle y carrito, ya
+están integrados).
 
 - **Estudiante:** Pablo Montaña Conti
 - **Curso:** Desarrollo Web · 2.º semestre · Año lectivo 2026
@@ -54,35 +54,37 @@ asesoramiento antes que el precio más bajo del mercado.
 Nexo-Store/
 ├── index.html          Página de inicio personalizada
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
-├── producto.html       Ficha dinámica, la misma página para todos los productos
-├── carrito.html        Carrito de compras persistido en LocalStorage
+├── producto.html       Ficha dinámica con características y opiniones de los usuarios
+├── carrito.html        Carrito en LocalStorage y confirmación de compra con Firebase
 ├── login.html          Ingresar y crear cuenta con Firebase Authentication · Sprint 3
 ├── cargar-productos.html  Herramienta interna: carga inicial de la colección productos · Sprint 3
-├── perfil.html         Página privada con los datos del usuario autenticado · Sprint 3
+├── perfil.html         Página privada: datos del usuario e historial de sus pedidos · Sprint 3
 ├── admin.html          Con la identidad del sitio y su aviso · Sprint 3
 ├── css/
-│   └── styles.css      Hoja de estilos organizada en 20 secciones comentadas
+│   └── styles.css      Hoja de estilos organizada en 21 secciones comentadas
 ├── js/
 │   ├── base.js         Navegación, avisos y funciones compartidas (precio, stock, carrito)
-│   ├── productos.js    Carga inicial y respaldo de los productos (ya no es la fuente del catálogo)
+│   ├── productos.js    Semilla exportada para la carga inicial (ya no es la fuente del catálogo)
 │   ├── inicio.js       Productos destacados de la portada, leídos de Firestore
 │   ├── catalogo.js     Catálogo desde Firestore: tarjetas, búsqueda, filtro y orden
-│   ├── producto.js     Ficha del producto: getDoc() con el id recibido por la URL
-│   ├── carrito.js      Carrito: cantidades, subtotales y total con datos de Firestore
+│   ├── producto.js     Ficha del producto (getDoc() con el id de la URL) y sus opiniones
+│   ├── carrito.js      Carrito con datos de Firestore y confirmación de la compra
 │   ├── firebase/
 │   │   └── config.js   Única inicialización de Firebase (exporta auth y db)
 │   ├── modules/
 │   │   ├── auth.js     Registro, inicio y cierre de sesión, mensajes de error
 │   │   ├── usuarios.js Documento usuarios/{uid} en Firestore
-│   │   ├── productos-firestore.js  Guardar, leer todos y leer uno de la colección productos
+│   │   ├── productos-firestore.js  Carga con writeBatch(), leer todos y leer uno
+│   │   ├── pedidos.js  Confirmar compra (pedido + stock en un lote) y pedidos del usuario
+│   │   ├── valoraciones.js  Validar, guardar y leer las opiniones de un producto
 │   │   ├── agregar-carrito.js  Vuelve a consultar stock y disponibilidad antes de agregar
 │   │   └── navbar.js   Navbar según la sesión (se carga en todas las páginas)
 │   └── pages/
-│       ├── cargar-productos.js  Carga inicial de los productos en Firestore
+│       ├── cargar-productos.js  Carga inicial de los productos (página de un solo uso)
 │       ├── login.js    Formularios de login.html: validación y estados de carga
-│       └── perfil.js   Protección de perfil.html y datos del usuario
+│       └── perfil.js   Protección de perfil.html, datos del usuario e historial de pedidos
 ├── assets/
-│   ├── img/            Imágenes propias y placeholder de producto
+│   ├── img/            Placeholder y carpeta productos/ con las fotos de cada producto
 │   ├── icons/          Íconos SVG de la sección de beneficios y del carrito
 │   └── logo/           Logotipo e isotipo de Nivel 99
 ├── README.md
@@ -96,8 +98,9 @@ Nexo-Store/
 3. Iniciar la extensión **Live Server** sobre `index.html`. Desde el Sprint 3 es obligatorio:
    los archivos de Firebase son módulos (`type="module"`) y el navegador no los ejecuta
    si la página se abre directamente como archivo (`file://`).
-4. Se requiere conexión a internet, ya que Bootstrap, las tipografías, las fotografías de
-   los productos y Firebase se cargan desde servicios externos.
+4. Se requiere conexión a internet, ya que Bootstrap, las tipografías y Firebase se cargan
+   desde servicios externos. Las fotografías de los productos están en `assets/img/productos`.
+5. Para probar compras y opiniones hay que iniciar sesión (ver *Usuarios de prueba*).
 
 ## Funcionalidades desarrolladas en el Sprint 3
 
@@ -147,10 +150,9 @@ Nexo-Store/
   no aparece en el catálogo ni en el inicio y no se puede agregar al carrito.
 - **`imagenes` reemplaza a `imagen`.** Es un arreglo de rutas y la primera es la imagen
   principal: las tarjetas, la ficha y el carrito usan `producto.imagenes[0]`.
-- **Carga inicial.** `cargar-productos.html` (no está enlazada en el menú) recorre el
-  arreglo de `js/productos.js` y guarda cada producto con `setDoc()`. Muestra el avance
-  producto por producto y, si algo falla, el motivo y el código del error. Como
-  `setDoc()` reemplaza el documento si ya existe, se puede volver a ejecutar sin duplicar.
+- **Carga inicial.** `cargar-productos.html` (no está enlazada en el menú) sube el arreglo
+  de `js/productos.js` a Firestore. En la semana 11 se ajustó a la forma del curso (ver
+  más abajo).
 
 #### Los productos se obtienen desde Firestore
 
@@ -222,6 +224,134 @@ Nexo-Store/
   agregar.
 - Los totales del carrito se calculan con los precios de Firestore.
 
+### Semana 11 · Migración de productos e imágenes (ajustes)
+
+Con los recursos de la Semana 11 se ajustó la carga inicial a la forma del curso:
+
+- **El array como semilla.** `js/productos.js` pasó a ser un módulo que exporta el array
+  (`export const productos`) y `js/pages/cargar-productos.js` lo importa.
+- **Un solo lote con `writeBatch()`.** `cargarProductos()` (en `productos-firestore.js`)
+  prepara un `lote.set()` por producto y los confirma juntos con `commit()`: se guardan
+  todos o ninguno. `const { id, ...datosProducto } = producto` separa el id, que se usa
+  como nombre del documento, del resto de los campos.
+- **Ids explícitos y no `addDoc()`.** Si la carga se ejecuta dos veces, actualiza los mismos
+  documentos `p1` a `p12` en lugar de duplicarlos.
+- **Página de un solo uso.** `cargar-productos.html` muestra un único mensaje con el
+  resultado (y el motivo si falla) y se usa `try / catch / finally` para volver a
+  habilitar el botón. Se eliminará antes de publicar el sitio (Sprint 4).
+- **Imágenes dentro del proyecto.** Las fotos pasaron a `assets/img/productos/`, con
+  nombres simples sin espacios ni tildes (`teclado-tkl-aurora.jpg`). Firestore guarda solo
+  la ruta relativa como texto, nunca el archivo ni una versión en base64.
+
+### Semana del 11/10 · Compras, pedidos y valoraciones
+
+#### Confirmar una compra
+
+- **Solo con sesión.** Sin usuario autenticado, el botón dice "Ingresá para comprar" y, al
+  tocarlo, aparece un aviso con un enlace a `login.html?volver=carrito.html`. Después de
+  ingresar o registrarse, `login.js` vuelve al carrito (solo acepta páginas del propio
+  sitio en `volver`, para no redirigir a otra dirección).
+- **Se vuelve a comprobar todo al confirmar.** `confirmarPedido()` (en
+  `js/modules/pedidos.js`) lee de nuevo cada producto con `getDoc()` y revisa que exista,
+  que esté disponible y que la cantidad no supere el stock actual. Si algo no alcanza,
+  no se guarda nada: se muestra la lista de problemas y el carrito se actualiza con los
+  datos nuevos, sin vaciarse.
+- **El total se calcula con la información actual.** Precios, subtotales y envío salen de
+  lo que se acaba de leer en Firestore, no de lo que se mostró en la página.
+- **Pedido y stock en un mismo lote.** Con el `writeBatch()` de la Semana 11 se prepara
+  el documento del pedido y un `lote.update()` con el stock nuevo de cada producto, y se
+  confirman juntos con `commit()`. Si falla la conexión no queda un pedido sin descontar
+  stock ni stock descontado sin pedido.
+- **Sin valores negativos.** El stock nuevo es `stock - cantidad`, y la cantidad ya se
+  comparó con el stock en el paso anterior; antes de escribir se controla otra vez que
+  el resultado sea mayor o igual a 0.
+- **El carrito se vacía solo al final.** `guardarCarrito([])` se ejecuta recién después de
+  que `commit()` terminó bien. Si hay un error, el carrito queda como estaba y se avisa.
+- **Pantalla de confirmación** con el número de pedido y el total, y enlaces a "Ver mis
+  pedidos" y "Seguir comprando". Mientras se procesa, el botón dice "Confirmando compra…"
+  y queda deshabilitado para no registrar el pedido dos veces.
+
+Cada pedido es un documento de la colección `pedidos`:
+
+| Campo | Contenido |
+| --- | --- |
+| `uid`, `nombreUsuario`, `correo` | Quién compró (el usuario autenticado) |
+| `productos` | Arreglo con `idProducto`, `nombre`, `precioUnitario`, `cantidad` y `subtotal` |
+| `subtotal`, `envio`, `total` | Importes calculados con los precios actuales |
+| `fecha` | Momento de la confirmación |
+| `estado` | `"pendiente"` al crearse (lo cambiará el panel administrativo) |
+
+#### Historial de pedidos en el perfil
+
+- `perfil.html` muestra "Mis pedidos" con la fecha, el estado, los productos, el envío y
+  el total de cada compra, de la más reciente a la más antigua.
+- `obtenerPedidosDeUsuario(uid)` usa `query()` y `where("uid", "==", uid)`: Firestore
+  devuelve **solo** los pedidos de la persona que inició sesión; los de otros usuarios no
+  llegan al navegador.
+- Tiene estado de carga, mensaje si todavía no hay compras y mensaje si falla la consulta.
+
+#### Opiniones y valoraciones en Firestore
+
+- En el Sprint 2 no se habían implementado comentarios locales, así que las opiniones se
+  crearon directamente en la colección `valoraciones` de Firestore.
+- **Una opinión por persona y producto.** El id del documento es `idProducto_uid` (por
+  ejemplo `p1_Xy12...`), con `setDoc()`: si alguien vuelve a opinar, se actualiza su
+  opinión en lugar de duplicarse. El formulario se abre con la opinión anterior cargada.
+- **Asociada al usuario autenticado.** Se guardan `uid` y `nombreUsuario` del usuario
+  actual. Sin sesión, en lugar del formulario aparece una invitación a ingresar que vuelve
+  a la misma ficha.
+- **Validación** con `validarValoracion()`: la puntuación debe ser un entero de 1 a 5 y el
+  comentario debe tener entre 10 y 500 caracteres (sin contar espacios al inicio y al
+  final). Si no cumple, se avisa y no se llama a Firestore.
+- **Seguridad al mostrar.** El nombre y el comentario los escribe un usuario, por eso se
+  insertan con `textContent` (creando los elementos con `createElement()`) y no con
+  `innerHTML`: si alguien escribe etiquetas HTML, se ven como texto y no se ejecutan.
+- La ficha muestra el promedio con estrellas y la cantidad de opiniones, y la lista de
+  opiniones de la más nueva a la más vieja, con estado de carga y mensaje de error.
+
+#### Pruebas de la semana del 11/10
+
+- Sin sesión, "Confirmar compra" no registra nada y ofrece ingresar; al registrarse se
+  vuelve al carrito.
+- Si el stock de un producto baja en Firestore antes de confirmar, la compra no se
+  registra, se explica qué producto falta y el carrito no se vacía.
+- Si falla la conexión al confirmar, el carrito queda intacto y el stock no cambia.
+- Si el precio cambió en Firestore, el pedido se registra con el precio nuevo.
+- Una compra correcta crea el pedido con todos sus campos, descuenta el stock (12 → 10 al
+  comprar 2 unidades) y vacía el carrito.
+- El perfil muestra solo los pedidos del usuario autenticado, aunque existan pedidos de
+  otras cuentas.
+- Las opiniones rechazan la falta de puntuación y los comentarios cortos; una opinión
+  válida se publica con el nombre del usuario y actualiza el promedio.
+- Volver a opinar actualiza la opinión existente sin duplicarla.
+- Un comentario con etiquetas HTML se muestra como texto.
+- Un parámetro `volver` con una dirección externa se descarta y se va al perfil.
+
+### Cómo se confirma una compra y se actualiza el stock
+
+1. En `carrito.html`, `js/carrito.js` comprueba que haya un usuario autenticado.
+2. Llama a `confirmarPedido(usuario, carrito)` de `js/modules/pedidos.js`.
+3. Esa función vuelve a leer cada producto, valida disponibilidad y stock, y calcula
+   subtotales, envío y total con los datos actuales.
+4. Arma un `writeBatch()` con `lote.set()` del pedido nuevo y `lote.update()` del stock de
+   cada producto, y lo confirma con `commit()`.
+5. Si todo salió bien, `carrito.js` vacía el carrito y muestra la confirmación; si no,
+   muestra el problema y el carrito queda como estaba.
+
+### Completitud del Sprint 3
+
+| Para considerar completo el Sprint 3 | Dónde |
+| --- | --- |
+| Firebase se inicializa correctamente | `js/firebase/config.js`, única inicialización |
+| Registro, inicio, persistencia y cierre de sesión | `login.html`, `auth.js`, `navbar.js` |
+| Perfil protegido con los datos del usuario | `perfil.html` y `js/pages/perfil.js` |
+| Productos obtenidos desde Firestore | `productos-firestore.js`, inicio, catálogo, ficha y carrito |
+| Catálogo y detalle con los datos actuales | `getDocs()` y `getDoc()` en cada carga |
+| Compras que registran pedidos y actualizan el stock | `confirmarPedido()` en `pedidos.js` |
+| Cada usuario ve únicamente sus pedidos | `where("uid", "==", uid)` en el perfil |
+| Comentarios que identifican al usuario correcto | `valoraciones.js`, id `idProducto_uid` |
+| Errores y estados de carga en la interfaz | `htmlCargando()` y `htmlMensaje()` en todas las páginas |
+
 ### Cómo se registran y autentican los usuarios
 
 1. En `login.html`, `js/pages/login.js` valida el formulario.
@@ -244,7 +374,7 @@ consigna (no mezclar autenticación, base de datos e interfaz en un único archi
 | Carpeta | Archivos | Responsabilidad |
 | --- | --- | --- |
 | `js/firebase/` | `config.js` | Conectar el proyecto con Firebase |
-| `js/modules/` | `auth.js`, `usuarios.js`, `productos-firestore.js` | Hablar con Authentication y con Firestore, sin tocar el HTML |
+| `js/modules/` | `auth.js`, `usuarios.js`, `productos-firestore.js`, `pedidos.js`, `valoraciones.js` | Hablar con Authentication y con Firestore, sin tocar el HTML |
 | `js/modules/` | `navbar.js`, `agregar-carrito.js` | Comportamiento común a varias páginas |
 | `js/pages/` | `login.js`, `perfil.js`, `cargar-productos.js` | Lógica de las páginas nuevas del Sprint 3 |
 
@@ -254,11 +384,16 @@ desde la semana del 4/10 son módulos que leen los productos de Firestore.
 
 ### Usuarios de prueba
 
-Cuentas creadas exclusivamente para evaluar el proyecto:
+Cuentas ficticias creadas exclusivamente para evaluar el proyecto (los correos no existen:
+Firebase Authentication no verifica el correo, así que alcanza con que tenga formato válido):
 
-| Rol | Correo | Contraseña |
-| --- | --- | --- |
-| Cliente | *(completar)* | *(completar)* |
+| Nombre | Rol | Correo | Contraseña |
+| --- | --- | --- | --- |
+| Cliente de Prueba | Cliente | `cliente.prueba@nivel99.uy` | `Prueba2026` |
+| John Doe | Cliente | `johndoe@nivel99.uy` | `Prueba2026` |
+
+Con dos cuentas se puede comprobar que cada usuario ve únicamente sus propios pedidos en
+el perfil y que cada opinión aparece con el nombre de quien la escribió.
 
 ### Pruebas de la semana del 20/9
 
@@ -542,8 +677,7 @@ validaciones y repaso integrador del sprint.
 
 | Sprint | Pendiente |
 | --- | --- |
-| Sprint 3 · 11/10 | Confirmación de compra, pedidos, stock, historial y valoraciones en Firestore |
-| Sprint 3 | Roles y panel administrativo |
+| Sprint 3 | Roles y panel administrativo (CRUD de productos con el campo de imagen como ruta o URL, cambio de estado de pedidos) |
 | Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
 
 ## Decisiones de diseño adoptadas
@@ -569,20 +703,28 @@ validaciones y repaso integrador del sprint.
 
 ## Limitaciones conocidas
 
-- Las fotografías de los productos se cargan desde Unsplash, por lo que requieren conexión
-  a internet. En `assets/img/producto-placeholder.svg` hay una imagen local de reemplazo.
+- Las fotografías de `assets/img/productos` son de Unsplash (licencia de uso libre) y
+  todavía no están optimizadas. En `assets/img/producto-placeholder.svg` hay una imagen
+  local de reemplazo.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
 - La base de Firestore está en modo de prueba: las reglas de seguridad se configuran en el Sprint 4.
 - El rol de administrador todavía no se usa; todas las cuentas se registran como cliente.
 - El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro
   navegador, el carrito aparece vacío. Compartir el carrito entre dispositivos requiere
   la cuenta de usuario del Sprint 3.
-- El stock se comprueba contra Firestore al agregar al carrito, pero todavía no se
-  descuenta: el descuento real de inventario llega con la confirmación de compra (11/10).
+- La confirmación lee el stock y después escribe el lote: si dos personas compran el último
+  producto en el mismo instante, las dos lecturas podrían ver stock disponible. Para
+  evitarlo del todo haría falta una transacción (`runTransaction()`) o reglas de seguridad
+  que rechacen stock negativo (Sprint 4).
+- El pago y el envío son simulados: el pedido queda en estado "pendiente".
+- `cargar-productos.html` sigue en el proyecto para poder repetir la carga; se elimina
+  antes de publicar (Sprint 4).
 - Cada producto tiene por ahora una sola imagen en el arreglo `imagenes`.
 
 ## Posibles mejoras futuras
 
-- Sustituir las fotografías externas por imágenes propias optimizadas dentro de `assets/img`.
+- Optimizar las fotografías de `assets/img/productos` y sumar más de una por producto
+  para el carrusel.
+- Subir imágenes desde el panel administrativo con Cloudinary, como propone la Semana 11.
 - Agregar un carrusel de marcas o de combos destacados en la página de inicio.
 - Incorporar un modo oscuro reutilizando las variables ya definidas en `:root`.
