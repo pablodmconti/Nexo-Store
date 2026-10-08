@@ -8,16 +8,36 @@
      Sin sesión  → botón "Ingresar"
      Con sesión  → enlace "Mi perfil" y menú con el nombre y
                    "Cerrar sesión"
+     Rol "admin" → además, el enlace "Administración"
+
+   Ocultar el enlace NO protege el panel: admin.js vuelve a comprobar
+   el rol al cargar la página, como pide la consigna.
    ===================================================================== */
 
 import { auth } from "../firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { cerrarSesion } from "./auth.js";
+import { obtenerPerfilUsuario } from "./usuarios.js";
 
 const btnIngresar = document.querySelector("#btnIngresar");
 const menuUsuario = document.querySelector("#menuUsuario");
 const nombreUsuarioNav = document.querySelector("#nombreUsuarioNav");
 const navPerfil = document.querySelector("#navPerfil");
+const navAdmin = document.querySelector("#navAdmin");
+
+/* Muestra "Administración" solo si el documento usuarios/{uid} dice
+   rol: "admin". Si la consulta falla, el enlace queda oculto. */
+async function mostrarEnlaceAdmin(uid) {
+  try {
+    const perfil = await obtenerPerfilUsuario(uid);
+
+    if (perfil && perfil.rol === "admin") {
+      navAdmin.classList.remove("d-none");
+    }
+  } catch (error) {
+    console.error("No se pudo leer el rol del usuario:", error);
+  }
+}
 
 /* onAuthStateChanged() se ejecuta al cargar la página (con la sesión
    que Firebase recordó) y cada vez que alguien entra o sale. */
@@ -29,10 +49,12 @@ onAuthStateChanged(auth, (usuario) => {
     btnIngresar.classList.add("d-none");
     menuUsuario.classList.remove("d-none");
     navPerfil.classList.remove("d-none");
+    mostrarEnlaceAdmin(usuario.uid);
   } else {
     btnIngresar.classList.remove("d-none");
     menuUsuario.classList.add("d-none");
     navPerfil.classList.add("d-none");
+    navAdmin.classList.add("d-none");
   }
 });
 
