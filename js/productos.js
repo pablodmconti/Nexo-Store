@@ -10,6 +10,8 @@ Datos de los productos de la tienda (semilla)
 
    Las imágenes viven en la carpeta del proyecto (assets/img/productos)
    y en Firestore se guarda solo su ruta relativa, como texto.
+   destacado: true marca los productos que aparecen en la portada;
+   se puede cambiar desde el panel administrativo.
    ===================================================================== */
 
 export const productos = [
@@ -21,6 +23,7 @@ export const productos = [
     precio: 4290,
     stock: 12,
     disponible: true,
+    destacado: true,
     imagenes: ["assets/img/productos/teclado-tkl-aurora.jpg"],
     imagenAlt: "Teclado mecánico compacto con retroiluminación azul",
     caracteristicas: [
@@ -39,6 +42,7 @@ export const productos = [
     precio: 3150,
     stock: 18,
     disponible: true,
+    destacado: true,
     imagenes: ["assets/img/productos/mouse-vortex.jpg"],
     imagenAlt: "Mouse gamer inalámbrico apoyado sobre un escritorio",
     caracteristicas: [
@@ -57,6 +61,7 @@ export const productos = [
     precio: 21900,
     stock: 3,
     disponible: true,
+    destacado: true,
     imagenes: ["assets/img/productos/monitor-nova-27.jpg"],
     imagenAlt: "Monitor de escritorio encendido sobre una mesa de trabajo",
     caracteristicas: [
@@ -75,6 +80,7 @@ export const productos = [
     precio: 13500,
     stock: 7,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/monitor-nova-24.jpg"],
     imagenAlt: "Monitor de computadora sobre un escritorio con luz tenue",
     caracteristicas: [
@@ -92,6 +98,7 @@ export const productos = [
     precio: 5480,
     stock: 15,
     disponible: true,
+    destacado: true,
     imagenes: ["assets/img/productos/auriculares-echo.jpg"],
     imagenAlt: "Auriculares over ear apoyados sobre un soporte",
     caracteristicas: [
@@ -109,6 +116,7 @@ export const productos = [
     precio: 4980,
     stock: 6,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/microfono-vox.jpg"],
     imagenAlt: "Micrófono de condensador montado en un brazo articulado",
     caracteristicas: [
@@ -126,6 +134,7 @@ export const productos = [
     precio: 32900,
     stock: 4,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/placa-video-titan.jpg"],
     imagenAlt: "Placa de video con dos ventiladores sobre una superficie oscura",
     caracteristicas: [
@@ -143,6 +152,7 @@ export const productos = [
     precio: 3890,
     stock: 20,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/memoria-ram-pulse.jpg"],
     imagenAlt: "Módulos de memoria RAM instalados en una placa madre",
     caracteristicas: [
@@ -160,6 +170,7 @@ export const productos = [
     precio: 18900,
     stock: 5,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/silla-nivel99-pro.jpg"],
     imagenAlt: "Silla gamer negra y azul frente a un escritorio",
     caracteristicas: [
@@ -177,6 +188,7 @@ export const productos = [
     precio: 12400,
     stock: 2,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/escritorio-rift.jpg"],
     imagenAlt: "Escritorio amplio con monitor, teclado y luces led",
     caracteristicas: [
@@ -194,6 +206,7 @@ export const productos = [
     precio: 990,
     stock: 30,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/alfombrilla-grid.jpg"],
     imagenAlt: "Alfombrilla extra grande cubriendo un escritorio con teclado y mouse",
     caracteristicas: [
@@ -211,6 +224,7 @@ export const productos = [
     precio: 1450,
     stock: 0,
     disponible: true,
+    destacado: false,
     imagenes: ["assets/img/productos/soporte-halo.jpg"],
     imagenAlt: "Soporte iluminado con unos auriculares colgados",
     caracteristicas: [

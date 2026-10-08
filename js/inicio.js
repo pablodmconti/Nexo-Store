@@ -13,9 +13,6 @@ Productos destacados de la página de inicio
 
 import { obtenerProductos } from "./modules/productos-firestore.js";
 
-/* Los cuatro productos elegidos para la portada, uno por categoría */
-const idsDestacados = ["p1", "p2", "p3", "p5"];
-
 /* Dibuja las tarjetas de los productos que recibe */
 function mostrarDestacados(destacados) {
   const contenedor = document.querySelector("#grillaDestacados");
@@ -61,10 +58,11 @@ async function iniciarDestacados() {
     return;
   }
 
-  /* Solo los que están en la lista de arriba y siguen activos */
-  const destacados = productos.filter((producto) =>
-    idsDestacados.includes(producto.id) && producto.disponible
-  );
+  /* Solo los marcados como destacados (desde el panel administrativo)
+     que además siguen activos. Como máximo se muestran cuatro. */
+  const destacados = productos
+    .filter((producto) => producto.destacado && producto.disponible)
+    .slice(0, 4);
 
   if (destacados.length === 0) {
     contenedor.innerHTML = htmlMensaje("Pronto vas a encontrar acá nuestros productos destacados.");

@@ -23,9 +23,12 @@ Productos en Cloud Firestore
 import { db } from "../firebase/config.js";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
+  setDoc,
+  updateDoc,
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
@@ -82,4 +85,42 @@ export async function obtenerProducto(idProducto) {
   }
 
   return { id: snapshot.id, ...snapshot.data() };
+}
+
+/* ---------------------------------------------------------------
+   ADMINISTRACIÓN DE PRODUCTOS (panel administrativo)
+   ---------------------------------------------------------------
+   Las cuatro operaciones del CRUD sobre la colección productos:
+     Crear      → guardarProducto()  con setDoc() y un id nuevo
+     Leer       → obtenerProductos() y obtenerProducto(), más arriba
+     Actualizar → actualizarProducto() con updateDoc(), que cambia
+                  SOLO los campos indicados y deja el resto igual
+     Eliminar   → eliminarProducto() con deleteDoc()
+   --------------------------------------------------------------- */
+export async function guardarProducto(idProducto, datos) {
+  await setDoc(doc(db, "productos", idProducto), datos);
+}
+
+export async function actualizarProducto(idProducto, cambios) {
+  await updateDoc(doc(db, "productos", idProducto), cambios);
+}
+
+export async function eliminarProducto(idProducto) {
+  await deleteDoc(doc(db, "productos", idProducto));
+}
+
+/* Próximo id libre siguiendo el formato de la tienda (p13, p14...),
+   así "Orden de la tienda" del catálogo sigue funcionando */
+export function siguienteIdProducto(productos) {
+  let mayor = 0;
+
+  productos.forEach((producto) => {
+    const numero = Number(producto.id.slice(1));
+
+    if (numero > mayor) {
+      mayor = numero;
+    }
+  });
+
+  return `p${mayor + 1}`;
 }
