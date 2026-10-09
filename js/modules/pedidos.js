@@ -138,3 +138,48 @@ export async function obtenerPedidosDeUsuario(uid) {
 
   return pedidos;
 }
+
+/* ---------------------------------------------------------------
+   3. PEDIDOS EN EL PANEL ADMINISTRATIVO
+   --------------------------------------------------------------- */
+
+/* Los estados posibles de un pedido, en el orden en que avanza */
+export const ESTADOS_PEDIDO = ["pendiente", "en preparación", "enviado", "entregado", "cancelado"];
+
+/* Todos los pedidos de la tienda, los más recientes primero */
+export async function obtenerTodosLosPedidos() {
+  const snapshot = await getDocs(collection(db, "pedidos"));
+
+  const pedidos = snapshot.docs.map((documento) => {
+    return { id: documento.id, ...documento.data() };
+  });
+
+  pedidos.sort((a, b) => b.fecha.toDate() - a.fecha.toDate());
+
+  return pedidos;
+}
+
+/* Cambia el estado de un pedido.
+   Si se CANCELA, las unidades vuelven al stock de cada producto en el
+   mismo lote: o se cancela y se devuelve el stock, o no cambia nada.
+   Un pedido ya cancelado no se puede volver a cambiar, para no
+   devolver el stock dos veces (se controla también en admin.js). */
+export async function cambiarEstadoPedido(pedido, nuevoEstado) {
+  const lote = writeBatch(db);
+
+  lote.update(doc(db, "pedidos", pedido.id), { estado: nuevoEstado });
+
+  if (nuevoEstado === "cancelado" && pedido.estado !== "cancelado") {
+    for (const item of pedido.productos) {
+      const referencia = doc(db, "productos", item.idProducto);
+      const snapshot = await getDoc(referencia);
+
+      /* Si el producto fue eliminado, no hay stock que devolver */
+      if (snapshot.exists()) {
+        lote.update(referencia, { stock: snapshot.data().stock + item.cantidad });
+      }
+    }
+  }
+
+  await lote.commit();
+}

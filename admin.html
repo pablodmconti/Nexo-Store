@@ -35,7 +35,7 @@
                         <li class="nav-item"><a class="nav-link" data-page="producto" href="producto.html">Producto</a></li>
                         <li class="nav-item"><a class="nav-link" data-page="carrito" href="carrito.html">Carrito</a></li>
                         <li class="nav-item d-none" id="navPerfil"><a class="nav-link" data-page="perfil" href="perfil.html">Mi perfil</a></li>
-                        <li class="nav-item"><a class="nav-link" data-page="admin" href="admin.html">Administración</a></li>
+                        <li class="nav-item d-none" id="navAdmin"><a class="nav-link" data-page="admin" href="admin.html">Administración</a></li>
                     </ul>
                     <div class="d-flex align-items-center gap-2 pb-2 pb-lg-0">
                         <a class="btn btn-carrito position-relative" href="carrito.html"
@@ -64,24 +64,137 @@
     <main class="flex-grow-1" id="contenido">
         <section class="seccion">
             <div class="container">
-                <div class="locked-module">
-                    <div class="locked-icon" aria-hidden="true">🛡️</div>
-                    <span class="pastilla-sprint">Sprint 3 · Semanas 9 a 12</span>
-                    <h1 class="mt-3">Panel administrativo</h1>
-                    <p class="lead texto-suave">Desde acá se administran los productos, el stock y los pedidos. Solo será visible para administradores autenticados.</p>
-                    <div class="locked-card">
-                        <h2 class="h5">Funcionalidad en desarrollo</h2>
-                        <p class="texto-suave">Esta página forma parte de la arquitectura final de Nivel 99. Su código se desarrolla en el Sprint 3, junto con Cloud Firestore y las reglas de seguridad.</p>
-                        <ul class="lista-pendientes">
-                            <li>Validación del rol de administrador</li>
-                            <li>Alta de productos</li>
-                            <li>Edición de productos existentes</li>
-                            <li>Baja o eliminación de productos</li>
-                            <li>Control de stock y disponibilidad</li>
-                            <li>Consulta de pedidos recibidos</li>
-                        </ul>
+                <!-- 1. Mientras se comprueba la sesión y el rol no se muestra nada -->
+                <div class="estado-carga" id="adminCargando" role="status">
+                    <div class="spinner-border text-primary" aria-hidden="true"></div>
+                    <p class="texto-suave mt-3 mb-0">Comprobando permisos…</p>
+                </div>
+
+                <!-- 2. Usuario sin rol de administrador -->
+                <div class="d-none" id="adminDenegado">
+                    <div class="locked-module">
+                        <div class="locked-icon" aria-hidden="true">🔒</div>
+                        <h1 class="h2 mt-3">Acceso restringido</h1>
+                        <p class="lead texto-suave mb-4" id="textoDenegado">Esta sección es solo para el equipo de
+                            administración de Nivel 99.</p>
+                        <a class="btn btn-primary" href="index.html">Volver al inicio</a>
                     </div>
-                    <a class="btn btn-primary mt-4" href="catalogo.html">Mientras tanto, mirá el catálogo</a>
+                </div>
+
+                <!-- 3. Panel: solo se muestra si el rol es "admin" -->
+                <div class="d-none" id="adminContenido">
+                    <div class="encabezado-seccion">
+                        <span class="etiqueta-seccion">Administración</span>
+                        <h1>Panel administrativo</h1>
+                        <p class="texto-suave mb-0" id="adminSaludo">Gestioná los productos y los pedidos de la tienda.</p>
+                    </div>
+
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tabProductos" data-bs-toggle="tab"
+                                data-bs-target="#panelProductos" type="button" role="tab"
+                                aria-controls="panelProductos" aria-selected="true">Productos</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tabPedidos" data-bs-toggle="tab"
+                                data-bs-target="#panelPedidos" type="button" role="tab"
+                                aria-controls="panelPedidos" aria-selected="false">Pedidos</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- PRODUCTOS -->
+                        <div class="tab-pane fade show active" id="panelProductos" role="tabpanel"
+                            aria-labelledby="tabProductos" tabindex="0">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <p class="texto-suave mb-0" id="resumenProductosAdmin"></p>
+                                <button class="btn btn-primary" type="button" id="btnNuevoProducto">+ Nuevo producto</button>
+                            </div>
+
+                            <!-- Formulario de alta y edición (se muestra al tocar Nuevo o Editar) -->
+                            <form class="formulario-producto d-none" id="formProducto" novalidate>
+                                <h2 class="h5 mb-3" id="tituloFormProducto">Nuevo producto</h2>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="prodNombre">Nombre</label>
+                                        <input class="form-control" type="text" id="prodNombre">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="prodCategoria">Categoría</label>
+                                        <input class="form-control" type="text" id="prodCategoria" list="listaCategorias"
+                                            placeholder="Elegí una o escribí una nueva">
+                                        <datalist id="listaCategorias"></datalist>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="prodDescripcion">Descripción</label>
+                                        <textarea class="form-control" id="prodDescripcion" rows="2"></textarea>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label" for="prodPrecio">Precio ($)</label>
+                                        <input class="form-control" type="number" id="prodPrecio" min="1" step="1">
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <label class="form-label" for="prodStock">Stock</label>
+                                        <input class="form-control" type="number" id="prodStock" min="0" step="1">
+                                    </div>
+                                    <div class="col-md-6 d-flex flex-wrap align-items-end gap-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="prodDisponible" checked>
+                                            <label class="form-check-label" for="prodDisponible">Disponible para la venta</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="prodDestacado">
+                                            <label class="form-check-label" for="prodDestacado">Destacado en el inicio</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="prodImagen">Imagen (ruta o URL)</label>
+                                        <input class="form-control" type="text" id="prodImagen"
+                                            placeholder="assets/img/productos/teclado.jpg o https://...">
+                                        <div class="form-text">La imagen va en la carpeta del proyecto; acá se escribe solo su ruta.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="prodImagenAlt">Texto alternativo de la imagen</label>
+                                        <input class="form-control" type="text" id="prodImagenAlt"
+                                            placeholder="Qué se ve en la foto">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="prodCaracteristicas">Características (una por línea)</label>
+                                        <textarea class="form-control" id="prodCaracteristicas" rows="4"></textarea>
+                                    </div>
+                                </div>
+                                <div class="alert d-none mt-3 mb-0" id="mensajeFormProducto" role="alert"></div>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-primary" type="submit" id="btnGuardarProducto">Guardar producto</button>
+                                    <button class="btn btn-outline-primary" type="button" id="btnCancelarProducto">Cancelar</button>
+                                </div>
+                            </form>
+
+                            <div class="table-responsive">
+                                <table class="table align-middle tabla-admin">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Producto</th>
+                                            <th scope="col">Categoría</th>
+                                            <th scope="col" class="text-end">Precio</th>
+                                            <th scope="col" class="text-end">Stock</th>
+                                            <th scope="col">Estado</th>
+                                            <th scope="col" class="text-end">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaProductos"></tbody>
+                                </table>
+                            </div>
+                            <div class="row" id="estadoProductosAdmin"></div>
+                        </div>
+
+                        <!-- PEDIDOS -->
+                        <div class="tab-pane fade" id="panelPedidos" role="tabpanel" aria-labelledby="tabPedidos"
+                            tabindex="0">
+                            <p class="texto-suave" id="resumenPedidosAdmin"></p>
+                            <div class="row g-3" id="listaPedidosAdmin"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -143,6 +256,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/base.js"></script>
     <script type="module" src="js/modules/navbar.js"></script>
+    <script type="module" src="js/pages/admin.js"></script>
 </body>
 
 </html>

@@ -25,6 +25,7 @@
    19. Carga inicial de productos (Sprint 3)
    20. Características en la ficha del producto (Sprint 3)
    21. Compra confirmada, pedidos y opiniones (Sprint 3)
+   22. Panel administrativo (Sprint 3)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -763,7 +764,7 @@ img {
 }
 
 /* ---------------------------------------------------------------
-   17. CARRITO DE COMPRAS (Sprint 2 · 13/9)
+   17. CARRITO DE COMPRAS (Sprint 2)
    Las filas y el panel de resumen se dibujan desde js/carrito.js,
    así que acá solo se define cómo se ven.
    --------------------------------------------------------------- */
@@ -932,7 +933,7 @@ img {
 }
 
 /* ---------------------------------------------------------------
-   18. CUENTA DE USUARIO (Sprint 3 · 20/9)
+   18. CUENTA DE USUARIO (Sprint 3)
    Menú de la cuenta en el navbar, página login.html y perfil.html.
    --------------------------------------------------------------- */
 
@@ -1089,7 +1090,7 @@ img {
 }
 
 /* ---------------------------------------------------------------
-   21. COMPRA CONFIRMADA, PEDIDOS Y OPINIONES (Sprint 3 · 11/10)
+   21. COMPRA CONFIRMADA, PEDIDOS Y OPINIONES (Sprint 3)
    --------------------------------------------------------------- */
 
 /* Pantalla final del carrito */
@@ -1209,4 +1210,31 @@ img {
 .estrellas {
   color: #8a5a00;
   letter-spacing: 0.08em;
+}
+
+/* ---------------------------------------------------------------
+   22. PANEL ADMINISTRATIVO (Sprint 3)
+   --------------------------------------------------------------- */
+.formulario-producto {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-medio);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tabla-admin {
+  background-color: var(--color-fondo);
+  font-size: 0.92rem;
+}
+
+.tabla-admin th {
+  font-family: var(--fuente-titulos);
+  color: var(--color-texto-suave);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tabla-admin .btn {
+  margin-left: 0.25rem;
 }
