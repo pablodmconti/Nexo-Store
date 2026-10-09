@@ -59,13 +59,13 @@ Nexo-Store/
 ├── login.html          Ingresar y crear cuenta con Firebase Authentication · Sprint 3
 ├── cargar-productos.html  Herramienta interna: carga inicial de la colección productos · Sprint 3
 ├── perfil.html         Página privada: datos del usuario e historial de sus pedidos · Sprint 3
-├── admin.html          Con la identidad del sitio y su aviso · Sprint 3
+├── admin.html          Panel administrativo, solo para el rol admin · Sprint 3
 ├── css/
-│   └── styles.css      Hoja de estilos organizada en 21 secciones comentadas
+│   └── styles.css      Hoja de estilos organizada en 22 secciones comentadas
 ├── js/
 │   ├── base.js         Navegación, avisos y funciones compartidas (precio, stock, carrito)
 │   ├── productos.js    Semilla exportada para la carga inicial (ya no es la fuente del catálogo)
-│   ├── inicio.js       Productos destacados de la portada, leídos de Firestore
+│   ├── inicio.js       Productos destacados de la portada (campo destacado en Firestore)
 │   ├── catalogo.js     Catálogo desde Firestore: tarjetas, búsqueda, filtro y orden
 │   ├── producto.js     Ficha del producto (getDoc() con el id de la URL) y sus opiniones
 │   ├── carrito.js      Carrito con datos de Firestore y confirmación de la compra
@@ -74,12 +74,13 @@ Nexo-Store/
 │   ├── modules/
 │   │   ├── auth.js     Registro, inicio y cierre de sesión, mensajes de error
 │   │   ├── usuarios.js Documento usuarios/{uid} en Firestore
-│   │   ├── productos-firestore.js  Carga con writeBatch(), leer todos y leer uno
-│   │   ├── pedidos.js  Confirmar compra (pedido + stock en un lote) y pedidos del usuario
+│   │   ├── productos-firestore.js  Carga con writeBatch() y CRUD de la colección productos
+│   │   ├── pedidos.js  Confirmar compra, pedidos del usuario y estados de los pedidos
 │   │   ├── valoraciones.js  Validar, guardar y leer las opiniones de un producto
 │   │   ├── agregar-carrito.js  Vuelve a consultar stock y disponibilidad antes de agregar
-│   │   └── navbar.js   Navbar según la sesión (se carga en todas las páginas)
+│   │   └── navbar.js   Navbar según la sesión y el rol (se carga en todas las páginas)
 │   └── pages/
+│       ├── admin.js    Protección por rol y panel: productos y pedidos
 │       ├── cargar-productos.js  Carga inicial de los productos (página de un solo uso)
 │       ├── login.js    Formularios de login.html: validación y estados de carga
 │       └── perfil.js   Protección de perfil.html, datos del usuario e historial de pedidos
@@ -351,6 +352,68 @@ Cada pedido es un documento de la colección `pedidos`:
 | Cada usuario ve únicamente sus pedidos | `where("uid", "==", uid)` en el perfil |
 | Comentarios que identifican al usuario correcto | `valoraciones.js`, id `idProducto_uid` |
 | Errores y estados de carga en la interfaz | `htmlCargando()` y `htmlMensaje()` en todas las páginas |
+| Panel administrativo inicial con CRUD (resultado esperado del sprint) | `admin.html` y `js/pages/admin.js`, protegido por rol |
+
+### Panel administrativo (`admin.html`)
+
+#### Roles de cliente y administrador
+
+- Todas las cuentas se registran con `rol: "cliente"` en `usuarios/{uid}`. El rol
+  `"admin"` se asigna a mano desde la consola de Firebase, como anticipa la Semana 9:
+  *Firestore Database → usuarios → documento de la cuenta → campo `rol` → `admin`*.
+- **El enlace "Administración" del menú** solo aparece si el rol es `"admin"`
+  (`navbar.js` lee el documento del usuario).
+- **Ocultar el enlace no alcanza**, como advierte la consigna: al cargar `admin.html`,
+  `js/pages/admin.js` vuelve a leer el rol en Firestore. Sin sesión redirige a
+  `login.html?volver=admin.html`; con rol cliente muestra "Acceso restringido" y el panel
+  nunca se dibuja, aunque se escriba la dirección a mano.
+
+#### Gestión de productos (CRUD)
+
+| Operación | Cómo se hace | Función de Firebase |
+| --- | --- | --- |
+| Crear | Botón **Nuevo producto** y formulario. El id es el siguiente libre (`p13`, `p14`…) | `setDoc()` |
+| Leer | Tabla con todos los productos, incluso los inactivos | `getDocs()` |
+| Actualizar | **Editar** abre el formulario con los datos actuales; se cambian solo esos campos | `updateDoc()` |
+| Desactivar | **Desactivar / Activar** cambia `disponible` sin borrar nada | `updateDoc()` |
+| Eliminar | **Eliminar**, con confirmación previa | `deleteDoc()` |
+
+- El formulario gestiona nombre, categoría (con las existentes como sugerencia),
+  descripción, **precio**, **stock**, **disponibilidad**, **destacado**, imagen,
+  texto alternativo y características (una por línea).
+- **Imagen como ruta o URL de texto**, como propone la Semana 11: la foto va en
+  `assets/img/productos` y en el formulario se escribe su ruta. Se rechazan las rutas de
+  una computadora (`C:\Users\...`).
+- **Validación:** nombre de al menos 3 caracteres, descripción de al menos 10, precio mayor
+  que 0 y stock entero igual o mayor que 0. Los problemas se muestran todos juntos y no
+  se guarda nada hasta corregirlos.
+- **Productos destacados:** el inicio ya no usa una lista fija de ids; muestra hasta cuatro
+  productos con `destacado: true` y `disponible: true`, que se marcan desde el panel.
+- **Desactivar o eliminar:** desactivar es lo recomendado, porque el producto deja de
+  venderse pero conserva sus opiniones. Los pedidos guardan nombre y precio, así que
+  eliminar un producto no rompe el historial.
+
+#### Consulta de pedidos
+
+- La pestaña **Pedidos** muestra todos los pedidos de la tienda, del más reciente al más
+  antiguo, con cliente, correo, fecha, productos y total.
+- **Cambio de estado:** pendiente → en preparación → enviado → entregado, o cancelado. El
+  cliente ve el estado nuevo en su perfil.
+- **Cancelar devuelve el stock:** en un mismo `writeBatch()` se cambia el estado y se suman
+  las unidades a cada producto. Un pedido cancelado ya no se puede cambiar, para no
+  devolver el stock dos veces.
+
+#### Pruebas del panel
+
+- Sin sesión, `admin.html` redirige al login y, después de ingresar, vuelve al panel.
+- Con una cuenta cliente aparece "Acceso restringido" y el enlace del menú no se ve.
+- Con rol `admin` se ven el enlace y el panel con los productos.
+- Crear un producto con datos vacíos o con una ruta `C:\...` muestra los problemas; con
+  datos válidos se crea `p13` y aparece en el catálogo.
+- Editar el precio de un producto se refleja en el catálogo sin tocar el resto de los campos.
+- Un producto desactivado desaparece del catálogo; uno eliminado desaparece del panel.
+- Una compra aparece en la pestaña Pedidos; pasarla a "enviado" se ve en el perfil del
+  cliente y cancelarla devuelve el stock (10 → 12).
 
 ### Cómo se registran y autentican los usuarios
 
@@ -376,7 +439,7 @@ consigna (no mezclar autenticación, base de datos e interfaz en un único archi
 | `js/firebase/` | `config.js` | Conectar el proyecto con Firebase |
 | `js/modules/` | `auth.js`, `usuarios.js`, `productos-firestore.js`, `pedidos.js`, `valoraciones.js` | Hablar con Authentication y con Firestore, sin tocar el HTML |
 | `js/modules/` | `navbar.js`, `agregar-carrito.js` | Comportamiento común a varias páginas |
-| `js/pages/` | `login.js`, `perfil.js`, `cargar-productos.js` | Lógica de las páginas nuevas del Sprint 3 |
+| `js/pages/` | `login.js`, `perfil.js`, `admin.js`, `cargar-productos.js` | Lógica de las páginas nuevas del Sprint 3 |
 
 Los archivos de las páginas del Sprint 2 (`inicio.js`, `catalogo.js`, `producto.js` y
 `carrito.js`) conservan su lugar en `js/` para no cambiar la estructura del proyecto, pero
@@ -389,11 +452,13 @@ Firebase Authentication no verifica el correo, así que alcanza con que tenga fo
 
 | Nombre | Rol | Correo | Contraseña |
 | --- | --- | --- | --- |
+| Administrador de Prueba | Administrador | `admin.prueba@nivel99.uy` | `Prueba2026` |
 | Cliente de Prueba | Cliente | `cliente.prueba@nivel99.uy` | `Prueba2026` |
 | John Doe | Cliente | `johndoe@nivel99.uy` | `Prueba2026` |
 
 Con dos cuentas se puede comprobar que cada usuario ve únicamente sus propios pedidos en
-el perfil y que cada opinión aparece con el nombre de quien la escribió.
+el perfil y que cada opinión aparece con el nombre de quien la escribió. Con la cuenta
+de administrador se accede a `admin.html`; con las de cliente aparece "Acceso restringido".
 
 ### Pruebas de la semana del 20/9
 
@@ -677,7 +742,6 @@ validaciones y repaso integrador del sprint.
 
 | Sprint | Pendiente |
 | --- | --- |
-| Sprint 3 | Roles y panel administrativo (CRUD de productos con el campo de imagen como ruta o URL, cambio de estado de pedidos) |
 | Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
 
 ## Decisiones de diseño adoptadas
@@ -708,7 +772,10 @@ validaciones y repaso integrador del sprint.
   local de reemplazo.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
 - La base de Firestore está en modo de prueba: las reglas de seguridad se configuran en el Sprint 4.
-- El rol de administrador todavía no se usa; todas las cuentas se registran como cliente.
+- El rol se comprueba en el navegador. Para que un cliente tampoco pueda escribir en
+  Firestore por fuera del sitio hacen falta reglas de seguridad que validen el rol
+  (Sprint 4).
+- El rol de administrador se asigna a mano desde la consola de Firebase.
 - El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro
   navegador, el carrito aparece vacío. Compartir el carrito entre dispositivos requiere
   la cuenta de usuario del Sprint 3.
