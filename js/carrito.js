@@ -249,24 +249,10 @@ let esAdministrador = false;
 const MENSAJE_ADMIN = `Las cuentas de administración no pueden comprar. Para probar una compra,
   <a class="alert-link" href="login.html">ingresá con una cuenta de cliente</a>.`;
 
-/* El botón cambia según haya o no una sesión, y según el rol */
-onAuthStateChanged(auth, async (usuario) => {
-  usuarioActual = usuario;
-  esAdministrador = false;
-
-  if (!usuario) {
-    btnConfirmar.disabled = false;
-    btnConfirmar.textContent = "Ingresá para comprar";
-    return;
-  }
-
-  btnConfirmar.disabled = false;
-  btnConfirmar.textContent = "Confirmar compra";
-  ocultarMensajeCompra();
-
-  /* El rol se lee en usuarios/{uid}, igual que en navbar.js. Las reglas
-     de Firestore rechazan igual un pedido creado por un administrador:
-     esto solo evita que lo intente y le explica por qué. */
+/* Lee el rol en usuarios/{uid}, igual que navbar.js. Las reglas de
+   Firestore rechazan igual un pedido creado por un administrador:
+   esto evita que lo intente y le explica por qué. */
+async function comprobarRol(usuario) {
   try {
     const perfil = await obtenerPerfilUsuario(usuario.uid);
     esAdministrador = perfil !== null && perfil.rol === "admin";
@@ -279,6 +265,27 @@ onAuthStateChanged(auth, async (usuario) => {
     btnConfirmar.textContent = "Solo para clientes";
     mostrarMensajeCompra(MENSAJE_ADMIN, "info");
   }
+}
+
+/* La lectura del rol tarda un instante: el botón la espera antes de
+   seguir, por si se toca "Confirmar compra" apenas carga la página */
+let comprobacionRol = Promise.resolve();
+
+/* El botón cambia según haya o no una sesión, y según el rol */
+onAuthStateChanged(auth, (usuario) => {
+  usuarioActual = usuario;
+  esAdministrador = false;
+  btnConfirmar.disabled = false;
+
+  if (!usuario) {
+    btnConfirmar.textContent = "Ingresá para comprar";
+    comprobacionRol = Promise.resolve();
+    return;
+  }
+
+  btnConfirmar.textContent = "Confirmar compra";
+  ocultarMensajeCompra();
+  comprobacionRol = comprobarRol(usuario);
 });
 
 /* Pantalla final: la compra quedó registrada */
@@ -308,6 +315,8 @@ btnConfirmar.addEventListener("click", async () => {
   }
 
   /* Una cuenta de administración no compra (Sprint 4) */
+  await comprobacionRol;
+
   if (esAdministrador) {
     mostrarMensajeCompra(MENSAJE_ADMIN, "info");
     return;
