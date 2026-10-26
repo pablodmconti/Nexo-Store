@@ -1,14 +1,53 @@
 # Nivel 99 · Gaming Setup Store
 
 Proyecto integrador de **Desarrollo Web** (CFE | ANEP) desarrollado sobre la base *Nexo Store*.
-Entrega correspondiente al **Sprint 3 · Firebase, autenticación, pedidos y administración**
-(el Sprint 1, interfaz e identidad visual, y el Sprint 2, catálogo, detalle y carrito, ya
-están integrados).
+Entrega final, correspondiente al **Sprint 4 · Seguridad, calidad, pruebas y publicación**
+(los sprints 1 a 3, de interfaz, catálogo y carrito, y Firebase, ya están integrados).
 
 - **Estudiante:** Pablo Montaña Conti
 - **Curso:** Desarrollo Web · 2.º semestre · Año lectivo 2026
 - **Repositorio:** https://github.com/pablodmconti/Nexo-Store
-- **Sitio publicado:** pendiente, se publicará mediante GitHub Pages en el Sprint 4
+- **Sitio publicado:** https://pablodmconti.github.io/Nexo-Store/
+
+## Cómo evaluar el proyecto
+
+1. Abrir el sitio publicado: https://pablodmconti.github.io/Nexo-Store/
+2. Ingresar con una de estas cuentas, creadas exclusivamente para la evaluación. Los
+   correos no existen: Firebase Authentication no los verifica, así que alcanza con que
+   tengan formato válido.
+
+   | Nombre | Rol | Correo | Contraseña |
+   | --- | --- | --- | --- |
+   | Administrador de Prueba | Administrador (`admin`) | `admin.prueba@nivel99.uy` | `Prueba2026` |
+   | Cliente de Prueba | Cliente | `cliente.prueba@nivel99.uy` | `Prueba2026` |
+   | John Doe | Cliente | `johndoe@nivel99.uy` | `Prueba2026` |
+
+3. Para comprar, elegir la forma de pago en el carrito. **Coordinar con el equipo**
+   registra el pedido en el momento. **Mercado Pago** abre el checkout en modo de prueba
+   (ver los datos de prueba más abajo).
+
+### Datos de prueba de Mercado Pago (Uruguay)
+
+Son datos públicos de prueba de Mercado Pago: no corresponden a tarjetas reales ni
+cobran dinero.
+
+| Tarjeta | Número | Código de seguridad | Vencimiento |
+| --- | --- | --- | --- |
+| Visa crédito | `4509 9535 6623 3704` | `123` | `11/30` |
+| Mastercard crédito | `5031 7557 3453 0604` | `123` | `11/30` |
+| Visa débito | `4410 1036 7243 6886` | `123` | `11/30` |
+
+- **El nombre del titular define el resultado:** `APRO` aprueba el pago, `OTHE` lo
+  rechaza y `CONT` lo deja pendiente. Documento: CI `12345678`.
+- Pagar en una **ventana de incógnito**. Mercado Pago recomienda ingresar en el checkout
+  con una cuenta compradora de prueba. Su usuario y contraseña no se publican en el
+  repositorio; se entregan al docente si los solicita.
+- **Estado al 26/10/2026:** el entorno de prueba de Mercado Pago está rechazando los
+  pagos de esta cuenta vendedora, también en otro proyecto que usa las mismas
+  credenciales. Los mensajes son "Por motivos de seguridad, tu pago fue rechazado" o "No
+  pudimos procesar tu pago". El sitio registra el pedido, crea el pago y abre el checkout
+  correctamente; el rechazo ocurre dentro de Mercado Pago. Para recorrer una compra
+  completa se puede usar **Coordinar con el equipo**.
 
 ## Descripción del e-commerce
 
@@ -45,8 +84,11 @@ asesoramiento antes que el precio más bajo del mercado.
 | Google Fonts | Tipografías Chakra Petch e Inter |
 | LocalStorage | Persistencia del carrito entre visitas, sin servidor |
 | Firebase Authentication | Registro, inicio y cierre de sesión con correo y contraseña (Sprint 3) |
-| Cloud Firestore | Datos de cada usuario: nombre, correo, rol y fecha de registro (Sprint 3) |
-| Git y GitHub | Control de versiones y publicación de los avances |
+| Cloud Firestore | Usuarios y roles, productos, pedidos y valoraciones (Sprint 3) |
+| Reglas de seguridad de Firestore | Quién puede leer y escribir cada colección, en `firestore.rules` (Sprint 4) |
+| Mercado Pago Checkout Pro | Pago con credenciales de prueba, sin dinero real (Sprint 4, extra) |
+| Cloudflare Workers | Servidor de pagos que guarda el Access Token de Mercado Pago (Sprint 4, extra) |
+| Git, GitHub y GitHub Pages | Control de versiones y publicación del sitio |
 
 ## Estructura del proyecto
 
@@ -55,16 +97,17 @@ Nexo-Store/
 ├── index.html          Página de inicio personalizada
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
 ├── producto.html       Ficha dinámica con características y opiniones de los usuarios
-├── carrito.html        Carrito en LocalStorage y confirmación de compra con Firebase
+├── carrito.html        Carrito en LocalStorage, forma de pago y confirmación de compra
+├── pago.html           Vuelta de Mercado Pago y resumen para pagar un pedido · Sprint 4
 ├── login.html          Ingresar y crear cuenta con Firebase Authentication · Sprint 3
-├── cargar-productos.html  Herramienta interna: carga inicial de la colección productos · Sprint 3
 ├── perfil.html         Página privada: datos del usuario e historial de sus pedidos · Sprint 3
 ├── admin.html          Panel administrativo, solo para el rol admin · Sprint 3
+├── firestore.rules     Reglas de seguridad publicadas en la consola de Firebase · Sprint 4
 ├── css/
 │   └── styles.css      Hoja de estilos organizada en 22 secciones comentadas
 ├── js/
 │   ├── base.js         Navegación, avisos y funciones compartidas (precio, stock, carrito)
-│   ├── productos.js    Semilla exportada para la carga inicial (ya no es la fuente del catálogo)
+│   ├── productos.js    Respaldo de los datos iniciales (ninguna página lo carga)
 │   ├── inicio.js       Productos destacados de la portada (campo destacado en Firestore)
 │   ├── catalogo.js     Catálogo desde Firestore: tarjetas, búsqueda, filtro y orden
 │   ├── producto.js     Ficha del producto (getDoc() con el id de la URL) y sus opiniones
@@ -75,24 +118,30 @@ Nexo-Store/
 │   │   ├── auth.js     Registro, inicio y cierre de sesión, mensajes de error
 │   │   ├── usuarios.js Documento usuarios/{uid} en Firestore
 │   │   ├── productos-firestore.js  Carga con writeBatch() y CRUD de la colección productos
-│   │   ├── pedidos.js  Confirmar compra, pedidos del usuario y estados de los pedidos
+│   │   ├── pedidos.js  Confirmar compra, pedidos, estados y registro del pago
+│   │   ├── mercadopago.js  Pedidos al Worker de pagos con fetch() · Sprint 4
 │   │   ├── valoraciones.js  Validar, guardar y leer las opiniones de un producto
 │   │   ├── agregar-carrito.js  Vuelve a consultar stock y disponibilidad antes de agregar
 │   │   └── navbar.js   Navbar según la sesión y el rol (se carga en todas las páginas)
 │   └── pages/
 │       ├── admin.js    Protección por rol y panel: productos y pedidos
-│       ├── cargar-productos.js  Carga inicial de los productos (página de un solo uso)
 │       ├── login.js    Formularios de login.html: validación y estados de carga
+│       ├── pago.js     Confirma el pago con Mercado Pago y lo guarda en el pedido
 │       └── perfil.js   Protección de perfil.html, datos del usuario e historial de pedidos
 ├── assets/
 │   ├── img/            Placeholder y carpeta productos/ con las fotos de cada producto
 │   ├── icons/          Íconos SVG de la sección de beneficios y del carrito
 │   └── logo/           Logotipo e isotipo de Nivel 99
+├── cloudflare/
+│   └── worker-pagos.js Código del Worker de pagos (se pega en Cloudflare, sin el token)
 ├── README.md
 └── .gitignore
 ```
 
 ## Instrucciones de ejecución
+
+El sitio está publicado en https://pablodmconti.github.io/Nexo-Store/. Para ejecutarlo en
+una computadora:
 
 1. Clonar el repositorio: `git clone https://github.com/pablodmconti/Nexo-Store.git`
 2. Abrir la carpeta en Visual Studio Code.
@@ -101,7 +150,167 @@ Nexo-Store/
    si la página se abre directamente como archivo (`file://`).
 4. Se requiere conexión a internet, ya que Bootstrap, las tipografías y Firebase se cargan
    desde servicios externos. Las fotografías de los productos están en `assets/img/productos`.
-5. Para probar compras y opiniones hay que iniciar sesión (ver *Usuarios de prueba*).
+5. Para probar compras y opiniones hay que iniciar sesión (ver *Cómo evaluar el proyecto*).
+6. El Worker de pagos acepta pedidos desde Live Server (`localhost` y `127.0.0.1`), así que
+   el pago con Mercado Pago también se puede probar en local.
+
+## Funcionalidades desarrolladas en el Sprint 4
+
+El último sprint no suma módulos grandes: cierra el proyecto con roles, panel
+administrativo, reglas de seguridad, una revisión completa y la publicación. Como extra,
+incorpora el pago con Mercado Pago en modo de prueba.
+
+### Semana del 18/10 · Roles y acceso administrativo
+
+Cada documento `usuarios/{uid}` tiene el campo `rol`, con dos valores: `cliente` y
+`admin`. La consigna lo nombra *administrador*; en el código y en Firestore se mantiene
+el valor `"admin"`, el que ya usaba el Sprint 3.
+
+**Cómo se diferencian los roles**
+
+| Acción | Cliente | Administrador |
+| --- | --- | --- |
+| Ver el catálogo, la ficha y las opiniones | Sí | Sí |
+| Comprar, pagar y ver sus pedidos en el perfil | Sí | Sí |
+| Opinar sobre un producto | Sí | Sí |
+| Ver el enlace "Administración" en el menú | No | Sí |
+| Abrir `admin.html` | No: vuelve al inicio con un aviso | Sí |
+| Crear, editar, activar o desactivar y eliminar productos | No | Sí |
+| Ver todos los pedidos y cambiar su estado | No | Sí |
+
+- **Registro siempre como cliente.** `crearPerfilUsuario()` guarda `rol: "cliente"` y el
+  formulario no permite elegir otro. Las reglas de Firestore rechazan crear una cuenta con
+  otro rol o cambiarse el rol después.
+- **Administrador asignado a mano**, desde la consola de Firebase, en la cuenta de prueba
+  `admin.prueba@nivel99.uy`.
+- **El rol se consulta después de iniciar sesión.** `navbar.js` lo lee para mostrar el
+  enlace, y `admin.js` lo vuelve a leer al abrir el panel.
+- **Usuario sin permisos.** Si un cliente escribe `admin.html` en la barra de direcciones,
+  `admin.js` lo redirige a `index.html?aviso=sin-permisos` y `base.js` muestra el aviso
+  *"La sección Administración es solo para el equipo de Nivel 99"* (parámetros de URL,
+  Semana 7). Solo se muestran avisos de una lista fija: un texto escrito a mano en la URL
+  nunca llega a la pantalla.
+
+### Semana del 25/10 · Panel administrativo básico
+
+El panel ya estaba completo desde el Sprint 3 (ver *Panel administrativo* más abajo).
+**Operaciones que puede realizar el administrador:**
+
+- Consultar todos los productos con nombre, categoría, precio, stock y disponibilidad.
+- Crear un producto y editar uno existente. El formulario valida nombre, categoría,
+  descripción, precio, stock e imagen, deshabilita el botón mientras guarda y muestra un
+  mensaje de éxito o de error. Los cambios se ven enseguida en el catálogo.
+- Activar o desactivar y eliminar productos (opcional de la consigna).
+- Consultar todos los pedidos, con su forma y estado de pago, y cambiar el estado de cada
+  uno. Al cancelar un pedido, el stock vuelve a los productos (opcionales de la consigna).
+
+### Semana del 30/10 · Revisión, seguridad básica y publicación
+
+#### Reglas de seguridad de Firestore
+
+`firestore.rules` reemplaza el modo de prueba. Se copia en la consola de Firebase
+(*Firestore Database → Reglas → Publicar*) y el archivo queda en el repositorio como
+registro. Ocultar un botón no protege nada; estas reglas las aplica Firebase en el
+servidor, aunque alguien escriba en la base por fuera del sitio.
+
+| Colección | Quién lee | Quién escribe |
+| --- | --- | --- |
+| `usuarios` | Cada persona su documento; el administrador, todos | Se crea solo como `cliente`; nadie puede cambiarse el rol |
+| `productos` | Cualquiera, sin iniciar sesión | Solo el administrador. Única excepción: al comprar, un cliente con sesión puede **bajar** el `stock` de un producto disponible, sin tocar otro campo y sin dejarlo en negativo |
+| `pedidos` | Cada cliente los suyos; el administrador, todos | Se crean con el `uid` propio, estado `pendiente` y pago pendiente. El estado lo cambia solo el administrador; el cliente solo registra el resultado del pago de su propio pedido |
+| `valoraciones` | Cualquiera | Cada usuario solo su opinión, de 1 a 5 estrellas y de 10 a 500 caracteres. El administrador puede borrarlas |
+
+Todo lo que no está permitido en el archivo queda prohibido.
+
+#### Revisión antes de publicar
+
+- Se retiró `cargar-productos.html`, la página de carga inicial, junto con su JavaScript
+  y sus estilos. `js/productos.js` queda como respaldo de los datos iniciales.
+- La imagen de la ficha empezaba con `src=""` y el navegador intentaba cargar la propia
+  página como imagen, lo que generaba un error en la consola. Ahora empieza con el placeholder.
+- En teléfonos, el inicio y la ficha se desbordaban 12 px hacia la derecha por los gutters
+  `g-5` de Bootstrap. Se cambiaron por `g-4 g-lg-5`: el espacio grande queda solo en
+  pantallas grandes.
+- Se revisaron todas las rutas de los HTML y los JS distinguiendo mayúsculas, porque
+  GitHub Pages trata `Foto.jpg` y `foto.jpg` como archivos distintos.
+
+#### Publicación
+
+El sitio se publica con **GitHub Pages** desde la rama `main`
+(*Settings → Pages → Deploy from a branch*): https://pablodmconti.github.io/Nexo-Store/.
+El dominio `pablodmconti.github.io` está agregado en *Authentication → Settings →
+Dominios autorizados* de Firebase para que funcione el inicio de sesión.
+
+### Pago con Mercado Pago (extra, modo de prueba)
+
+La consigna no pide pagos reales, así que esto es una funcionalidad adicional: usa
+**Checkout Pro de Mercado Pago con credenciales de prueba** y no cobra dinero real. En el
+carrito se elige la forma de pago: **Mercado Pago** o **Coordinar con el equipo**
+(transferencia o efectivo al recibir, como en el Sprint 3).
+
+**Por qué hace falta un Worker.** Para crear un pago, Mercado Pago pide un *Access Token*
+secreto, que no puede ir en el JavaScript que descarga el navegador, y GitHub Pages no
+ejecuta código de servidor. Por eso hay un servidor de pagos chico: un **Worker de
+Cloudflare** (gratuito), con el código de `cloudflare/worker-pagos.js`, que guarda el
+token como secreto. El sitio nunca lo ve.
+
+**Recorrido**
+
+1. Al confirmar la compra, el pedido se registra igual que en el Sprint 3, con
+   `pago: { metodo: "mercadopago", estado: "pendiente" }`.
+2. `js/modules/mercadopago.js` le pide al Worker la dirección del checkout con `fetch()`.
+3. El Worker lee el pedido con el token de sesión del usuario, así que las reglas solo se
+   lo entregan a su dueño. Toma los precios de la colección `productos` y no del
+   navegador, crea la preferencia en pesos uruguayos (una cuota, sin pagos en efectivo) y
+   devuelve la dirección del checkout.
+4. Al terminar, Mercado Pago vuelve al Worker (`/volver`), que reenvía a `pago.html` con
+   `payment_id`, `status` y `external_reference` (el id del pedido).
+5. `js/pages/pago.js` no le cree a la URL: consulta el pago a través del Worker, comprueba
+   que corresponda al pedido y que el importe sea el total, y guarda el resultado en el
+   campo `pago` del pedido (aprobado, rechazado o en proceso). Si se rechaza, explica el
+   motivo.
+6. El perfil muestra la forma y el estado del pago y permite volver a intentarlo. El panel
+   administrativo muestra el pago y su número de operación.
+
+**Configuración**
+
+1. En Cloudflare, crear el Worker `nivel99-pagos`, pegar `cloudflare/worker-pagos.js` y
+   desplegarlo.
+2. En *Settings → Variables and Secrets*, agregar el secreto `MP_ACCESS_TOKEN` con el
+   Access Token de prueba de Mercado Pago.
+3. Comprobar en https://nivel99-pagos.pablodmconti.workers.dev/ que diga
+   `"accessTokenConfigurado": true`.
+4. La dirección del Worker está en `URL_WORKER`, dentro de `js/modules/mercadopago.js`.
+
+`fetch()` con JSON y la lectura de parámetros de URL (Semana 7) son lo único nuevo del
+lado del sitio. El Worker excede los contenidos del curso y está comentado paso a paso.
+
+### Completitud del Sprint 4
+
+| Lo que pide la consigna | Dónde |
+| --- | --- |
+| Diferenciar clientes y administradores | Campo `rol` en `usuarios/{uid}` (`usuarios.js`) |
+| Mostrar el acceso administrativo solo cuando corresponde | `navbar.js` |
+| Proteger la página de administración y redirigir sin permisos | `admin.js`, `base.js` y reglas de Firestore |
+| Consultar, crear y editar productos | `admin.html`, `admin.js` y `productos-firestore.js` |
+| Proteger las operaciones principales de Firestore | `firestore.rules` |
+| Conservar las funcionalidades de los sprints anteriores | Catálogo, ficha, carrito, pedidos, perfil y opiniones |
+| Publicar la aplicación con un enlace | GitHub Pages: https://pablodmconti.github.io/Nexo-Store/ |
+| README actualizado con cuentas para la evaluación | *Cómo evaluar el proyecto* y esta sección |
+
+### Pruebas del Sprint 4
+
+- Sin sesión: inicio, catálogo, ficha, carrito y login cargan sin errores en la consola ni
+  imágenes rotas. `perfil.html` y `admin.html` llevan al login.
+- A 375 px de ancho, ninguna página se desplaza hacia los costados.
+- Un cliente que escribe `admin.html` vuelve al inicio con el aviso; el administrador entra
+  al panel.
+- Registro, inicio y cierre de sesión. Compra con "Coordinar con el equipo": el pedido
+  aparece en el perfil y el stock baja.
+- El administrador crea y edita un producto y lo ve en el catálogo, cambia el estado de un
+  pedido y, al cancelarlo, el stock vuelve.
+- Mercado Pago: el pedido se registra, el Worker crea el pago y se abre el checkout. El
+  pago lo rechaza el entorno de prueba de Mercado Pago (ver *Limitaciones conocidas*).
 
 ## Funcionalidades desarrolladas en el Sprint 3
 
@@ -365,8 +574,8 @@ Cada pedido es un documento de la colección `pedidos`:
   (`navbar.js` lee el documento del usuario).
 - **Ocultar el enlace no alcanza**, como advierte la consigna: al cargar `admin.html`,
   `js/pages/admin.js` vuelve a leer el rol en Firestore. Sin sesión redirige a
-  `login.html?volver=admin.html`; con rol cliente muestra "Acceso restringido" y el panel
-  nunca se dibuja, aunque se escriba la dirección a mano.
+  `login.html?volver=admin.html`; con rol cliente el panel nunca se dibuja, aunque se
+  escriba la dirección a mano (desde el Sprint 4, además, vuelve al inicio con un aviso).
 
 #### Gestión de productos (CRUD)
 
@@ -406,7 +615,7 @@ Cada pedido es un documento de la colección `pedidos`:
 #### Pruebas del panel
 
 - Sin sesión, `admin.html` redirige al login y, después de ingresar, vuelve al panel.
-- Con una cuenta cliente aparece "Acceso restringido" y el enlace del menú no se ve.
+- Con una cuenta cliente el enlace del menú no se ve y el panel no se muestra.
 - Con rol `admin` se ven el enlace y el panel con los productos.
 - Crear un producto con datos vacíos o con una ruta `C:\...` muestra los problemas; con
   datos válidos se crea `p13` y aparece en el catálogo.
@@ -447,18 +656,10 @@ desde la semana del 4/10 son módulos que leen los productos de Firestore.
 
 ### Usuarios de prueba
 
-Cuentas ficticias creadas exclusivamente para evaluar el proyecto (los correos no existen:
-Firebase Authentication no verifica el correo, así que alcanza con que tenga formato válido):
-
-| Nombre | Rol | Correo | Contraseña |
-| --- | --- | --- | --- |
-| Administrador de Prueba | Administrador | `admin.prueba@nivel99.uy` | `Prueba2026` |
-| Cliente de Prueba | Cliente | `cliente.prueba@nivel99.uy` | `Prueba2026` |
-| John Doe | Cliente | `johndoe@nivel99.uy` | `Prueba2026` |
-
-Con dos cuentas se puede comprobar que cada usuario ve únicamente sus propios pedidos en
-el perfil y que cada opinión aparece con el nombre de quien la escribió. Con la cuenta
-de administrador se accede a `admin.html`; con las de cliente aparece "Acceso restringido".
+Las cuentas están en *Cómo evaluar el proyecto*, al principio de este archivo. Con dos
+cuentas se puede comprobar que cada usuario ve únicamente sus propios pedidos en el perfil
+y que cada opinión aparece con el nombre de quien la escribió. Con la cuenta de
+administrador se accede a `admin.html`; con las de cliente se vuelve al inicio con un aviso.
 
 ### Pruebas de la semana del 20/9
 
@@ -740,9 +941,8 @@ validaciones y repaso integrador del sprint.
 
 ## Funcionalidades pendientes
 
-| Sprint | Pendiente |
-| --- | --- |
-| Sprint 4 | Reglas de seguridad, pruebas finales, documentación y publicación en GitHub Pages |
+Con el Sprint 4 se completaron todos los sprints del proyecto. Lo que podría sumarse más
+adelante está en *Posibles mejoras futuras*.
 
 ## Decisiones de diseño adoptadas
 
@@ -764,6 +964,10 @@ validaciones y repaso integrador del sprint.
   las semanas 1 a 4: HTML semántico, selectores, herencia, especificidad, modelo de caja,
   `box-sizing`, `position`, pseudo-clases, `::before` y los componentes de Bootstrap
   (contenedores, grilla de 12 columnas, utilidades, botones, cards, navbar y formularios).
+- **Mercado Pago como extra acotado.** La única pieza que excede los contenidos del curso
+  es el Worker de pagos, porque el Access Token no puede vivir en el navegador. El sitio
+  solo agrega `fetch()` y la lectura de parámetros de URL, y el pago se puede evitar
+  eligiendo "Coordinar con el equipo".
 
 ## Limitaciones conocidas
 
@@ -771,25 +975,43 @@ validaciones y repaso integrador del sprint.
   todavía no están optimizadas. En `assets/img/producto-placeholder.svg` hay una imagen
   local de reemplazo.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
-- La base de Firestore está en modo de prueba: las reglas de seguridad se configuran en el Sprint 4.
-- El rol se comprueba en el navegador. Para que un cliente tampoco pueda escribir en
-  Firestore por fuera del sitio hacen falta reglas de seguridad que validen el rol
-  (Sprint 4).
+- Las reglas de Firestore no comparan el precio guardado en un pedido con el de la
+  tienda, así que un pedido "Coordinar con el equipo" creado por fuera del sitio podría
+  tener un total falso; el equipo lo revisa antes de enviarlo. Con Mercado Pago no pasa,
+  porque el Worker cobra con los precios de `productos`.
+- Las reglas dejan que un cliente con sesión baje el stock (sin dejarlo negativo), porque
+  la compra lo descuenta desde el navegador. Un descuento sin compra solo se evitaría
+  confirmando el pedido desde un servidor.
 - El rol de administrador se asigna a mano desde la consola de Firebase.
 - El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro
   navegador, el carrito aparece vacío. Compartir el carrito entre dispositivos requiere
   la cuenta de usuario del Sprint 3.
 - La confirmación lee el stock y después escribe el lote: si dos personas compran el último
   producto en el mismo instante, las dos lecturas podrían ver stock disponible. Para
-  evitarlo del todo haría falta una transacción (`runTransaction()`) o reglas de seguridad
-  que rechacen stock negativo (Sprint 4).
-- El pago y el envío son simulados: el pedido queda en estado "pendiente".
-- `cargar-productos.html` sigue en el proyecto para poder repetir la carga; se elimina
-  antes de publicar (Sprint 4).
+  evitarlo del todo haría falta una transacción (`runTransaction()`); las reglas del
+  Sprint 4 ya impiden que el stock quede negativo.
+- El envío es simulado. El pago "Coordinar con el equipo" deja el pedido en estado
+  "pendiente" hasta que el equipo lo actualiza.
+- Mercado Pago funciona solo con credenciales de prueba. Al 26/10/2026, su entorno de
+  prueba rechaza los pagos de la cuenta vendedora usada (ver *Datos de prueba de
+  Mercado Pago*).
+- El checkout muestra "EduTechCourses" como vendedor, porque la tienda comparte la
+  aplicación de Mercado Pago de otro proyecto del profesorado.
+- El resultado del pago lo guarda el navegador al volver de Mercado Pago, después de
+  confirmarlo con el Worker. Las reglas no pueden consultar a Mercado Pago, así que antes
+  de enviar un pedido el equipo comprueba su número de operación en el panel de Mercado
+  Pago. Por la misma razón, si un pago queda "en proceso" y se aprueba más tarde, el
+  pedido no se actualiza solo. Para las dos cosas harían falta las notificaciones de
+  Mercado Pago (webhooks) y un servidor que escriba en Firestore.
 - Cada producto tiene por ahora una sola imagen en el arreglo `imagenes`.
 
 ## Posibles mejoras futuras
 
+- Recibir las notificaciones de Mercado Pago (webhooks) en el Worker para actualizar el
+  pago de los pedidos sin depender del navegador.
+- Crear una aplicación de Mercado Pago propia de Nivel 99, para que el checkout muestre el
+  nombre de la tienda.
+- Confirmar las compras con `runTransaction()` para evitar dos ventas del último producto.
 - Optimizar las fotografías de `assets/img/productos` y sumar más de una por producto
   para el carrusel.
 - Subir imágenes desde el panel administrativo con Cloudinary, como propone la Semana 11.
