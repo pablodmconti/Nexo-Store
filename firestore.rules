@@ -26,9 +26,11 @@ service cloud.firestore {
     }
 
     // El rol se lee del documento usuarios/{uid} de quien hace la
-    // operación, igual que en admin.js y navbar.js
+    // operación, igual que en admin.js y navbar.js. exists() evita un
+    // error con una cuenta que todavía no tiene ese documento.
     function esAdmin() {
       return haySesion()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
         && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.rol == "admin";
     }
 
@@ -102,15 +104,17 @@ service cloud.firestore {
     // ---------------------------------------------------------------
     // pedidos/{idPedido}
     // Cada cliente lee solo sus pedidos; el administrador, todos.
-    // Un pedido nuevo tiene que ser de quien lo crea y empezar como
-    // "pendiente", con el pago también pendiente. El estado lo cambia
-    // solo el administrador; el cliente solo registra su pago.
+    // Un pedido nuevo lo crea solo un cliente (una cuenta de
+    // administración no compra), a su nombre, como "pendiente" y con el
+    // pago también pendiente. El estado lo cambia solo el administrador;
+    // el cliente solo registra su pago.
     // ---------------------------------------------------------------
     match /pedidos/{idPedido} {
       allow read: if haySesion()
         && (resource.data.uid == request.auth.uid || esAdmin());
 
       allow create: if haySesion()
+        && !esAdmin()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.estado == "pendiente"
         && request.resource.data.pago.metodo in ["mercadopago", "coordinar"]

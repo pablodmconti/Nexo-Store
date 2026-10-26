@@ -14,6 +14,7 @@ import { auth } from "./firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerProductos } from "./modules/productos-firestore.js";
 import { confirmarPedido } from "./modules/pedidos.js";
+import { obtenerPerfilUsuario } from "./modules/usuarios.js";
 import { iniciarPago } from "./modules/mercadopago.js";
 
 /* Productos de la tienda, tal como llegan de Firestore */
@@ -242,15 +243,41 @@ function ocultarMensajeCompra() {
   mensajeCompra.className = "d-none";
 }
 
-/* El botón cambia según haya o no una sesión */
-onAuthStateChanged(auth, (usuario) => {
-  usuarioActual = usuario;
+/* true si la sesión es de una cuenta de administración (Sprint 4) */
+let esAdministrador = false;
 
-  if (usuario) {
-    btnConfirmar.textContent = "Confirmar compra";
-    ocultarMensajeCompra();
-  } else {
+const MENSAJE_ADMIN = `Las cuentas de administración no pueden comprar. Para probar una compra,
+  <a class="alert-link" href="login.html">ingresá con una cuenta de cliente</a>.`;
+
+/* El botón cambia según haya o no una sesión, y según el rol */
+onAuthStateChanged(auth, async (usuario) => {
+  usuarioActual = usuario;
+  esAdministrador = false;
+
+  if (!usuario) {
+    btnConfirmar.disabled = false;
     btnConfirmar.textContent = "Ingresá para comprar";
+    return;
+  }
+
+  btnConfirmar.disabled = false;
+  btnConfirmar.textContent = "Confirmar compra";
+  ocultarMensajeCompra();
+
+  /* El rol se lee en usuarios/{uid}, igual que en navbar.js. Las reglas
+     de Firestore rechazan igual un pedido creado por un administrador:
+     esto solo evita que lo intente y le explica por qué. */
+  try {
+    const perfil = await obtenerPerfilUsuario(usuario.uid);
+    esAdministrador = perfil !== null && perfil.rol === "admin";
+  } catch (error) {
+    console.error("No se pudo leer el rol del usuario:", error);
+  }
+
+  if (esAdministrador) {
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = "Solo para clientes";
+    mostrarMensajeCompra(MENSAJE_ADMIN, "info");
   }
 });
 
@@ -277,6 +304,12 @@ btnConfirmar.addEventListener("click", async () => {
        <a class="alert-link" href="login.html?volver=carrito.html">Ingresar o crear una cuenta</a>`,
       "warning"
     );
+    return;
+  }
+
+  /* Una cuenta de administración no compra (Sprint 4) */
+  if (esAdministrador) {
+    mostrarMensajeCompra(MENSAJE_ADMIN, "info");
     return;
   }
 

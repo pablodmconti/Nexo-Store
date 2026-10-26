@@ -182,7 +182,9 @@ una computadora:
 
 ### Para el administrador
 
-1. Al ingresar con una cuenta de rol `admin`, aparece **Administración** en el menú.
+1. Al ingresar con una cuenta de rol `admin`, aparece **Administración** en el menú. Las
+   cuentas de administración no pueden comprar: para probar una compra se usa una cuenta
+   de cliente.
 2. **Pestaña Productos:**
    - **+ Nuevo producto** abre el formulario. La imagen se indica con su ruta, por ejemplo
      `assets/img/productos/teclado.jpg`, o con una URL.
@@ -209,7 +211,7 @@ el valor `"admin"`, el que ya usaba el Sprint 3.
 | Acción | Cliente | Administrador |
 | --- | --- | --- |
 | Ver el catálogo, la ficha y las opiniones | Sí | Sí |
-| Comprar, pagar y ver sus pedidos en el perfil | Sí | Sí |
+| Comprar, pagar y ver sus pedidos en el perfil | Sí | No: el carrito lo explica y las reglas lo impiden |
 | Opinar sobre un producto | Sí | Sí |
 | Ver el enlace "Administración" en el menú | No | Sí |
 | Abrir `admin.html` | No: vuelve al inicio con un aviso | Sí |
@@ -223,6 +225,9 @@ el valor `"admin"`, el que ya usaba el Sprint 3.
   `admin.prueba@nivel99.uy`.
 - **El rol se consulta después de iniciar sesión.** `navbar.js` lo lee para mostrar el
   enlace, y `admin.js` lo vuelve a leer al abrir el panel.
+- **El administrador no compra.** Una cuenta de administración gestiona la tienda pero no
+  hace pedidos: en el carrito, "Confirmar compra" queda deshabilitado con una explicación, y
+  las reglas de Firestore rechazan un pedido creado por un administrador.
 - **Usuario sin permisos.** Si un cliente escribe `admin.html` en la barra de direcciones,
   `admin.js` lo redirige a `index.html?aviso=sin-permisos` y `base.js` muestra el aviso
   *"La sección Administración es solo para el equipo de Nivel 99"* (parámetros de URL,
@@ -255,7 +260,7 @@ servidor, aunque alguien escriba en la base por fuera del sitio.
 | --- | --- | --- |
 | `usuarios` | Cada persona su documento; el administrador, todos | Se crea solo como `cliente`; nadie puede cambiarse el rol |
 | `productos` | Cualquiera, sin iniciar sesión | Solo el administrador. Única excepción: al comprar, un cliente con sesión puede **bajar** el `stock` de un producto disponible, sin tocar otro campo y sin dejarlo en negativo |
-| `pedidos` | Cada cliente los suyos; el administrador, todos | Se crean con el `uid` propio, estado `pendiente` y pago pendiente. El estado lo cambia solo el administrador; el cliente solo registra el resultado del pago de su propio pedido |
+| `pedidos` | Cada cliente los suyos; el administrador, todos | Los crea solo un cliente (una cuenta de administración no compra), con su `uid`, estado `pendiente` y pago pendiente. El estado lo cambia solo el administrador; el cliente solo registra el resultado del pago de su propio pedido |
 | `valoraciones` | Cualquiera | Cada usuario solo su opinión, de 1 a 5 estrellas y de 10 a 500 caracteres. El administrador puede borrarlas |
 
 Todo lo que no está permitido en el archivo queda prohibido.
@@ -358,7 +363,7 @@ lado del sitio. El Worker excede los contenidos del curso y está comentado paso
   imágenes rotas. `perfil.html` y `admin.html` llevan al login.
 - A 375 px de ancho, ninguna página se desplaza hacia los costados.
 - Un cliente que escribe `admin.html` vuelve al inicio con el aviso; el administrador entra
-  al panel.
+  al panel. Con la cuenta de administración, el carrito no permite confirmar la compra.
 - Registro, inicio y cierre de sesión. Compra con "Coordinar con el equipo": el pedido
   aparece en el perfil y el stock baja.
 - El administrador crea y edita un producto y lo ve en el catálogo, cambia el estado de un
