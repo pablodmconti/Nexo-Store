@@ -172,6 +172,14 @@ function htmlMensaje(texto) {
 /* ---------------------------------------------------------------
    5. ARRANQUE DE LA INTERFAZ
    --------------------------------------------------------------- */
+
+/* Mensajes que otra página puede pedir mostrar con ?aviso=clave.
+   Solo se muestran los de esta lista: un texto escrito a mano en la
+   URL no llega nunca a la pantalla. */
+const AVISOS_URL = {
+  "sin-permisos": "La sección Administración es solo para el equipo de Nivel 99. Te trajimos al inicio."
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   const paginaActual = document.body.dataset.page;
 
@@ -188,6 +196,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* El número del carrito se muestra en todas las páginas */
   actualizarContadorCarrito();
+
+  /* Aviso que llega desde otra página por la URL (Semana 7), por
+     ejemplo index.html?aviso=sin-permisos cuando un cliente intenta
+     abrir admin.html */
+  const avisoUrl = new URLSearchParams(window.location.search).get("aviso");
+
+  if (AVISOS_URL[avisoUrl]) {
+    mostrarAviso(AVISOS_URL[avisoUrl]);
+  }
 
   /* El botón "Ingresar" y el menú de la cuenta los maneja
      js/modules/navbar.js desde el Sprint 3. */

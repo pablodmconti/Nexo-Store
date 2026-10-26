@@ -4,8 +4,8 @@ Panel administrativo
 
    1. PROTECCIÓN: al cargar la página se comprueba la sesión y se lee el
       rol en usuarios/{uid}. Sin sesión se va a login.html; con un rol
-      que no sea "admin" se muestra "Acceso restringido" y el panel
-      nunca aparece, aunque se escriba la dirección a mano.
+      que no sea "admin" se redirige al inicio con un aviso, y el panel
+      nunca aparece aunque se escriba la dirección a mano.
    2. PRODUCTOS: alta, edición, activar o desactivar y eliminación,
       con precio, stock, disponibilidad, destacado e imagen (ruta o
       URL como texto, Semana 11).
@@ -64,8 +64,11 @@ onAuthStateChanged(auth, async (usuario) => {
     return;
   }
 
+  /* Con sesión pero sin rol admin (un cliente que escribió admin.html
+     en la barra de direcciones): se lo lleva al inicio. El motivo
+     viaja como parámetro de URL y base.js lo muestra en un aviso. */
   if (!perfil || perfil.rol !== "admin") {
-    mostrarDenegado("Esta sección es solo para el equipo de administración de Nivel 99.");
+    window.location.href = "index.html?aviso=sin-permisos";
     return;
   }
 
