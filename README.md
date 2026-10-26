@@ -154,6 +154,44 @@ una computadora:
 6. El Worker de pagos acepta pedidos desde Live Server (`localhost` y `127.0.0.1`), así que
    el pago con Mercado Pago también se puede probar en local.
 
+## Manual breve de usuario
+
+### Para clientes
+
+1. **Explorar la tienda.** En **Catálogo** se puede buscar por nombre o descripción,
+   filtrar por categoría y ordenar por nombre o precio. **Ver producto** abre la ficha con
+   precio, stock, características y opiniones.
+2. **Armar el carrito.** **Agregar al carrito** está en las tarjetas y en la ficha. El
+   número junto al ícono del carrito muestra cuántas unidades hay. En **Carrito** se
+   cambian las cantidades con **+** y **−**, se quita un producto con **Eliminar** o se
+   vacía todo. El envío es gratis desde $ 2.000. El carrito queda guardado en el navegador.
+3. **Crear una cuenta o ingresar.** Con el botón **Ingresar** de la barra superior. En la
+   pestaña **Crear cuenta** se completan nombre y apellido, correo y contraseña (6
+   caracteres como mínimo, repetida para confirmarla).
+4. **Confirmar la compra.** En el carrito, elegir la forma de pago y tocar **Confirmar
+   compra**. Con **Coordinar con el equipo**, el pedido queda registrado y la tienda escribe
+   para coordinar el pago y la entrega. Con **Mercado Pago** se abre el checkout en modo de
+   prueba (ver *Datos de prueba de Mercado Pago*). Si un producto se agotó mientras tanto,
+   la tienda avisa y el carrito no se pierde.
+5. **Seguir los pedidos.** **Mi perfil** muestra los datos de la cuenta y el historial de
+   pedidos, con su estado y su forma de pago. Un pedido de Mercado Pago sin pagar ofrece
+   **Pagar con Mercado Pago**.
+6. **Opinar.** En la ficha de un producto, con la sesión iniciada: de 1 a 5 estrellas y un
+   comentario de 10 a 500 caracteres. Si se vuelve a opinar, se actualiza la opinión anterior.
+7. **Salir.** En el menú con el nombre del usuario, **Cerrar sesión**.
+
+### Para el administrador
+
+1. Al ingresar con una cuenta de rol `admin`, aparece **Administración** en el menú.
+2. **Pestaña Productos:**
+   - **+ Nuevo producto** abre el formulario. La imagen se indica con su ruta, por ejemplo
+     `assets/img/productos/teclado.jpg`, o con una URL.
+   - **Editar** carga los datos actuales del producto.
+   - **Desactivar** lo saca de la tienda sin borrarlo.
+   - **Eliminar** lo borra definitivamente, después de una confirmación.
+3. **Pestaña Pedidos:** se elige el nuevo estado en la lista y se toca **Actualizar**. Al
+   cancelar un pedido, el stock vuelve a los productos y el estado ya no se puede cambiar.
+
 ## Funcionalidades desarrolladas en el Sprint 4
 
 El último sprint no suma módulos grandes: cierra el proyecto con roles, panel
@@ -312,6 +350,7 @@ lado del sitio. El Worker excede los contenidos del curso y está comentado paso
 | Conservar las funcionalidades de los sprints anteriores | Catálogo, ficha, carrito, pedidos, perfil y opiniones |
 | Publicar la aplicación con un enlace | GitHub Pages: https://pablodmconti.github.io/Nexo-Store/ |
 | README actualizado con cuentas para la evaluación | *Cómo evaluar el proyecto* y esta sección |
+| Manual breve de usuario (resultado final del proyecto) | *Manual breve de usuario* |
 
 ### Pruebas del Sprint 4
 
