@@ -42,12 +42,10 @@ cobran dinero.
 - Pagar en una **ventana de incógnito**. Mercado Pago recomienda ingresar en el checkout
   con una cuenta compradora de prueba. Su usuario y contraseña no se publican en el
   repositorio; se entregan al docente si los solicita.
-- **Estado al 26/10/2026:** el entorno de prueba de Mercado Pago está rechazando los
-  pagos de esta cuenta vendedora, también en otro proyecto que usa las mismas
-  credenciales. Los mensajes son "Por motivos de seguridad, tu pago fue rechazado" o "No
-  pudimos procesar tu pago". El sitio registra el pedido, crea el pago y abre el checkout
-  correctamente; el rechazo ocurre dentro de Mercado Pago. Para recorrer una compra
-  completa se puede usar **Coordinar con el equipo**.
+- **Solo credenciales de prueba.** Antes de crear un pago, el Worker le pregunta a Mercado
+  Pago de qué cuenta es el token. Si no es una cuenta de prueba, no crea el pago, así el
+  sitio nunca cobra dinero real. Si el pago con Mercado Pago no se inicia, la compra se
+  puede completar con **Coordinar con el equipo**.
 
 ## Descripción del e-commerce
 
@@ -310,7 +308,9 @@ está marcada por defecto mientras el entorno de prueba de Mercado Pago rechace 
 secreto, que no puede ir en el JavaScript que descarga el navegador, y GitHub Pages no
 ejecuta código de servidor. Por eso hay un servidor de pagos chico: un **Worker de
 Cloudflare** (gratuito), con el código de `cloudflare/worker-pagos.js`, que guarda el
-token como secreto. El sitio nunca lo ve.
+token como secreto. El sitio nunca lo ve. Además, el Worker **solo acepta credenciales de
+prueba**: consulta a Mercado Pago de qué cuenta es el token y, si es una cuenta real, se
+niega a crear el pago.
 
 **Recorrido**
 
@@ -334,11 +334,14 @@ token como secreto. El sitio nunca lo ve.
 
 1. En Cloudflare, crear el Worker `nivel99-pagos`, pegar `cloudflare/worker-pagos.js` y
    desplegarlo.
-2. En *Settings → Variables and Secrets*, agregar el secreto `MP_ACCESS_TOKEN` con el
-   Access Token de prueba de Mercado Pago.
-3. Comprobar en https://nivel99-pagos.pablodmconti.workers.dev/ que diga
-   `"accessTokenConfigurado": true`.
-4. La dirección del Worker está en `URL_WORKER`, dentro de `js/modules/mercadopago.js`.
+2. En Mercado Pago Developers, en *Cuentas de prueba*, crear una cuenta **vendedora** y una
+   **compradora** de Uruguay. Con la vendedora, en una ventana privada, crear una
+   aplicación y copiar su Access Token.
+3. En *Settings → Variables and Secrets* del Worker, agregar ese token como secreto
+   `MP_ACCESS_TOKEN`.
+4. Comprobar en https://nivel99-pagos.pablodmconti.workers.dev/ que diga
+   `"accessTokenConfigurado": true` y `"modo": "prueba"`.
+5. La dirección del Worker está en `URL_WORKER`, dentro de `js/modules/mercadopago.js`.
 
 `fetch()` con JSON y la lectura de parámetros de URL (Semana 7) son lo único nuevo del
 lado del sitio. El Worker excede los contenidos del curso y está comentado paso a paso.
@@ -368,8 +371,8 @@ lado del sitio. El Worker excede los contenidos del curso y está comentado paso
   aparece en el perfil y el stock baja.
 - El administrador crea y edita un producto y lo ve en el catálogo, cambia el estado de un
   pedido y, al cancelarlo, el stock vuelve.
-- Mercado Pago: el pedido se registra, el Worker crea el pago y se abre el checkout. El
-  pago lo rechaza el entorno de prueba de Mercado Pago (ver *Limitaciones conocidas*).
+- Mercado Pago: el pedido se registra, el Worker crea el pago y se abre el checkout. Con un
+  token que no es de una cuenta de prueba, el Worker se niega a crear el pago.
 
 ## Funcionalidades desarrolladas en el Sprint 3
 
@@ -1051,11 +1054,8 @@ adelante está en *Posibles mejoras futuras*.
   Sprint 4 ya impiden que el stock quede negativo.
 - El envío es simulado. El pago "Coordinar con el equipo" deja el pedido en estado
   "pendiente" hasta que el equipo lo actualiza.
-- Mercado Pago funciona solo con credenciales de prueba. Al 26/10/2026, su entorno de
-  prueba rechaza los pagos de la cuenta vendedora usada (ver *Datos de prueba de
-  Mercado Pago*).
-- El checkout muestra "EduTechCourses" como vendedor, porque la tienda comparte la
-  aplicación de Mercado Pago de otro proyecto del profesorado.
+- Mercado Pago funciona solo con credenciales de prueba: con credenciales reales, el
+  Worker se niega a crear pagos.
 - El resultado del pago lo guarda el navegador al volver de Mercado Pago, después de
   confirmarlo con el Worker. Las reglas no pueden consultar a Mercado Pago, así que antes
   de enviar un pedido el equipo comprueba su número de operación en el panel de Mercado
@@ -1068,8 +1068,6 @@ adelante está en *Posibles mejoras futuras*.
 
 - Recibir las notificaciones de Mercado Pago (webhooks) en el Worker para actualizar el
   pago de los pedidos sin depender del navegador.
-- Crear una aplicación de Mercado Pago propia de Nivel 99, para que el checkout muestre el
-  nombre de la tienda.
 - Confirmar las compras con `runTransaction()` para evitar dos ventas del último producto.
 - Optimizar las fotografías de `assets/img/productos` y sumar más de una por producto
   para el carrusel.

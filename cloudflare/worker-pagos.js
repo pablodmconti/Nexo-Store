@@ -25,8 +25,14 @@
                              estado, el motivo y el importe, si corresponde
                              a ese pedido.
 
+   SOLO CREDENCIALES DE PRUEBA: Nivel 99 es un proyecto académico con
+   productos ficticios. Antes de crear un pago, el Worker le pregunta a
+   Mercado Pago de qué cuenta es el token y, si es una cuenta real, se
+   niega: con credenciales reales se cobraría dinero de verdad.
+
    Variables del Worker (Settings → Variables and Secrets):
-     MP_ACCESS_TOKEN  secreto, obligatorio: Access Token de PRUEBA.
+     MP_ACCESS_TOKEN  secreto, obligatorio: Access Token de una cuenta
+                      vendedora de PRUEBA (o una credencial TEST-...).
      MONEDA           opcional: moneda del cobro. Si no se define, "UYU".
    ===================================================================== */
 
@@ -41,6 +47,30 @@ const PATRONES_PERMITIDOS = [/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/];
 /* Mismas condiciones de envío que base.js */
 const MONTO_ENVIO_GRATIS = 2000;
 const COSTO_ENVIO = 290;
+
+/* ¿El token es de prueba? Las credenciales viejas de prueba empiezan
+   con TEST-. Las nuevas empiezan con APP_USR- igual que las reales:
+   para distinguirlas se consulta la cuenta dueña del token, y las
+   cuentas de prueba de Mercado Pago tienen la etiqueta "test_user" y
+   un apodo que empieza con TEST. */
+async function credencialesDePrueba(env) {
+  if (env.MP_ACCESS_TOKEN.startsWith("TEST-")) {
+    return true;
+  }
+
+  const respuesta = await fetch("https://api.mercadopago.com/users/me", {
+    headers: { "Authorization": `Bearer ${env.MP_ACCESS_TOKEN}` }
+  });
+
+  if (!respuesta.ok) {
+    return false;
+  }
+
+  const cuenta = await respuesta.json().catch(() => ({}));
+  const etiquetas = cuenta.tags || [];
+
+  return etiquetas.includes("test_user") || String(cuenta.nickname || "").startsWith("TEST");
+}
 
 function origenPermitido(origen) {
   if (!origen) return false;
@@ -105,6 +135,12 @@ async function crearPago(request, env, origen) {
 
   if (!destino || !origenPermitido(destino.origin)) {
     return responder({ error: "La página de retorno no está permitida." }, 400, origen);
+  }
+
+  /* 0. Nunca con credenciales reales */
+  if (!(await credencialesDePrueba(env))) {
+    console.log("Se rechazó crear un pago: el Access Token no es de una cuenta de prueba.");
+    return responder({ error: "El servidor de pagos solo funciona con credenciales de prueba de Mercado Pago." }, 403, origen);
   }
 
   /* 1. El pedido se lee CON el token del usuario: las reglas de
@@ -289,9 +325,18 @@ export default {
     }
 
     if (request.method === "GET" && url.pathname === "/") {
+      let modo = "sin Access Token";
+
+      if (env.MP_ACCESS_TOKEN) {
+        modo = (await credencialesDePrueba(env))
+          ? "prueba"
+          : "REAL: el Worker no crea pagos con estas credenciales";
+      }
+
       return responder({
         servicio: "Servidor de pagos de Nivel 99",
         accessTokenConfigurado: Boolean(env.MP_ACCESS_TOKEN),
+        modo: modo,
         moneda: env.MONEDA || "UYU"
       }, 200, origen);
     }
