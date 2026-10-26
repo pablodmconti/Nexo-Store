@@ -26,7 +26,8 @@ import {
 import {
   ESTADOS_PEDIDO,
   obtenerTodosLosPedidos,
-  cambiarEstadoPedido
+  cambiarEstadoPedido,
+  describirPago
 } from "../modules/pedidos.js";
 
 let productos = [];
@@ -439,6 +440,13 @@ function htmlPedidoAdmin(pedido) {
     opciones += `<option value="${estado}" ${seleccionado}>${estado}</option>`;
   });
 
+  /* Pago (Sprint 4): forma, estado y número de operación simulado */
+  let pago = describirPago(pedido);
+
+  if (pedido.pago && pedido.pago.idOperacion) {
+    pago += ` · ${pedido.pago.idOperacion}`;
+  }
+
   const fecha = pedido.fecha.toDate().toLocaleString("es-UY", {
     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
   });
@@ -456,6 +464,7 @@ function htmlPedidoAdmin(pedido) {
         </header>
         <ul class="small mb-2">${filas}</ul>
         <p class="linea-pedido total-pedido"><span>Total</span><span>${formatearPrecio(pedido.total)}</span></p>
+        <p class="linea-pago mb-2">${pago}</p>
         <div class="d-flex gap-2 mt-2">
           <label class="visually-hidden" for="estado-${pedido.id}">Estado del pedido</label>
           <select class="form-select form-select-sm" id="estado-${pedido.id}" ${deshabilitado}>${opciones}</select>

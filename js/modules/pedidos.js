@@ -12,7 +12,9 @@ Pedidos en Cloud Firestore
        │                    cantidad, subtotal }, ...]
        ├─ subtotal, envio, total
        ├─ fecha:         momento de la confirmación
-       └─ estado:        "pendiente"
+       ├─ estado:        "pendiente"
+       └─ pago:          { metodo, estado, idOperacion, fecha }
+                         (Sprint 4: "mercadopago" o "coordinar")
 
    Este archivo SOLO habla con la base de datos: no toca el HTML.
    ===================================================================== */
@@ -24,20 +26,55 @@ import {
   getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
   writeBatch
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ---------------------------------------------------------------
+   0. FORMAS DE PAGO (Sprint 4)
+   ---------------------------------------------------------------
+   Textos para mostrar el pago en el perfil y en el panel. Los pedidos
+   anteriores al Sprint 4 no tienen el campo pago: se muestran como
+   "A coordinar con el equipo".
+   --------------------------------------------------------------- */
+export const METODOS_PAGO = {
+  mercadopago: "Mercado Pago (simulado)",
+  coordinar: "A coordinar con el equipo"
+};
+
+export const ESTADOS_PAGO = {
+  pendiente: "pago pendiente",
+  aprobado: "pago aprobado",
+  rechazado: "pago rechazado"
+};
+
+/* Ejemplo: "Mercado Pago (simulado) · pago aprobado" */
+export function describirPago(pedido) {
+  if (!pedido.pago) {
+    return METODOS_PAGO.coordinar;
+  }
+
+  let texto = METODOS_PAGO[pedido.pago.metodo];
+
+  if (pedido.pago.metodo === "mercadopago") {
+    texto += ` · ${ESTADOS_PAGO[pedido.pago.estado]}`;
+  }
+
+  return texto;
+}
+
+/* ---------------------------------------------------------------
    1. CONFIRMAR UNA COMPRA
    ---------------------------------------------------------------
-   Recibe el usuario autenticado y el carrito de LocalStorage.
+   Recibe el usuario autenticado, el carrito de LocalStorage y la forma
+   de pago elegida ("mercadopago" o "coordinar").
    Devuelve un objeto con el resultado:
      { confirmado: true,  idPedido, total }
      { confirmado: false, problemas: ["...", "..."] }
    Si falla la conexión con Firestore, el error sube a quien la llamó.
    --------------------------------------------------------------- */
-export async function confirmarPedido(usuario, carrito) {
+export async function confirmarPedido(usuario, carrito, metodoPago) {
   const items = [];
   const problemas = [];
 
@@ -99,7 +136,11 @@ export async function confirmarPedido(usuario, carrito) {
     envio: envio,
     total: total,
     fecha: new Date(),
-    estado: "pendiente"
+    estado: "pendiente",
+    pago: {
+      metodo: metodoPago,
+      estado: "pendiente"
+    }
   });
 
   items.forEach(({ producto, cantidad }) => {
@@ -182,4 +223,35 @@ export async function cambiarEstadoPedido(pedido, nuevoEstado) {
   }
 
   await lote.commit();
+}
+
+/* ---------------------------------------------------------------
+   4. PAGO SIMULADO CON MERCADO PAGO (Sprint 4)
+   --------------------------------------------------------------- */
+
+/* Un pedido a partir de su id, o null si no existe.
+   Las reglas de Firestore solo dejan leerlo a su dueño (y al admin):
+   con el id de un pedido ajeno, getDoc() falla con permission-denied. */
+export async function obtenerPedido(idPedido) {
+  const snapshot = await getDoc(doc(db, "pedidos", idPedido));
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return { id: snapshot.id, ...snapshot.data() };
+}
+
+/* Guarda en el pedido el resultado que devolvió la pasarela.
+   updateDoc() cambia SOLO el campo pago: las reglas de Firestore
+   rechazan que un cliente toque el estado, el total o los productos. */
+export async function registrarPago(idPedido, estadoPago, idOperacion) {
+  await updateDoc(doc(db, "pedidos", idPedido), {
+    pago: {
+      metodo: "mercadopago",
+      estado: estadoPago,
+      idOperacion: idOperacion,
+      fecha: new Date()
+    }
+  });
 }

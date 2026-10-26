@@ -49,6 +49,23 @@ service cloud.firestore {
         && request.resource.data.stock < resource.data.stock;
     }
 
+    // Lo que hace registrarPago() (pedidos.js) al volver de la pasarela
+    // simulada: el dueño de un pedido pendiente con Mercado Pago cambia
+    // SOLO el campo pago, a "aprobado" o "rechazado", con un número de
+    // operación SIM-123... Un pago aprobado ya no se puede cambiar.
+    function registraPagoSimulado() {
+      return haySesion()
+        && resource.data.uid == request.auth.uid
+        && resource.data.estado == "pendiente"
+        && resource.data.pago.metodo == "mercadopago"
+        && resource.data.pago.estado != "aprobado"
+        && soloCambia(["pago"])
+        && request.resource.data.pago.metodo == "mercadopago"
+        && request.resource.data.pago.estado in ["aprobado", "rechazado"]
+        && request.resource.data.pago.idOperacion is string
+        && request.resource.data.pago.idOperacion.matches("SIM-[0-9]+");
+    }
+
     // ---------------------------------------------------------------
     // usuarios/{uid}
     // Cada persona lee solo su documento (el administrador, todos).
@@ -86,7 +103,8 @@ service cloud.firestore {
     // pedidos/{idPedido}
     // Cada cliente lee solo sus pedidos; el administrador, todos.
     // Un pedido nuevo tiene que ser de quien lo crea y empezar como
-    // "pendiente". El estado lo cambia solo el administrador.
+    // "pendiente", con el pago también pendiente. El estado lo cambia
+    // solo el administrador; el cliente solo registra su pago.
     // ---------------------------------------------------------------
     match /pedidos/{idPedido} {
       allow read: if haySesion()
@@ -94,9 +112,11 @@ service cloud.firestore {
 
       allow create: if haySesion()
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.estado == "pendiente";
+        && request.resource.data.estado == "pendiente"
+        && request.resource.data.pago.metodo in ["mercadopago", "coordinar"]
+        && request.resource.data.pago.estado == "pendiente";
 
-      allow update: if esAdmin();
+      allow update: if esAdmin() || registraPagoSimulado();
 
       allow delete: if false;
     }

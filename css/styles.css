@@ -25,6 +25,7 @@
    19. Características en la ficha del producto (Sprint 3)
    20. Compra confirmada, pedidos y opiniones (Sprint 3)
    21. Panel administrativo (Sprint 3)
+   22. Forma de pago y pago simulado (Sprint 4)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -1228,4 +1229,62 @@ img {
 
 .tabla-admin .btn {
   margin-left: 0.25rem;
+}
+
+/* ---------------------------------------------------------------
+   22. FORMA DE PAGO Y PAGO SIMULADO (Sprint 4)
+   --------------------------------------------------------------- */
+
+/* Opciones de pago del resumen del carrito */
+.metodos-pago {
+  margin: 1rem 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.metodos-pago .form-check {
+  margin-bottom: 0.6rem;
+}
+
+/* Tarjeta de la pasarela: el borde punteado y el cartel amarillo
+   dejan claro que no es un pago real */
+.pasarela-simulada {
+  max-width: 520px;
+  margin: 0 auto;
+  background-color: var(--color-fondo);
+  border: 2px dashed var(--color-borde);
+  border-radius: var(--radio-grande);
+  box-shadow: var(--sombra-suave);
+  padding: 2rem 1.5rem;
+}
+
+.etiqueta-simulacion {
+  display: inline-block;
+  background-color: #fff3cd;
+  color: #664d03;
+  font-family: var(--fuente-titulos);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+}
+
+.resumen-pago {
+  background-color: var(--color-superficie);
+  border-radius: var(--radio-medio);
+  padding: 1rem 1.25rem;
+}
+
+/* Variante roja del ícono de la compra confirmada */
+.icono-rechazado {
+  background-color: #f8d7da;
+  color: #b02a37;
+}
+
+/* Línea con la forma de pago en las tarjetas de pedidos */
+.linea-pago {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
 }

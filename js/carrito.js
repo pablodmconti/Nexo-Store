@@ -6,6 +6,8 @@ Carrito de compras
    imagen y el stock de cada producto se toman de Cloud Firestore, así
    el carrito muestra siempre la información actual de la tienda.
    Desde el 11/10 el botón "Confirmar compra" registra el pedido.
+   Desde el Sprint 4 se elige la forma de pago: con Mercado Pago el
+   pedido se registra y se pasa a la pasarela simulada (pago.html).
    ===================================================================== */
 
 import { auth } from "./firebase/config.js";
@@ -277,6 +279,9 @@ btnConfirmar.addEventListener("click", async () => {
     return;
   }
 
+  /* Forma de pago elegida: el botón de radio marcado del grupo */
+  const metodoPago = document.querySelector('input[name="metodoPago"]:checked').value;
+
   btnConfirmar.disabled = true;
   btnConfirmar.textContent = "Confirmando compra…";
 
@@ -285,7 +290,7 @@ btnConfirmar.addEventListener("click", async () => {
   try {
     /* 2. pedidos.js revisa stock y disponibilidad actuales, calcula el
           total, guarda el pedido y descuenta el stock en un solo lote */
-    resultado = await confirmarPedido(usuarioActual, obtenerCarrito());
+    resultado = await confirmarPedido(usuarioActual, obtenerCarrito(), metodoPago);
   } catch (error) {
     console.error("Error al confirmar la compra:", error);
     mostrarMensajeCompra("No pudimos registrar la compra. Revisá tu conexión y volvé a intentar: tu carrito sigue guardado.", "danger");
@@ -320,6 +325,14 @@ btnConfirmar.addEventListener("click", async () => {
 
   /* 4. Todo salió bien: recién ahora se vacía el carrito */
   guardarCarrito([]);
+
+  /* 5. Con Mercado Pago el pedido ya quedó reservado y se pasa a la
+        pasarela simulada, con el id del pedido en la URL (Semana 7) */
+  if (metodoPago === "mercadopago") {
+    window.location.href = `pago.html?pedido=${resultado.idPedido}`;
+    return;
+  }
+
   mostrarCompraConfirmada(resultado);
 });
 

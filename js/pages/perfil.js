@@ -15,7 +15,7 @@ Página privada perfil.html
 import { auth } from "../firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerPerfilUsuario } from "../modules/usuarios.js";
-import { obtenerPedidosDeUsuario } from "../modules/pedidos.js";
+import { obtenerPedidosDeUsuario, describirPago } from "../modules/pedidos.js";
 
 const perfilCargando = document.querySelector("#perfilCargando");
 const perfilContenido = document.querySelector("#perfilContenido");
@@ -81,6 +81,15 @@ function htmlPedido(pedido) {
     envio = "Gratis";
   }
 
+  /* Forma de pago (Sprint 4). Un pedido con Mercado Pago que todavía
+     no se pagó ofrece volver a la pasarela simulada. */
+  let botonPagar = "";
+
+  if (pedido.pago && pedido.pago.metodo === "mercadopago"
+      && pedido.pago.estado !== "aprobado" && pedido.estado === "pendiente") {
+    botonPagar = `<a class="btn btn-primary btn-sm mt-3" href="pago.html?pedido=${pedido.id}">Pagar con Mercado Pago</a>`;
+  }
+
   return `
     <div class="col-12">
       <article class="tarjeta-pedido">
@@ -94,6 +103,8 @@ function htmlPedido(pedido) {
         <ul class="lista-pedido">${filas}</ul>
         <p class="linea-pedido texto-suave small mb-1"><span>Envío</span><span>${envio}</span></p>
         <p class="linea-pedido total-pedido mb-0"><span>Total</span><span>${formatearPrecio(pedido.total)}</span></p>
+        <p class="linea-pago mt-2 mb-0">${describirPago(pedido)}</p>
+        ${botonPagar}
       </article>
     </div>
   `;

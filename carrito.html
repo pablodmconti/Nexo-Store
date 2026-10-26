@@ -101,6 +101,27 @@
                             <p class="linea-resumen total-resumen">
                                 <span>Total</span><span id="resumenTotal">$ 0</span>
                             </p>
+                            <!-- Forma de pago (Sprint 4). Mercado Pago es una simulación:
+                                 no se piden datos de tarjeta ni se cobra dinero -->
+                            <fieldset class="metodos-pago">
+                                <legend class="h6 mb-2">Forma de pago</legend>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="metodoPago"
+                                        id="pagoMercadoPago" value="mercadopago" checked>
+                                    <label class="form-check-label" for="pagoMercadoPago">
+                                        Mercado Pago <span class="badge text-bg-warning">Simulado</span>
+                                        <span class="d-block small texto-suave">Pagás en el momento, sin salir de la tienda.</span>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="metodoPago"
+                                        id="pagoCoordinar" value="coordinar">
+                                    <label class="form-check-label" for="pagoCoordinar">
+                                        Coordinar con el equipo
+                                        <span class="d-block small texto-suave">Transferencia o efectivo al recibir.</span>
+                                    </label>
+                                </div>
+                            </fieldset>
                             <button class="btn btn-primary w-100" type="button" id="btnConfirmar">
                                 Confirmar compra
                             </button>
@@ -108,7 +129,7 @@
                             <div class="d-none" id="mensajeCompra" role="alert"></div>
                             <p class="nota-resumen mb-0">Envío simulado: gratis a partir de $ 2.000 y $ 290 a
                                 todo el país por debajo de ese monto. Para confirmar la compra tenés que iniciar
-                                sesión; el pago se coordina con el equipo de Nivel 99.</p>
+                                sesión. El pago con Mercado Pago es una simulación del proyecto: no se cobra dinero.</p>
                         </aside>
                     </div>
                 </div>
