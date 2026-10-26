@@ -22,10 +22,9 @@
    16. Avisos de los próximos sprints
    17. Carrito de compras
    18. Cuenta de usuario: login, perfil y navbar (Sprint 3)
-   19. Carga inicial de productos (Sprint 3)
-   20. Características en la ficha del producto (Sprint 3)
-   21. Compra confirmada, pedidos y opiniones (Sprint 3)
-   22. Panel administrativo (Sprint 3)
+   19. Características en la ficha del producto (Sprint 3)
+   20. Compra confirmada, pedidos y opiniones (Sprint 3)
+   21. Panel administrativo (Sprint 3)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -1064,15 +1063,7 @@ img {
 }
 
 /* ---------------------------------------------------------------
-   19. CARGA INICIAL DE PRODUCTOS (Sprint 3)
-   Página interna cargar-productos.html.
-   --------------------------------------------------------------- */
-.tarjeta-carga {
-  max-width: 640px;
-}
-
-/* ---------------------------------------------------------------
-   20. CARACTERÍSTICAS EN LA FICHA DEL PRODUCTO (Sprint 3)
+   19. CARACTERÍSTICAS EN LA FICHA DEL PRODUCTO (Sprint 3)
    --------------------------------------------------------------- */
 .titulo-caracteristicas {
   font-family: var(--fuente-titulos);
@@ -1090,7 +1081,7 @@ img {
 }
 
 /* ---------------------------------------------------------------
-   21. COMPRA CONFIRMADA, PEDIDOS Y OPINIONES (Sprint 3)
+   20. COMPRA CONFIRMADA, PEDIDOS Y OPINIONES (Sprint 3)
    --------------------------------------------------------------- */
 
 /* Pantalla final del carrito */
@@ -1213,7 +1204,7 @@ img {
 }
 
 /* ---------------------------------------------------------------
-   22. PANEL ADMINISTRATIVO (Sprint 3)
+   21. PANEL ADMINISTRATIVO (Sprint 3)
    --------------------------------------------------------------- */
 .formulario-producto {
   background-color: var(--color-superficie);

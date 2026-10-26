@@ -1,9 +1,11 @@
 /* =====================================================================
 Datos de los productos de la tienda (semilla)
    ---------------------------------------------------------------------
-   Desde el Sprint 3 este arreglo ya NO es la fuente del catálogo: es la
-   semilla que cargar-productos.html sube a la colección "productos" de
-   Cloud Firestore con writeBatch().
+   Desde el Sprint 3 este arreglo ya NO es la fuente del catálogo: fue la
+   semilla que cargar-productos.html subió a la colección "productos" de
+   Cloud Firestore con writeBatch(). En el Sprint 4 esa página se retiró
+   antes de publicar (sigue en el historial de git) y ninguna página
+   carga este archivo: queda como respaldo de los datos iniciales.
 
    export permite importarlo desde otro archivo:
      import { productos } from "../productos.js";
