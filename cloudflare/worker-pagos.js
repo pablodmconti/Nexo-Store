@@ -22,7 +22,8 @@
                              como dirección de retorno.
      GET  /verificar-pago?pago=123&pedido=ABC
                              Consulta el pago en Mercado Pago y devuelve su
-                             estado e importe, si corresponde a ese pedido.
+                             estado, el motivo y el importe, si corresponde
+                             a ese pedido.
 
    Variables del Worker (Settings → Variables and Secrets):
      MP_ACCESS_TOKEN  secreto, obligatorio: Access Token de PRUEBA.
@@ -268,6 +269,7 @@ async function verificarPago(url, env, origen) {
   return responder({
     id: String(pago.id),
     estado: pago.status,              // approved, rejected, pending, in_process...
+    detalle: pago.status_detail,      // motivo, por ejemplo cc_rejected_high_risk
     importe: pago.transaction_amount,
     moneda: pago.currency_id
   }, 200, origen);

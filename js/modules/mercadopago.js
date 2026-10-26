@@ -54,8 +54,9 @@ export async function iniciarPago(usuario, idPedido) {
 }
 
 /* Pregunta el estado REAL de un pago a Mercado Pago, a través del
-   Worker. Devuelve { id, estado, importe, moneda }; estado es el de
-   Mercado Pago: "approved", "rejected", "pending", "in_process"... */
+   Worker. Devuelve { id, estado, detalle, importe, moneda }; estado es
+   el de Mercado Pago: "approved", "rejected", "pending", "in_process"...
+   y detalle explica el motivo (por ejemplo "cc_rejected_high_risk"). */
 export async function consultarPago(idPago, idPedido) {
   const ruta = `/verificar-pago?pago=${encodeURIComponent(idPago)}&pedido=${encodeURIComponent(idPedido)}`;
   return await pedirAlWorker(ruta, { method: "GET" });

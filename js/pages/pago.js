@@ -59,6 +59,17 @@ function numeroPedido(id) {
   return id.slice(0, 6).toUpperCase();
 }
 
+/* Motivos de rechazo más comunes (status_detail de Mercado Pago) */
+const MOTIVOS_RECHAZO = {
+  cc_rejected_high_risk: "Mercado Pago lo rechazó por prevención de fraude. En modo de prueba pasa si en el checkout no se ingresó con la cuenta compradora de prueba.",
+  cc_rejected_insufficient_amount: "La tarjeta no tiene fondos suficientes.",
+  cc_rejected_bad_filled_security_code: "El código de seguridad no es correcto.",
+  cc_rejected_bad_filled_date: "La fecha de vencimiento no es correcta.",
+  cc_rejected_bad_filled_other: "Algún dato de la tarjeta no es correcto.",
+  cc_rejected_call_for_authorize: "La tarjeta pide autorizar el pago con el banco.",
+  cc_rejected_other_reason: "La tarjeta rechazó el pago."
+};
+
 /* Estados de Mercado Pago → estados del pago del pedido */
 function traducirEstado(estadoMercadoPago) {
   if (estadoMercadoPago === "approved") {
@@ -118,7 +129,7 @@ btnIrAPagar.addEventListener("click", async () => {
 /* ---------------------------------------------------------------
    3. RESULTADO DEL PAGO
    --------------------------------------------------------------- */
-function mostrarResultado(pedido, estado) {
+function mostrarResultado(pedido, estado, detalle) {
   const icono = document.querySelector("#pagoIcono");
   const titulo = document.querySelector("#pagoTitulo");
   const texto = document.querySelector("#pagoTexto");
@@ -138,7 +149,8 @@ function mostrarResultado(pedido, estado) {
     icono.textContent = "✕";
     icono.className = "icono-confirmada icono-rechazado";
     titulo.textContent = "El pago fue rechazado";
-    texto.textContent = `Tu pedido #${numero} sigue reservado. Podés intentar de nuevo con otro medio de pago o pagarlo más tarde desde tu perfil.`;
+    const motivo = MOTIVOS_RECHAZO[detalle] || "";
+    texto.textContent = `${motivo} Tu pedido #${numero} sigue reservado. Podés intentar de nuevo con otro medio de pago o pagarlo más tarde desde tu perfil.`.trim();
     botones.innerHTML = `
       <a class="btn btn-primary" href="pago.html?pedido=${pedido.id}">Intentar de nuevo</a>
       <a class="btn btn-outline-primary" href="perfil.html">Ver mis pedidos</a>
@@ -257,5 +269,5 @@ onAuthStateChanged(auth, async (usuario) => {
      página, no se vuelven a procesar */
   window.history.replaceState(null, "", `pago.html?pedido=${idPedido}`);
 
-  mostrarResultado(pedido, estado);
+  mostrarResultado(pedido, estado, consulta.detalle);
 });
