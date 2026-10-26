@@ -81,12 +81,12 @@ function htmlPedido(pedido) {
     envio = "Gratis";
   }
 
-  /* Forma de pago (Sprint 4). Un pedido con Mercado Pago que todavía
-     no se pagó ofrece volver a la pasarela simulada. */
+  /* Forma de pago (Sprint 4). Un pedido con Mercado Pago sin pagar
+     (o con el pago rechazado) ofrece volver a intentarlo. */
   let botonPagar = "";
 
-  if (pedido.pago && pedido.pago.metodo === "mercadopago"
-      && pedido.pago.estado !== "aprobado" && pedido.estado === "pendiente") {
+  if (pedido.pago && pedido.pago.metodo === "mercadopago" && pedido.estado === "pendiente"
+      && (pedido.pago.estado === "pendiente" || pedido.pago.estado === "rechazado")) {
     botonPagar = `<a class="btn btn-primary btn-sm mt-3" href="pago.html?pedido=${pedido.id}">Pagar con Mercado Pago</a>`;
   }
 

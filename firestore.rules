@@ -49,11 +49,11 @@ service cloud.firestore {
         && request.resource.data.stock < resource.data.stock;
     }
 
-    // Lo que hace registrarPago() (pedidos.js) al volver de la pasarela
-    // simulada: el dueño de un pedido pendiente con Mercado Pago cambia
-    // SOLO el campo pago, a "aprobado" o "rechazado", con un número de
-    // operación SIM-123... Un pago aprobado ya no se puede cambiar.
-    function registraPagoSimulado() {
+    // Lo que hace registrarPago() (pedidos.js) al volver de Mercado
+    // Pago: el dueño de un pedido pendiente con Mercado Pago cambia SOLO
+    // el campo pago, con el resultado y el número de pago (payment_id).
+    // Un pago aprobado ya no se puede cambiar.
+    function registraPagoMercadoPago() {
       return haySesion()
         && resource.data.uid == request.auth.uid
         && resource.data.estado == "pendiente"
@@ -61,9 +61,9 @@ service cloud.firestore {
         && resource.data.pago.estado != "aprobado"
         && soloCambia(["pago"])
         && request.resource.data.pago.metodo == "mercadopago"
-        && request.resource.data.pago.estado in ["aprobado", "rechazado"]
+        && request.resource.data.pago.estado in ["aprobado", "rechazado", "en proceso"]
         && request.resource.data.pago.idOperacion is string
-        && request.resource.data.pago.idOperacion.matches("SIM-[0-9]+");
+        && request.resource.data.pago.idOperacion.matches("[0-9]+");
     }
 
     // ---------------------------------------------------------------
@@ -116,7 +116,7 @@ service cloud.firestore {
         && request.resource.data.pago.metodo in ["mercadopago", "coordinar"]
         && request.resource.data.pago.estado == "pendiente";
 
-      allow update: if esAdmin() || registraPagoSimulado();
+      allow update: if esAdmin() || registraPagoMercadoPago();
 
       allow delete: if false;
     }

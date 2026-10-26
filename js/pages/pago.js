@@ -1,33 +1,42 @@
 /* =====================================================================
-Pago simulado con Mercado Pago (Sprint 4)
+Pago con Mercado Pago (Sprint 4)
    ---------------------------------------------------------------------
 
-   Imita el recorrido de Mercado Pago (Checkout Pro) sin conectarse a
-   Mercado Pago:
+   Recorrido de Checkout Pro, con credenciales de prueba:
 
      1. carrito.js registra el pedido y lleva a pago.html?pedido=ID
-     2. Esta página muestra la "pasarela" con el total del pedido
-     3. Cada botón vuelve a esta misma página con el resultado en la URL:
-          pago.html?pedido=ID&estado=aprobado&operacion=SIM-1761500000000
-        Mercado Pago real vuelve a la tienda de la misma forma, con
-        parámetros como external_reference, status y payment_id.
-     4. Con el estado en la URL, se guarda el resultado en el campo
-        pago del pedido y se muestra el mensaje final.
+        (el perfil también trae acá los pedidos que quedaron sin pagar)
+     2. Esta página muestra el resumen. "Ir a Mercado Pago" le pide al
+        Worker de Cloudflare la dirección de pago y lleva al usuario al
+        sitio de Mercado Pago.
+     3. Al terminar, Mercado Pago vuelve a pago.html con el resultado
+        en la URL (Semana 7):
+          ?payment_id=123&status=approved&external_reference=ID...
+     4. La página NO le cree a la URL: le pide al Worker que consulte
+        ese pago en Mercado Pago, guarda el resultado en el pedido
+        (campo pago) y muestra el mensaje final.
 
-   Una integración real necesita un servidor que guarde la clave
-   privada de Mercado Pago (Access Token). Un sitio publicado en
-   GitHub Pages no tiene servidor, por eso el pago se simula.
+   El Access Token de Mercado Pago vive solo en el Worker
+   (cloudflare/worker-pagos.js): el navegador nunca lo ve.
    ===================================================================== */
 
 import { auth } from "../firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerPedido, registrarPago } from "../modules/pedidos.js";
+import { iniciarPago, consultarPago } from "../modules/mercadopago.js";
 
-/* Parámetros de la URL (Semana 7) */
+/* Parámetros de la URL. Desde el carrito o el perfil llega ?pedido=ID;
+   desde Mercado Pago, el mismo id viene en external_reference */
 const parametros = new URLSearchParams(window.location.search);
-const idPedido = parametros.get("pedido");
-const estadoUrl = parametros.get("estado");       // "aprobado", "rechazado" o null
-const operacionUrl = parametros.get("operacion"); // número de operación simulado
+const idPedido = parametros.get("pedido") || parametros.get("external_reference");
+
+/* payment_id solo existe a la vuelta de Mercado Pago. Si la persona
+   volvió sin pagar, Mercado Pago lo manda con el texto "null". */
+const idPago = parametros.get("payment_id");
+const volvioDeMercadoPago = idPago !== null;
+const hayPago = volvioDeMercadoPago && idPago !== "null";
+
+let usuarioActual = null;
 
 /* ---------------------------------------------------------------
    1. AYUDAS PARA LA INTERFAZ
@@ -35,7 +44,7 @@ const operacionUrl = parametros.get("operacion"); // número de operación simul
 
 /* La página tiene cuatro bloques y se ve uno solo a la vez */
 function mostrarSeccion(idSeccion) {
-  ["pagoCargando", "pagoError", "pagoPasarela", "pagoResultado"].forEach((id) => {
+  ["pagoCargando", "pagoError", "pagoResumen", "pagoResultado"].forEach((id) => {
     document.querySelector(`#${id}`).classList.toggle("d-none", id !== idSeccion);
   });
 }
@@ -50,19 +59,23 @@ function numeroPedido(id) {
   return id.slice(0, 6).toUpperCase();
 }
 
-/* Solo se acepta un número de operación con la forma SIM-123456...
-   (las reglas de Firestore hacen el mismo control) */
-function operacionValida(texto) {
-  return texto !== null
-    && texto.startsWith("SIM-")
-    && texto.length > 4
-    && Number.isInteger(Number(texto.slice(4)));
+/* Estados de Mercado Pago → estados del pago del pedido */
+function traducirEstado(estadoMercadoPago) {
+  if (estadoMercadoPago === "approved") {
+    return "aprobado";
+  }
+
+  if (estadoMercadoPago === "rejected" || estadoMercadoPago === "cancelled") {
+    return "rechazado";
+  }
+
+  return "en proceso"; // pending, in_process...
 }
 
 /* ---------------------------------------------------------------
-   2. PASARELA SIMULADA
+   2. RESUMEN E INICIO DEL PAGO
    --------------------------------------------------------------- */
-function mostrarPasarela(pedido) {
+function mostrarResumen(pedido) {
   const lista = document.querySelector("#pagoProductos");
   lista.innerHTML = "";
 
@@ -81,26 +94,25 @@ function mostrarPasarela(pedido) {
 
   document.querySelector("#pagoNumero").textContent = numeroPedido(pedido.id);
   document.querySelector("#pagoTotal").textContent = formatearPrecio(pedido.total);
-  mostrarSeccion("pagoPasarela");
+  mostrarSeccion("pagoResumen");
 }
 
-/* Cada botón "vuelve" a la tienda con el resultado en la URL.
-   El número de operación usa la fecha en milisegundos, que no se
-   repite de un pago a otro: SIM-1761500000000 */
-function simularPago(estado) {
-  document.querySelector("#btnPagoAprobado").disabled = true;
-  document.querySelector("#btnPagoRechazado").disabled = true;
+const btnIrAPagar = document.querySelector("#btnIrAPagar");
 
-  const operacion = `SIM-${Date.now()}`;
-  window.location.href = `pago.html?pedido=${idPedido}&estado=${estado}&operacion=${operacion}`;
-}
+btnIrAPagar.addEventListener("click", async () => {
+  btnIrAPagar.disabled = true;
+  btnIrAPagar.textContent = "Conectando con Mercado Pago…";
 
-document.querySelector("#btnPagoAprobado").addEventListener("click", () => {
-  simularPago("aprobado");
-});
-
-document.querySelector("#btnPagoRechazado").addEventListener("click", () => {
-  simularPago("rechazado");
+  try {
+    /* El Worker crea la preferencia de pago y devuelve su dirección */
+    const urlPago = await iniciarPago(usuarioActual, idPedido);
+    window.location.href = urlPago;
+  } catch (error) {
+    console.error("Error al iniciar el pago:", error);
+    mostrarAviso(error.message);
+    btnIrAPagar.disabled = false;
+    btnIrAPagar.textContent = "Ir a Mercado Pago";
+  }
 });
 
 /* ---------------------------------------------------------------
@@ -117,20 +129,26 @@ function mostrarResultado(pedido, estado) {
     icono.textContent = "✓";
     icono.className = "icono-confirmada";
     titulo.textContent = "¡Pago aprobado!";
-    texto.textContent = `Registramos el pago del pedido #${numero} por ${formatearPrecio(pedido.total)}. Te vamos a escribir para coordinar la entrega.`;
+    texto.textContent = `Mercado Pago aprobó el pago del pedido #${numero} por ${formatearPrecio(pedido.total)}. Te vamos a escribir para coordinar la entrega.`;
     botones.innerHTML = `
       <a class="btn btn-primary" href="perfil.html">Ver mis pedidos</a>
       <a class="btn btn-outline-primary" href="catalogo.html">Seguir comprando</a>
     `;
-  } else {
+  } else if (estado === "rechazado") {
     icono.textContent = "✕";
     icono.className = "icono-confirmada icono-rechazado";
     titulo.textContent = "El pago fue rechazado";
-    texto.textContent = `Tu pedido #${numero} sigue reservado. Podés intentar de nuevo ahora o pagarlo más tarde desde tu perfil.`;
+    texto.textContent = `Tu pedido #${numero} sigue reservado. Podés intentar de nuevo con otro medio de pago o pagarlo más tarde desde tu perfil.`;
     botones.innerHTML = `
       <a class="btn btn-primary" href="pago.html?pedido=${pedido.id}">Intentar de nuevo</a>
       <a class="btn btn-outline-primary" href="perfil.html">Ver mis pedidos</a>
     `;
+  } else {
+    icono.textContent = "…";
+    icono.className = "icono-confirmada icono-pendiente";
+    titulo.textContent = "Tu pago está en proceso";
+    texto.textContent = `Mercado Pago todavía está procesando el pago del pedido #${numero}. Revisá el estado en un rato desde tu perfil.`;
+    botones.innerHTML = `<a class="btn btn-primary" href="perfil.html">Ver mis pedidos</a>`;
   }
 
   mostrarSeccion("pagoResultado");
@@ -154,6 +172,8 @@ onAuthStateChanged(auth, async (usuario) => {
     }
     return;
   }
+
+  usuarioActual = usuario;
 
   let pedido;
 
@@ -196,25 +216,36 @@ onAuthStateChanged(auth, async (usuario) => {
     return;
   }
 
-  /* Sin resultado en la URL: todavía falta pasar por la pasarela */
-  if (estadoUrl !== "aprobado" && estadoUrl !== "rechazado") {
-    mostrarPasarela(pedido);
+  /* Todavía no hay pago: se muestra el resumen con el botón */
+  if (!hayPago) {
+    mostrarResumen(pedido);
+
+    if (volvioDeMercadoPago) {
+      mostrarAviso("No se completó el pago. Podés intentarlo de nuevo cuando quieras.");
+    }
     return;
   }
 
-  if (!operacionValida(operacionUrl)) {
-    mostrarError("El resultado del pago no es válido. Volvé a intentarlo desde tu perfil.");
-    return;
-  }
+  /* Volvió de Mercado Pago con un pago: se confirma con el Worker */
+  let consulta;
 
-  /* Volvió de la pasarela: se guarda el resultado en el pedido */
   try {
-    await registrarPago(idPedido, estadoUrl, operacionUrl);
+    consulta = await consultarPago(idPago, idPedido);
+  } catch (error) {
+    console.error("Error al confirmar el pago:", error);
+    mostrarError(`${error.message} Si el pago se hizo, recargá esta página en un momento.`);
+    return;
+  }
+
+  const estado = traducirEstado(consulta.estado);
+
+  try {
+    await registrarPago(idPedido, estado, idPago);
   } catch (error) {
     console.error("Error al registrar el pago:", error);
-    mostrarError("No pudimos registrar el pago. Revisá tu conexión y volvé a intentarlo desde tu perfil.");
+    mostrarError("No pudimos guardar el resultado del pago. Recargá esta página en un momento.");
     return;
   }
 
-  mostrarResultado(pedido, estadoUrl);
+  mostrarResultado(pedido, estado);
 });

@@ -7,7 +7,7 @@ Carrito de compras
    el carrito muestra siempre la información actual de la tienda.
    Desde el 11/10 el botón "Confirmar compra" registra el pedido.
    Desde el Sprint 4 se elige la forma de pago: con Mercado Pago el
-   pedido se registra y se pasa a la pasarela simulada (pago.html).
+   pedido se registra y se pasa a pago.html para pagarlo.
    ===================================================================== */
 
 import { auth } from "./firebase/config.js";
@@ -326,8 +326,8 @@ btnConfirmar.addEventListener("click", async () => {
   /* 4. Todo salió bien: recién ahora se vacía el carrito */
   guardarCarrito([]);
 
-  /* 5. Con Mercado Pago el pedido ya quedó reservado y se pasa a la
-        pasarela simulada, con el id del pedido en la URL (Semana 7) */
+  /* 5. Con Mercado Pago el pedido ya quedó reservado y se pasa a
+        pago.html, con el id del pedido en la URL (Semana 7) */
   if (metodoPago === "mercadopago") {
     window.location.href = `pago.html?pedido=${resultado.idPedido}`;
     return;

@@ -440,7 +440,7 @@ function htmlPedidoAdmin(pedido) {
     opciones += `<option value="${estado}" ${seleccionado}>${estado}</option>`;
   });
 
-  /* Pago (Sprint 4): forma, estado y número de operación simulado */
+  /* Pago (Sprint 4): forma, estado y número de pago de Mercado Pago */
   let pago = describirPago(pedido);
 
   if (pedido.pago && pedido.pago.idOperacion) {

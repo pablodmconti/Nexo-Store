@@ -39,17 +39,18 @@ import {
    "A coordinar con el equipo".
    --------------------------------------------------------------- */
 export const METODOS_PAGO = {
-  mercadopago: "Mercado Pago (simulado)",
+  mercadopago: "Mercado Pago",
   coordinar: "A coordinar con el equipo"
 };
 
 export const ESTADOS_PAGO = {
   pendiente: "pago pendiente",
   aprobado: "pago aprobado",
-  rechazado: "pago rechazado"
+  rechazado: "pago rechazado",
+  "en proceso": "pago en proceso"
 };
 
-/* Ejemplo: "Mercado Pago (simulado) · pago aprobado" */
+/* Ejemplo: "Mercado Pago · pago aprobado" */
 export function describirPago(pedido) {
   if (!pedido.pago) {
     return METODOS_PAGO.coordinar;
@@ -226,7 +227,7 @@ export async function cambiarEstadoPedido(pedido, nuevoEstado) {
 }
 
 /* ---------------------------------------------------------------
-   4. PAGO SIMULADO CON MERCADO PAGO (Sprint 4)
+   4. PAGO CON MERCADO PAGO (Sprint 4)
    --------------------------------------------------------------- */
 
 /* Un pedido a partir de su id, o null si no existe.
@@ -242,7 +243,8 @@ export async function obtenerPedido(idPedido) {
   return { id: snapshot.id, ...snapshot.data() };
 }
 
-/* Guarda en el pedido el resultado que devolvió la pasarela.
+/* Guarda en el pedido el resultado que confirmó Mercado Pago y el
+   número del pago (payment_id), para buscarlo en su panel.
    updateDoc() cambia SOLO el campo pago: las reglas de Firestore
    rechazan que un cliente toque el estado, el total o los productos. */
 export async function registrarPago(idPedido, estadoPago, idOperacion) {
