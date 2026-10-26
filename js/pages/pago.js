@@ -4,17 +4,17 @@ Pago con Mercado Pago (Sprint 4)
 
    Recorrido de Checkout Pro, con credenciales de prueba:
 
-     1. carrito.js registra el pedido y lleva a pago.html?pedido=ID
-        (el perfil también trae acá los pedidos que quedaron sin pagar)
-     2. Esta página muestra el resumen. "Ir a Mercado Pago" le pide al
-        Worker de Cloudflare la dirección de pago y lleva al usuario al
-        sitio de Mercado Pago.
-     3. Al terminar, Mercado Pago vuelve a pago.html con el resultado
-        en la URL (Semana 7):
-          ?payment_id=123&status=approved&external_reference=ID...
-     4. La página NO le cree a la URL: le pide al Worker que consulte
-        ese pago en Mercado Pago, guarda el resultado en el pedido
-        (campo pago) y muestra el mensaje final.
+     1. carrito.js registra el pedido, le pide al Worker de Cloudflare
+        el pago y lleva directo al checkout de Mercado Pago.
+     2. Al terminar, Mercado Pago vuelve al Worker (/volver), que
+        reenvía a esta página con el resultado en la URL (Semana 7):
+          pago.html?payment_id=123&status=approved&external_reference=ID
+     3. La página NO le cree a la URL: le pide al Worker que consulte
+        ese pago en Mercado Pago, controla que el importe sea el del
+        pedido, guarda el resultado (campo pago) y muestra el mensaje.
+
+   Con pago.html?pedido=ID (desde el perfil, o si el checkout no se
+   pudo abrir) se muestra el resumen con el botón "Ir a Mercado Pago".
 
    El Access Token de Mercado Pago vive solo en el Worker
    (cloudflare/worker-pagos.js): el navegador nunca lo ve.
@@ -239,6 +239,12 @@ onAuthStateChanged(auth, async (usuario) => {
 
   const estado = traducirEstado(consulta.estado);
 
+  /* Un pago aprobado tiene que ser por el total del pedido */
+  if (estado === "aprobado" && Number(consulta.importe) !== Number(pedido.total)) {
+    mostrarError(`El importe pagado ($ ${consulta.importe}) no coincide con el total del pedido (${formatearPrecio(pedido.total)}). Escribinos para revisarlo.`);
+    return;
+  }
+
   try {
     await registrarPago(idPedido, estado, idPago);
   } catch (error) {
@@ -246,6 +252,10 @@ onAuthStateChanged(auth, async (usuario) => {
     mostrarError("No pudimos guardar el resultado del pago. Recargá esta página en un momento.");
     return;
   }
+
+  /* Se quitan de la dirección los datos del pago: si se recarga la
+     página, no se vuelven a procesar */
+  window.history.replaceState(null, "", `pago.html?pedido=${idPedido}`);
 
   mostrarResultado(pedido, estado);
 });

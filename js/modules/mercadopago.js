@@ -32,11 +32,14 @@ async function pedirAlWorker(ruta, opciones) {
   return datos;
 }
 
-/* Pide la dirección de pago de Mercado Pago para un pedido.
+/* Pide la dirección del checkout de Mercado Pago para un pedido.
    Se envía el token de la sesión de Firebase: con él, el Worker lee
-   el pedido con los permisos de su dueño (las reglas hacen el resto). */
+   el pedido con los permisos de su dueño (las reglas hacen el resto).
+   volverA es la página a la que Mercado Pago devuelve al terminar:
+   pago.html del mismo sitio (el publicado o Live Server). */
 export async function iniciarPago(usuario, idPedido) {
   const token = await usuario.getIdToken();
+  const volverA = new URL("pago.html", window.location.href).href;
 
   const datos = await pedirAlWorker("/crear-pago", {
     method: "POST",
@@ -44,14 +47,14 @@ export async function iniciarPago(usuario, idPedido) {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     },
-    body: JSON.stringify({ idPedido: idPedido })
+    body: JSON.stringify({ idPedido: idPedido, volverA: volverA })
   });
 
   return datos.url;
 }
 
 /* Pregunta el estado REAL de un pago a Mercado Pago, a través del
-   Worker. Devuelve { estado, detalle, monto }; estado es el de
+   Worker. Devuelve { id, estado, importe, moneda }; estado es el de
    Mercado Pago: "approved", "rejected", "pending", "in_process"... */
 export async function consultarPago(idPago, idPedido) {
   const ruta = `/verificar-pago?pago=${encodeURIComponent(idPago)}&pedido=${encodeURIComponent(idPedido)}`;

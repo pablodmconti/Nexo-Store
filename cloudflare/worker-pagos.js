@@ -3,73 +3,65 @@
    ---------------------------------------------------------------------
    Corre en Cloudflare Workers, NO en el navegador. Es el único lugar
    que conoce el Access Token de Mercado Pago, guardado como secreto
-   del Worker (Settings → Variables and Secrets → MP_ACCESS_TOKEN).
-   El token nunca aparece en este archivo ni en el repositorio.
+   del Worker. El token nunca aparece en este archivo ni en el repo.
 
-   Se copia en el editor del Worker en Cloudflare (Edit code → Deploy).
+   Se copia en el editor del Worker nivel99-pagos (Edit code → Deploy).
 
    Rutas:
-     POST /crear-pago        { idPedido }  + Authorization: Bearer <token de Firebase>
-                             → { url }  dirección de pago de Mercado Pago
+     GET  /                  Comprueba que el Worker funciona y si tiene
+                             el Access Token configurado.
+     POST /crear-pago        { idPedido, volverA }
+                             + Authorization: Bearer <token de Firebase>
+                             Lee el pedido (solo si es de quien lo pide) y
+                             los precios desde Firestore, crea la preferencia
+                             de Checkout Pro y devuelve { url } del checkout.
+     GET  /volver            Mercado Pago vuelve acá al terminar y el Worker
+                             reenvía a pago.html con payment_id, status y
+                             external_reference. Pasar por acá permite probar
+                             desde Live Server, que Mercado Pago no acepta
+                             como dirección de retorno.
      GET  /verificar-pago?pago=123&pedido=ABC
-                             → { estado, detalle, monto }  según Mercado Pago
+                             Consulta el pago en Mercado Pago y devuelve su
+                             estado e importe, si corresponde a ese pedido.
 
-   Credenciales de PRUEBA: no se cobra dinero real.
+   Variables del Worker (Settings → Variables and Secrets):
+     MP_ACCESS_TOKEN  secreto, obligatorio: Access Token de PRUEBA.
+     MONEDA           opcional: moneda del cobro. Si no se define, "UYU".
    ===================================================================== */
 
 const PROYECTO_FIREBASE = "login-nexostore";
 const API_KEY_FIREBASE = "AIzaSyBHIJuumx0Q1kBGuOin7bAE05R6QXBymds"; // pública, la misma de config.js
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${PROYECTO_FIREBASE}/databases/(default)/documents`;
 
-/* Página a la que vuelve Mercado Pago. Mercado Pago le agrega
-   payment_id, status, external_reference (el id del pedido) y otros */
-const RETORNO = "https://pablodmconti.github.io/Nexo-Store/pago.html";
-
-/* Sitios que pueden llamar al Worker (el publicado y Live Server) */
-const ORIGENES = ["https://pablodmconti.github.io", "http://127.0.0.1:5500", "http://localhost:5500"];
+/* Sitios que pueden usar este Worker: el publicado y Live Server */
+const ORIGENES_PERMITIDOS = ["https://pablodmconti.github.io"];
+const PATRONES_PERMITIDOS = [/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/];
 
 /* Mismas condiciones de envío que base.js */
 const MONTO_ENVIO_GRATIS = 2000;
 const COSTO_ENVIO = 290;
 
-export default {
-  async fetch(request, env) {
-    const origen = request.headers.get("Origin");
-    const cors = {
-      "Access-Control-Allow-Origin": ORIGENES.includes(origen) ? origen : ORIGENES[0],
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Vary": "Origin"
-    };
+function origenPermitido(origen) {
+  if (!origen) return false;
+  return ORIGENES_PERMITIDOS.includes(origen) || PATRONES_PERMITIDOS.some((patron) => patron.test(origen));
+}
 
-    /* El navegador pregunta antes de un POST con JSON (preflight) */
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: cors });
-    }
+function encabezadosCors(origen) {
+  const encabezados = { "Vary": "Origin" };
 
-    const url = new URL(request.url);
-
-    try {
-      if (request.method === "POST" && url.pathname === "/crear-pago") {
-        return await crearPago(request, env, cors);
-      }
-
-      if (request.method === "GET" && url.pathname === "/verificar-pago") {
-        return await verificarPago(url, env, cors);
-      }
-
-      return responder({ error: "Ruta no encontrada." }, 404, cors);
-    } catch (error) {
-      console.log("Error inesperado:", error);
-      return responder({ error: "El servicio de pagos tuvo un problema. Probá de nuevo en un rato." }, 500, cors);
-    }
+  if (origenPermitido(origen)) {
+    encabezados["Access-Control-Allow-Origin"] = origen;
+    encabezados["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
+    encabezados["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
   }
-};
 
-function responder(datos, estado, cors) {
+  return encabezados;
+}
+
+function responder(datos, estado, origen) {
   return new Response(JSON.stringify(datos), {
     status: estado,
-    headers: { ...cors, "Content-Type": "application/json; charset=utf-8" }
+    headers: { "Content-Type": "application/json; charset=utf-8", ...encabezadosCors(origen) }
   });
 }
 
@@ -92,38 +84,52 @@ function subcampo(campo, nombre) {
 /* ---------------------------------------------------------------
    POST /crear-pago
    --------------------------------------------------------------- */
-async function crearPago(request, env, cors) {
+async function crearPago(request, env, origen) {
   const autorizacion = request.headers.get("Authorization") || "";
   const datos = await request.json().catch(() => ({}));
-  const idPedido = datos.idPedido;
+  const { idPedido, volverA } = datos;
 
-  if (!autorizacion.startsWith("Bearer ") || !idPedido) {
-    return responder({ error: "Faltan datos para iniciar el pago." }, 400, cors);
+  if (!autorizacion.startsWith("Bearer ") || typeof idPedido !== "string" || !/^[A-Za-z0-9]{1,40}$/.test(idPedido)) {
+    return responder({ error: "Faltan los datos del pedido o de la sesión." }, 400, origen);
+  }
+
+  /* La página de retorno tiene que ser de un sitio permitido */
+  let destino = null;
+
+  try {
+    destino = new URL(volverA);
+  } catch (error) {
+    destino = null;
+  }
+
+  if (!destino || !origenPermitido(destino.origin)) {
+    return responder({ error: "La página de retorno no está permitida." }, 400, origen);
   }
 
   /* 1. El pedido se lee CON el token del usuario: las reglas de
         Firestore solo lo devuelven si es suyo */
-  const respuestaPedido = await fetch(`${FIRESTORE}/pedidos/${encodeURIComponent(idPedido)}`, {
+  const respuestaPedido = await fetch(`${FIRESTORE}/pedidos/${idPedido}`, {
     headers: { Authorization: autorizacion }
   });
 
   if (!respuestaPedido.ok) {
-    return responder({ error: "No encontramos ese pedido en tu cuenta." }, 403, cors);
+    return responder({ error: "No encontramos ese pedido en tu cuenta." }, 403, origen);
   }
 
-  const pedido = (await respuestaPedido.json()).fields;
+  const pedido = (await respuestaPedido.json()).fields || {};
 
   if (texto(pedido.estado) !== "pendiente"
     || texto(subcampo(pedido.pago, "metodo")) !== "mercadopago"
     || texto(subcampo(pedido.pago, "estado")) === "aprobado") {
-    return responder({ error: "Este pedido no tiene un pago pendiente con Mercado Pago." }, 409, cors);
+    return responder({ error: "Este pedido no tiene un pago pendiente con Mercado Pago." }, 409, origen);
   }
 
   /* 2. Los precios salen de la colección productos (lectura pública),
         no de lo que mande el navegador */
+  const moneda = env.MONEDA || "UYU";
   const items = [];
   let subtotal = 0;
-  const productosPedido = pedido.productos.arrayValue.values || [];
+  const productosPedido = (pedido.productos && pedido.productos.arrayValue.values) || [];
 
   for (const valor of productosPedido) {
     const item = valor.mapValue.fields;
@@ -133,57 +139,98 @@ async function crearPago(request, env, cors) {
     const respuestaProducto = await fetch(`${FIRESTORE}/productos/${encodeURIComponent(idProducto)}?key=${API_KEY_FIREBASE}`);
 
     if (!respuestaProducto.ok) {
-      return responder({ error: "Uno de los productos del pedido ya no está en la tienda." }, 409, cors);
+      return responder({ error: "Uno de los productos del pedido ya no está en la tienda." }, 409, origen);
     }
 
     const producto = (await respuestaProducto.json()).fields;
     const precio = numero(producto.precio);
 
     if (precio !== numero(item.precioUnitario)) {
-      return responder({ error: `El precio de ${texto(producto.nombre)} cambió desde que hiciste el pedido. Escribinos para actualizarlo.` }, 409, cors);
+      return responder({ error: `El precio de ${texto(producto.nombre)} cambió desde que hiciste el pedido. Escribinos para actualizarlo.` }, 409, origen);
     }
 
-    items.push({
-      id: idProducto,
-      title: texto(producto.nombre),
-      quantity: cantidad,
-      unit_price: precio,
-      currency_id: "UYU"
-    });
-
+    items.push({ id: idProducto, title: texto(producto.nombre), quantity: cantidad, unit_price: precio, currency_id: moneda });
     subtotal += precio * cantidad;
+  }
+
+  if (items.length === 0) {
+    return responder({ error: "El pedido no tiene productos." }, 409, origen);
   }
 
   const envio = subtotal >= MONTO_ENVIO_GRATIS ? 0 : COSTO_ENVIO;
 
   if (envio > 0) {
-    items.push({ id: "envio", title: "Envío", quantity: 1, unit_price: envio, currency_id: "UYU" });
+    items.push({ id: "envio", title: "Envío", quantity: 1, unit_price: envio, currency_id: moneda });
   }
+
+  /* Mercado Pago vuelve primero al Worker (/volver) y el Worker reenvía
+     a la página indicada */
+  const volver = new URL("/volver", request.url);
+  volver.searchParams.set("destino", destino.href);
 
   /* 3. La preferencia de Checkout Pro, firmada con el Access Token */
   const respuestaMP = await fetch("https://api.mercadopago.com/checkout/preferences", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.MP_ACCESS_TOKEN}`
+      "Authorization": `Bearer ${env.MP_ACCESS_TOKEN}`,
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       items: items,
       external_reference: idPedido,
-      back_urls: { success: RETORNO, failure: RETORNO, pending: RETORNO },
+      back_urls: { success: volver.href, failure: volver.href, pending: volver.href },
       auto_return: "approved",
-      statement_descriptor: "NIVEL99"
+      statement_descriptor: "NIVEL99",
+      /* Sin pagos en efectivo (Abitab, Red Pagos): quedarían pendientes y
+         el sitio no tiene cómo enterarse de cuándo se acreditan. En una
+         sola cuota, así el importe cobrado es exactamente el del pedido. */
+      payment_methods: { excluded_payment_types: [{ id: "ticket" }], installments: 1 }
     })
   });
 
-  const preferencia = await respuestaMP.json();
+  const preferencia = await respuestaMP.json().catch(() => ({}));
 
   if (!respuestaMP.ok) {
-    console.log("Mercado Pago rechazó la preferencia:", JSON.stringify(preferencia));
-    return responder({ error: "Mercado Pago no pudo iniciar el pago. Probá de nuevo en un rato." }, 502, cors);
+    console.log("Mercado Pago rechazó la preferencia:", respuestaMP.status, JSON.stringify(preferencia));
+    return responder({ error: "Mercado Pago no aceptó el pago: " + (preferencia.message || "error " + respuestaMP.status) }, 502, origen);
   }
 
-  return responder({ url: preferencia.init_point }, 200, cors);
+  /* Las credenciales viejas de prueba empiezan con TEST- y usan el
+     checkout de sandbox */
+  const url = env.MP_ACCESS_TOKEN.startsWith("TEST-") ? preferencia.sandbox_init_point : preferencia.init_point;
+
+  return responder({ url: url }, 200, origen);
+}
+
+/* ---------------------------------------------------------------
+   GET /volver
+   Reenvía a pago.html con los datos del pago que manda Mercado Pago.
+   --------------------------------------------------------------- */
+function volverAlSitio(url) {
+  let destino = null;
+
+  try {
+    destino = new URL(url.searchParams.get("destino"));
+  } catch (error) {
+    destino = null;
+  }
+
+  if (!destino || !origenPermitido(destino.origin)) {
+    return new Response("Destino no permitido.", { status: 400 });
+  }
+
+  const idPago = url.searchParams.get("payment_id") || url.searchParams.get("collection_id") || "null";
+  const estado = url.searchParams.get("status") || url.searchParams.get("collection_status") || "null";
+  destino.searchParams.set("payment_id", idPago);
+  destino.searchParams.set("status", estado);
+
+  const referencia = url.searchParams.get("external_reference");
+
+  if (referencia) {
+    destino.searchParams.set("external_reference", referencia);
+  }
+
+  return Response.redirect(destino.href, 302);
 }
 
 /* ---------------------------------------------------------------
@@ -191,31 +238,87 @@ async function crearPago(request, env, cors) {
    La página de retorno no le cree a la URL: pregunta a Mercado Pago
    el estado real del pago y que corresponda a ese pedido.
    --------------------------------------------------------------- */
-async function verificarPago(url, env, cors) {
+async function verificarPago(url, env, origen) {
   const idPago = url.searchParams.get("pago") || "";
   const idPedido = url.searchParams.get("pedido") || "";
 
-  if (!/^[0-9]+$/.test(idPago) || idPedido === "") {
-    return responder({ error: "Faltan datos del pago." }, 400, cors);
+  if (!/^\d{1,20}$/.test(idPago) || idPedido === "") {
+    return responder({ error: "El número de pago no es válido." }, 400, origen);
   }
 
   const respuesta = await fetch(`https://api.mercadopago.com/v1/payments/${idPago}`, {
-    headers: { Authorization: `Bearer ${env.MP_ACCESS_TOKEN}` }
+    headers: { "Authorization": `Bearer ${env.MP_ACCESS_TOKEN}` }
   });
 
-  if (!respuesta.ok) {
-    return responder({ error: "No encontramos ese pago en Mercado Pago." }, 404, cors);
+  if (respuesta.status === 404) {
+    return responder({ error: "No encontramos ese pago en Mercado Pago." }, 404, origen);
   }
 
-  const pago = await respuesta.json();
+  const pago = await respuesta.json().catch(() => ({}));
+
+  if (!respuesta.ok) {
+    console.log("No se pudo consultar el pago:", respuesta.status, JSON.stringify(pago));
+    return responder({ error: "No pudimos consultar el pago en Mercado Pago." }, 502, origen);
+  }
 
   if (pago.external_reference !== idPedido) {
-    return responder({ error: "Ese pago no corresponde a este pedido." }, 404, cors);
+    return responder({ error: "Ese pago no corresponde a este pedido." }, 404, origen);
   }
 
   return responder({
-    estado: pago.status,             // approved, rejected, pending, in_process...
-    detalle: pago.status_detail,
-    monto: pago.transaction_amount
-  }, 200, cors);
+    id: String(pago.id),
+    estado: pago.status,              // approved, rejected, pending, in_process...
+    importe: pago.transaction_amount,
+    moneda: pago.currency_id
+  }, 200, origen);
 }
+
+/* ---------------------------------------------------------------
+   ENTRADA DEL WORKER
+   --------------------------------------------------------------- */
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const origen = request.headers.get("Origin");
+
+    /* El navegador pregunta antes de un POST con JSON (preflight) */
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: encabezadosCors(origen) });
+    }
+
+    if (request.method === "GET" && url.pathname === "/") {
+      return responder({
+        servicio: "Servidor de pagos de Nivel 99",
+        accessTokenConfigurado: Boolean(env.MP_ACCESS_TOKEN),
+        moneda: env.MONEDA || "UYU"
+      }, 200, origen);
+    }
+
+    if (request.method === "GET" && url.pathname === "/volver") {
+      return volverAlSitio(url);
+    }
+
+    if (!origenPermitido(origen)) {
+      return responder({ error: "Este sitio no puede usar el servidor de pagos." }, 403, origen);
+    }
+
+    if (!env.MP_ACCESS_TOKEN) {
+      return responder({ error: "El servidor de pagos no tiene configurado el Access Token de Mercado Pago." }, 500, origen);
+    }
+
+    try {
+      if (request.method === "POST" && url.pathname === "/crear-pago") {
+        return await crearPago(request, env, origen);
+      }
+
+      if (request.method === "GET" && url.pathname === "/verificar-pago") {
+        return await verificarPago(url, env, origen);
+      }
+
+      return responder({ error: "Ruta no encontrada." }, 404, origen);
+    } catch (error) {
+      console.log("Error inesperado en el servidor de pagos:", error);
+      return responder({ error: "Ocurrió un error en el servidor de pagos. Intentá nuevamente." }, 500, origen);
+    }
+  }
+};

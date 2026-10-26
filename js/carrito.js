@@ -7,13 +7,14 @@ Carrito de compras
    el carrito muestra siempre la información actual de la tienda.
    Desde el 11/10 el botón "Confirmar compra" registra el pedido.
    Desde el Sprint 4 se elige la forma de pago: con Mercado Pago el
-   pedido se registra y se pasa a pago.html para pagarlo.
+   pedido se registra y se va directo al checkout de Mercado Pago.
    ===================================================================== */
 
 import { auth } from "./firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerProductos } from "./modules/productos-firestore.js";
 import { confirmarPedido } from "./modules/pedidos.js";
+import { iniciarPago } from "./modules/mercadopago.js";
 
 /* Productos de la tienda, tal como llegan de Firestore */
 let productos = [];
@@ -326,10 +327,18 @@ btnConfirmar.addEventListener("click", async () => {
   /* 4. Todo salió bien: recién ahora se vacía el carrito */
   guardarCarrito([]);
 
-  /* 5. Con Mercado Pago el pedido ya quedó reservado y se pasa a
-        pago.html, con el id del pedido en la URL (Semana 7) */
+  /* 5. Con Mercado Pago el pedido ya quedó reservado: el Worker crea
+        el pago y se va directo al checkout. Si no se puede abrir, se
+        pasa a pago.html para reintentar (el pedido no se pierde). */
   if (metodoPago === "mercadopago") {
-    window.location.href = `pago.html?pedido=${resultado.idPedido}`;
+    btnConfirmar.textContent = "Abriendo Mercado Pago…";
+
+    try {
+      window.location.href = await iniciarPago(usuarioActual, resultado.idPedido);
+    } catch (error) {
+      console.error("Error al abrir Mercado Pago:", error);
+      window.location.href = `pago.html?pedido=${resultado.idPedido}&aviso=pago-no-iniciado`;
+    }
     return;
   }
 
