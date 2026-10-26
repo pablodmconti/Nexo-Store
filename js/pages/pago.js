@@ -93,7 +93,7 @@ function mostrarResumen(pedido) {
   pedido.productos.forEach((item) => {
     lista.innerHTML += `
       <li class="linea-pedido">
-        <span>${item.nombre} <span class="texto-suave">× ${item.cantidad}</span></span>
+        <span>${escaparHtml(item.nombre)} <span class="texto-suave">× ${escaparHtml(item.cantidad)}</span></span>
         <span>${formatearPrecio(item.subtotal)}</span>
       </li>
     `;

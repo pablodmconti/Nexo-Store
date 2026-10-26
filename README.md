@@ -22,9 +22,9 @@ Entrega final, correspondiente al **Sprint 4 · Seguridad, calidad, pruebas y pu
    | Cliente de Prueba | Cliente | `cliente.prueba@nivel99.uy` | `Prueba2026` |
    | John Doe | Cliente | `johndoe@nivel99.uy` | `Prueba2026` |
 
-3. Para comprar, elegir la forma de pago en el carrito. **Coordinar con el equipo**
-   registra el pedido en el momento. **Mercado Pago** abre el checkout en modo de prueba
-   (ver los datos de prueba más abajo).
+3. Para comprar, elegir la forma de pago en el carrito. **Coordinar con el equipo**, la
+   opción marcada por defecto, registra el pedido en el momento. **Mercado Pago** abre el
+   checkout en modo de prueba (ver los datos de prueba más abajo).
 
 ### Datos de prueba de Mercado Pago (Uruguay)
 
@@ -222,6 +222,20 @@ servidor, aunque alguien escriba en la base por fuera del sitio.
 
 Todo lo que no está permitido en el archivo queda prohibido.
 
+#### Otros cuidados de seguridad
+
+- **Texto de los usuarios dentro del HTML.** Los datos de un pedido (nombre, correo,
+  productos e importes) los guarda el navegador del cliente, y el panel administrativo los
+  muestra con `innerHTML`. Un nombre como `<img onerror="...">` se ejecutaría en la sesión
+  del administrador. `escaparHtml()`, en `base.js`, convierte esos caracteres en texto
+  común antes de insertarlos en el panel, el perfil y la página de pago. Las opiniones ya
+  usaban `textContent`, que es seguro.
+- **La `apiKey` de `js/firebase/config.js` no es un secreto.** GitHub la marca como "clave
+  de Google expuesta" porque reconoce el formato, pero en Firebase esa clave solo
+  identifica el proyecto y es pública por diseño. Cualquier sitio con Firebase la muestra
+  en su JavaScript. Lo que protege los datos son las reglas de Firestore. La clave está
+  restringida a las APIs de Firebase y no se revoca, porque el sitio dejaría de funcionar.
+
 #### Revisión antes de publicar
 
 - Se retiró `cargar-productos.html`, la página de carga inicial, junto con su JavaScript
@@ -246,7 +260,8 @@ Dominios autorizados* de Firebase para que funcione el inicio de sesión.
 La consigna no pide pagos reales, así que esto es una funcionalidad adicional: usa
 **Checkout Pro de Mercado Pago con credenciales de prueba** y no cobra dinero real. En el
 carrito se elige la forma de pago: **Mercado Pago** o **Coordinar con el equipo**
-(transferencia o efectivo al recibir, como en el Sprint 3).
+(transferencia o efectivo al recibir, como en el Sprint 3). "Coordinar con el equipo"
+está marcada por defecto mientras el entorno de prueba de Mercado Pago rechace los pagos.
 
 **Por qué hace falta un Worker.** Para crear un pago, Mercado Pago pide un *Access Token*
 secreto, que no puede ir en el JavaScript que descarga el navegador, y GitHub Pages no

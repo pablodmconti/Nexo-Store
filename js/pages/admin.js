@@ -415,10 +415,13 @@ campo("btnCancelarProducto").addEventListener("click", () => {
 const listaPedidosAdmin = document.querySelector("#listaPedidosAdmin");
 
 function htmlPedidoAdmin(pedido) {
+  /* Los datos del pedido los guardó el navegador del cliente: se
+     escapan antes de insertarlos (ver escaparHtml() en base.js) */
+  const id = escaparHtml(pedido.id);
   let filas = "";
 
   pedido.productos.forEach((item) => {
-    filas += `<li>${item.nombre} × ${item.cantidad} · ${formatearPrecio(item.subtotal)}</li>`;
+    filas += `<li>${escaparHtml(item.nombre)} × ${escaparHtml(item.cantidad)} · ${escaparHtml(formatearPrecio(item.subtotal))}</li>`;
   });
 
   /* Un pedido cancelado ya devolvió su stock: no se puede cambiar */
@@ -444,7 +447,7 @@ function htmlPedidoAdmin(pedido) {
   let pago = describirPago(pedido);
 
   if (pedido.pago && pedido.pago.idOperacion) {
-    pago += ` · ${pedido.pago.idOperacion}`;
+    pago += ` · ${escaparHtml(pedido.pago.idOperacion)}`;
   }
 
   const fecha = pedido.fecha.toDate().toLocaleString("es-UY", {
@@ -456,19 +459,19 @@ function htmlPedidoAdmin(pedido) {
       <article class="tarjeta-pedido h-100">
         <header class="encabezado-pedido">
           <div>
-            <h3 class="h6 mb-1">Pedido #${pedido.id.slice(0, 6).toUpperCase()}</h3>
-            <p class="small mb-0">${pedido.nombreUsuario} · <span class="texto-suave">${pedido.correo}</span></p>
+            <h3 class="h6 mb-1">Pedido #${escaparHtml(pedido.id.slice(0, 6).toUpperCase())}</h3>
+            <p class="small mb-0">${escaparHtml(pedido.nombreUsuario)} · <span class="texto-suave">${escaparHtml(pedido.correo)}</span></p>
             <p class="small texto-suave mb-0">${fecha}</p>
           </div>
-          <span class="estado-pedido">${pedido.estado}</span>
+          <span class="estado-pedido">${escaparHtml(pedido.estado)}</span>
         </header>
         <ul class="small mb-2">${filas}</ul>
-        <p class="linea-pedido total-pedido"><span>Total</span><span>${formatearPrecio(pedido.total)}</span></p>
+        <p class="linea-pedido total-pedido"><span>Total</span><span>${escaparHtml(formatearPrecio(pedido.total))}</span></p>
         <p class="linea-pago mb-2">${pago}</p>
         <div class="d-flex gap-2 mt-2">
-          <label class="visually-hidden" for="estado-${pedido.id}">Estado del pedido</label>
-          <select class="form-select form-select-sm" id="estado-${pedido.id}" ${deshabilitado}>${opciones}</select>
-          <button class="btn btn-primary btn-sm text-nowrap" type="button" data-pedido="${pedido.id}" ${deshabilitado}>
+          <label class="visually-hidden" for="estado-${id}">Estado del pedido</label>
+          <select class="form-select form-select-sm" id="estado-${id}" ${deshabilitado}>${opciones}</select>
+          <button class="btn btn-primary btn-sm text-nowrap" type="button" data-pedido="${id}" ${deshabilitado}>
             Actualizar
           </button>
         </div>

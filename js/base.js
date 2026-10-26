@@ -170,6 +170,25 @@ function htmlMensaje(texto) {
 }
 
 /* ---------------------------------------------------------------
+   TEXTO ESCRITO POR UN USUARIO DENTRO DE innerHTML (Sprint 4)
+   ---------------------------------------------------------------
+   innerHTML interpreta las etiquetas: si un cliente se registra con
+   un nombre como <img src=x onerror="..."> y ese nombre se inserta
+   tal cual en el panel, el código se ejecutaría en la sesión del
+   administrador. escaparHtml() reemplaza los caracteres especiales
+   por sus entidades, así el texto se ve igual pero nunca se ejecuta.
+   Se usa con todo dato que haya escrito un usuario (los de un pedido,
+   por ejemplo); donde se puede, se usa textContent, que ya es seguro. */
+function escaparHtml(valor) {
+  return String(valor)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+/* ---------------------------------------------------------------
    5. ARRANQUE DE LA INTERFAZ
    --------------------------------------------------------------- */
 
