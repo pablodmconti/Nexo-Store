@@ -10,11 +10,17 @@ Pedidos en Cloud Firestore
        ├─ correo:        "ana@correo.com"
        ├─ productos:     [{ idProducto, nombre, precioUnitario,
        │                    cantidad, subtotal }, ...]
+       ├─ cantidades:    { idProducto: cantidad, ... }
+       │                 (lo mismo en forma de mapa, para las reglas)
        ├─ subtotal, envio, total
        ├─ fecha:         momento de la confirmación
        ├─ estado:        "pendiente"
        └─ pago:          { metodo, estado, idOperacion, fecha }
                          (Sprint 4: "simulado" o "coordinar")
+
+   Al comprar, cada producto guarda el id del pedido en el campo
+   ultimoPedido. Así las reglas de Firestore pueden comprobar que el
+   stock baja solo junto con un pedido nuevo de la misma cuenta.
 
    Este archivo SOLO habla con la base de datos: no toca el HTML.
    ===================================================================== */
@@ -160,13 +166,25 @@ async function comprarEnTransaccion(transaccion, referenciaPedido, usuario, carr
   const envio = calcularEnvio(subtotal); // está en base.js
   const total = subtotal + envio;
 
+  /* Las cantidades también como mapa { p3: 2, p7: 1 }. Las reglas de
+     Firestore no pueden recorrer la lista productos para buscar un
+     producto, pero en un mapa lo encuentran directo por su id */
+  const cantidades = {};
+  items.forEach(({ producto, cantidad }) => {
+    cantidades[producto.id] = cantidad;
+  });
+
   /* Paso 3: las escrituras, después de todas las lecturas: el pedido
-     nuevo y el descuento de stock de cada producto */
+     nuevo y el descuento de stock de cada producto. Cada producto anota
+     el id del pedido (ultimoPedido): las reglas solo dejan bajar el
+     stock si ese pedido se crea en esta misma transacción, es de quien
+     compra y pide exactamente esa cantidad */
   transaccion.set(referenciaPedido, {
     uid: usuario.uid,
     nombreUsuario: usuario.displayName || usuario.email,
     correo: usuario.email,
     productos: productosPedido,
+    cantidades: cantidades,
     subtotal: subtotal,
     envio: envio,
     total: total,
@@ -179,7 +197,10 @@ async function comprarEnTransaccion(transaccion, referenciaPedido, usuario, carr
   });
 
   items.forEach(({ referencia, producto, cantidad }) => {
-    transaccion.update(referencia, { stock: producto.stock - cantidad });
+    transaccion.update(referencia, {
+      stock: producto.stock - cantidad,
+      ultimoPedido: referenciaPedido.id
+    });
   });
 
   return { confirmado: true, idPedido: referenciaPedido.id, total: total };

@@ -39,16 +39,34 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos);
     }
 
-    // Lo que hace confirmarPedido() (pedidos.js) al comprar: descuenta
-    // stock de un producto disponible, sin tocar nada más y sin dejarlo
-    // en negativo
-    function descuentaStockAlComprar() {
+    // Lo que hace confirmarPedido() (pedidos.js) al comprar: baja el
+    // stock de un producto disponible SOLO junto con un pedido nuevo.
+    // El producto anota el id de ese pedido en ultimoPedido y la regla
+    // comprueba que:
+    //   - el pedido no existía y se crea en esta misma operación
+    //     (exists() mira la base antes de escribir; getAfter(), cómo
+    //     queda después),
+    //   - es de quien está comprando,
+    //   - el stock baja exactamente la cantidad que figura en el pedido,
+    //   - no cambia ningún otro campo y el stock no queda negativo.
+    // Sin un pedido nuevo, nadie puede bajar el stock por su cuenta.
+    function bajaStockConPedidoNuevo(idProducto) {
+      let idPedido = request.resource.data.ultimoPedido;
+      let rutaPedido = /databases/$(database)/documents/pedidos/$(idPedido);
+      let pedido = getAfter(rutaPedido).data;
+      let stockAntes = resource.data.stock;
+      let stockDespues = request.resource.data.stock;
+
       return haySesion()
-        && soloCambia(["stock"])
+        && soloCambia(["stock", "ultimoPedido"])
         && resource.data.disponible == true
-        && request.resource.data.stock is int
-        && request.resource.data.stock >= 0
-        && request.resource.data.stock < resource.data.stock;
+        && idPedido is string
+        && stockDespues is int
+        && stockDespues >= 0
+        && stockDespues < stockAntes
+        && !exists(rutaPedido)
+        && pedido.uid == request.auth.uid
+        && pedido.cantidades[idProducto] == stockAntes - stockDespues;
     }
 
     // Lo que hace registrarPago() (pedidos.js) al volver de la pasarela
@@ -94,11 +112,14 @@ service cloud.firestore {
     // Lectura pública: el catálogo se ve sin iniciar sesión.
     // Crear, editar y eliminar: solo administradores.
     // Única excepción: el descuento de stock de una compra.
+    // (La compra se comprueba primero: así un cliente no gasta lecturas
+    // en esAdmin() y la compra no se acerca al límite de get()/exists()
+    // de Firestore.)
     // ---------------------------------------------------------------
     match /productos/{idProducto} {
       allow read: if true;
       allow create, delete: if esAdmin();
-      allow update: if esAdmin() || descuentaStockAlComprar();
+      allow update: if bajaStockConPedidoNuevo(idProducto) || esAdmin();
     }
 
     // ---------------------------------------------------------------
