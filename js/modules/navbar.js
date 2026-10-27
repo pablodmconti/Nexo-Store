@@ -8,7 +8,8 @@
      Sin sesión  → botón "Ingresar"
      Con sesión  → enlace "Mi perfil" y menú con el nombre y
                    "Cerrar sesión"
-     Rol "admin" → además, el enlace "Administración"
+     Rol "admin" → además, los enlaces "Administración" del menú y
+                   del pie de página (marcados con data-solo-admin)
 
    Ocultar el enlace NO protege el panel: admin.js vuelve a comprobar
    el rol al cargar la página, como pide la consigna.
@@ -23,16 +24,24 @@ const btnIngresar = document.querySelector("#btnIngresar");
 const menuUsuario = document.querySelector("#menuUsuario");
 const nombreUsuarioNav = document.querySelector("#nombreUsuarioNav");
 const navPerfil = document.querySelector("#navPerfil");
-const navAdmin = document.querySelector("#navAdmin");
+
+/* Todos los accesos al panel: el del menú y el del pie de página */
+const enlacesAdmin = document.querySelectorAll("[data-solo-admin]");
+
+function mostrarEnlacesAdmin(visibles) {
+  enlacesAdmin.forEach((enlace) => {
+    enlace.classList.toggle("d-none", !visibles);
+  });
+}
 
 /* Muestra "Administración" solo si el documento usuarios/{uid} dice
-   rol: "admin". Si la consulta falla, el enlace queda oculto. */
+   rol: "admin". Si la consulta falla, los enlaces quedan ocultos. */
 async function mostrarEnlaceAdmin(uid) {
   try {
     const perfil = await obtenerPerfilUsuario(uid);
 
     if (perfil && perfil.rol === "admin") {
-      navAdmin.classList.remove("d-none");
+      mostrarEnlacesAdmin(true);
     }
   } catch (error) {
     console.error("No se pudo leer el rol del usuario:", error);
@@ -54,7 +63,7 @@ onAuthStateChanged(auth, (usuario) => {
     btnIngresar.classList.remove("d-none");
     menuUsuario.classList.add("d-none");
     navPerfil.classList.add("d-none");
-    navAdmin.classList.add("d-none");
+    mostrarEnlacesAdmin(false);
   }
 });
 
