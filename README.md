@@ -22,8 +22,9 @@ Entrega final, correspondiente al **Sprint 4 · Seguridad, calidad, pruebas y pu
    | Cliente de Prueba | Cliente | `cliente.prueba@nivel99.uy` | `Prueba2026` |
    | John Doe | Cliente | `johndoe@nivel99.uy` | `Prueba2026` |
 
-3. Para comprar, elegir la forma de pago en el carrito. **Coordinar con el equipo**, la
-   opción marcada por defecto, registra el pedido en el momento. **Pago en línea** lleva a
+3. Para comprar, usar una cuenta de cliente (la de administración no puede comprar) y
+   elegir la forma de pago en el carrito. **Coordinar con el equipo**, la opción marcada
+   por defecto, registra el pedido en el momento. **Pago en línea** lleva a
    una pasarela simulada donde se elige si el pago se aprueba o se rechaza.
 
 ### Pago en línea (simulado)
@@ -44,6 +45,26 @@ asesoramiento personal: cada compra la sigue una persona del equipo, con garant�
 de doce meses y entrega en 24 horas en Artigas.
 
 El estilo de comunicación es cercano, directo y en segunda persona del singular rioplatense.
+
+## Funcionalidades principales
+
+- **Catálogo desde Cloud Firestore:** búsqueda por nombre o descripción, filtro por
+  categoría, orden por nombre o precio y productos destacados en la portada.
+- **Ficha del producto:** precio, stock, disponibilidad, características y opiniones con
+  su promedio.
+- **Carrito persistente** en LocalStorage: agregar, cambiar cantidades y eliminar, con
+  subtotales, envío y total, y control del stock disponible.
+- **Cuentas con Firebase Authentication:** registro, inicio y cierre de sesión, y la sesión
+  se mantiene al recargar.
+- **Compras:** confirmación con stock y precios actuales, pedidos guardados en Firestore e
+  historial en el perfil. El pago se coordina con el equipo o se hace en línea con una
+  pasarela simulada.
+- **Opiniones** de 1 a 5 estrellas, solo con la sesión iniciada.
+- **Roles cliente y administrador.** El panel administrativo permite crear, editar,
+  desactivar y eliminar productos, cambiar el stock, la disponibilidad y los destacados,
+  y consultar los pedidos y cambiar su estado.
+- **Seguridad:** páginas privadas protegidas y reglas de Firestore por colección.
+- **Diseño responsive y accesible**, publicado en GitHub Pages.
 
 ## Público objetivo
 
@@ -74,7 +95,7 @@ asesoramiento antes que el precio más bajo del mercado.
 | Cloud Firestore | Usuarios y roles, productos, pedidos y valoraciones (Sprint 3) |
 | Reglas de seguridad de Firestore | Quién puede leer y escribir cada colección, en `firestore.rules` (Sprint 4) |
 | Mercado Pago Checkout Pro | Integración con credenciales de prueba, desactivada en la entrega (Sprint 4, extra) |
-| Cloudflare Workers | Servidor de pagos que guarda el Access Token de Mercado Pago (Sprint 4, extra) |
+| Cloudflare Workers | Servidor de pagos para Mercado Pago; su código está en `cloudflare/` y no se despliega en la entrega (Sprint 4, extra) |
 | Git, GitHub y GitHub Pages | Control de versiones y publicación del sitio |
 
 ## Estructura del proyecto
@@ -383,11 +404,12 @@ El nombre del titular define el resultado: `APRO` aprueba el pago, `OTHE` lo rec
 `CONT` lo deja pendiente (documento: CI `12345678`). Se paga en una ventana privada,
 ingresando en el checkout con una cuenta compradora de prueba.
 
-**Estado al momento de la entrega.** El Worker está desplegado **sin Access Token** y el
-interruptor está en `false`. Para Checkout Pro, las credenciales de prueba se obtienen
+**Estado al momento de la entrega.** El interruptor está en `false` y el Worker **no está
+desplegado**: su código queda en `cloudflare/worker-pagos.js`, listo para pegarlo en
+Cloudflare. Para Checkout Pro, las credenciales de prueba se obtienen
 iniciando sesión con una cuenta vendedora de prueba, y Mercado Pago no permitió ingresar
-con las cuentas de prueba creadas. La integración queda lista: cargando ese token en el
-Worker y poniendo el interruptor en `true`, funciona sin cambiar otro código.
+con las cuentas de prueba creadas. La integración queda lista: desplegando el Worker con
+ese token y poniendo el interruptor en `true`, funciona sin cambiar otro código.
 
 `fetch()` con JSON y la lectura de parámetros de URL (Semana 7) son lo único nuevo del
 lado del sitio. El Worker excede los contenidos del curso y está comentado paso a paso.
@@ -1064,15 +1086,15 @@ adelante está en *Posibles mejoras futuras*.
 - **Dos tipografías.** Chakra Petch en títulos y botones aporta el carácter gamer;
   Inter en los textos largos prioriza la lectura.
 - **Variables CSS.** Toda la identidad está centralizada en `:root`, de modo que un cambio
-  de color o de radio se propaga a las seis páginas.
+  de color o de radio se propaga a todas las páginas.
 - **Bootstrap + CSS propio.** Bootstrap resuelve grilla y componentes; el archivo
   `styles.css` solo redefine lo necesario para que el sitio no parezca una plantilla.
 - **Coherencia entre páginas.** Navbar, footer, toast y tipografías son idénticos en las
-  seis páginas para que el sistema se perciba como un único producto.
+  todas las páginas para que el sistema se perciba como un único producto.
 - **Íconos y logotipo en SVG.** Se almacenan en `assets/` porque escalan sin perder
   calidad y no dependen de librerías externas de íconos.
-- **Alcance técnico acotado al curso.** El sitio se resolvió con los recursos trabajados en
-  las semanas 1 a 4: HTML semántico, selectores, herencia, especificidad, modelo de caja,
+- **Alcance técnico acotado al curso.** En el Sprint 1, el sitio se resolvió con los
+  recursos trabajados en las semanas 1 a 4: HTML semántico, selectores, herencia, especificidad, modelo de caja,
   `box-sizing`, `position`, pseudo-clases, `::before` y los componentes de Bootstrap
   (contenedores, grilla de 12 columnas, utilidades, botones, cards, navbar y formularios).
 - **Pago en línea simulado, con Mercado Pago como extra acotado.** La pasarela simulada se
@@ -1107,15 +1129,16 @@ adelante está en *Posibles mejoras futuras*.
 - El pago en línea de la entrega es simulado: el resultado lo elige la persona en la
   pasarela. En un comercio real lo confirmaría el medio de pago.
 - Mercado Pago funciona solo con credenciales de prueba: con credenciales reales, el
-  Worker se niega a crear pagos. Al momento de la entrega está desactivado y sin
-  credenciales (ver *Pago en línea: pasarela simulada y Mercado Pago*).
+  Worker se niega a crear pagos. Al momento de la entrega está desactivado y el Worker no
+  está desplegado (ver *Pago en línea: pasarela simulada y Mercado Pago*).
 - Con Mercado Pago, el resultado del pago lo guarda el navegador al volver, después de
   confirmarlo con el Worker. Las reglas no pueden consultar a Mercado Pago, así que antes
   de enviar un pedido el equipo comprueba su número de operación en el panel de Mercado
   Pago. Por la misma razón, si un pago queda "en proceso" y se aprueba más tarde, el
   pedido no se actualiza solo. Para las dos cosas harían falta las notificaciones de
   Mercado Pago (webhooks) y un servidor que escriba en Firestore.
-- Cada producto tiene por ahora una sola imagen en el arreglo `imagenes`.
+- Cada producto tiene por ahora una sola imagen en el arreglo `imagenes`, por eso la ficha
+  muestra una foto y todavía no incluye el carrusel de imágenes que propone el proyecto.
 
 ## Posibles mejoras futuras
 

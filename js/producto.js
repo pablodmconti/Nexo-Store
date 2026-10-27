@@ -83,8 +83,11 @@ async function iniciarFicha() {
   const parametros = new URLSearchParams(window.location.search);
   const idProducto = parametros.get("id");
 
-  /* Sin id no hay nada que buscar */
+  /* Sin id no hay nada que buscar: es el caso del enlace "Producto"
+     del menú, así que se invita a elegir uno en lugar de mostrar un error */
   if (!idProducto) {
+    document.querySelector("#textoMensajeError").textContent =
+      "Elegí un producto del catálogo para ver su ficha completa: precio, stock, características y opiniones.";
     mostrarMensajeError();
     return;
   }
