@@ -69,6 +69,86 @@ service cloud.firestore {
         && pedido.cantidades[idProducto] == stockAntes - stockDespues;
     }
 
+    // Lo que arma confirmarPedido() (pedidos.js): un pedido nuevo con
+    // exactamente estos campos, a nombre de quien compra, con la hora
+    // del servidor, pendiente y con cuentas que cierran. El envío se
+    // vuelve a calcular con los montos de calcularEnvio() (base.js):
+    // gratis desde $ 2000, si no $ 290.
+    function pedidoNuevoValido(idPedido) {
+      let pedido = request.resource.data;
+      let campos = ["uid", "nombreUsuario", "correo", "productos", "cantidades",
+                    "subtotal", "envio", "total", "fecha", "estado", "pago"];
+
+      return pedido.keys().hasOnly(campos)
+        && pedido.keys().hasAll(campos)
+        && pedido.uid == request.auth.uid
+        && pedido.correo == request.auth.token.email
+        && pedido.nombreUsuario is string
+        && pedido.nombreUsuario.size() > 0
+        && pedido.fecha == request.time
+        && pedido.estado == "pendiente"
+        && pedido.pago.keys().hasOnly(["metodo", "estado"])
+        && pedido.pago.metodo in ["simulado", "coordinar"]
+        && pedido.pago.estado == "pendiente"
+        && productosDelPedidoValidos(pedido, idPedido)
+        && pedido.subtotal == sumaDeSubtotales(pedido.productos)
+        && pedido.envio == (pedido.subtotal >= 2000 ? 0 : 290)
+        && pedido.total == pedido.subtotal + pedido.envio;
+    }
+
+    // Las reglas no tienen bucles: por eso la compra admite hasta 5
+    // productos distintos (MAXIMO_PRODUCTOS_CARRITO en base.js) y cada
+    // posición de la lista se revisa por separado. cantidades tiene que
+    // tener un id por producto: si un producto se repite en la lista,
+    // los tamaños no coinciden.
+    function productosDelPedidoValidos(pedido, idPedido) {
+      let lista = pedido.productos;
+
+      return lista is list
+        && lista.size() >= 1
+        && lista.size() <= 5
+        && pedido.cantidades is map
+        && pedido.cantidades.size() == lista.size()
+        && productoDelPedidoValido(pedido, 0, idPedido)
+        && (lista.size() < 2 || productoDelPedidoValido(pedido, 1, idPedido))
+        && (lista.size() < 3 || productoDelPedidoValido(pedido, 2, idPedido))
+        && (lista.size() < 4 || productoDelPedidoValido(pedido, 3, idPedido))
+        && (lista.size() < 5 || productoDelPedidoValido(pedido, 4, idPedido));
+    }
+
+    // Un producto del pedido se compara con el producto REAL tal como
+    // queda después de la compra (getAfter):
+    //   - tiene que haber anotado este pedido en ultimoPedido, o sea que
+    //     su stock bajó en esta misma operación (ver
+    //     bajaStockConPedidoNuevo, que exige que baje esta cantidad),
+    //   - el nombre y el precio son los de la tienda,
+    //   - la cantidad es un entero positivo, igual a la de cantidades,
+    //   - el subtotal es precio × cantidad.
+    function productoDelPedidoValido(pedido, i, idPedido) {
+      let item = pedido.productos[i];
+      let producto = getAfter(/databases/$(database)/documents/productos/$(item.idProducto)).data;
+
+      return item.keys().hasOnly(["idProducto", "nombre", "precioUnitario", "cantidad", "subtotal"])
+        && item.cantidad is int
+        && item.cantidad > 0
+        && pedido.cantidades[item.idProducto] == item.cantidad
+        && producto.ultimoPedido == idPedido
+        && item.nombre == producto.nombre
+        && item.precioUnitario == producto.precio
+        && item.subtotal == item.precioUnitario * item.cantidad;
+    }
+
+    // La suma de los subtotales de la lista (hasta 5 productos).
+    // condición ? valor : otro elige un valor según la condición.
+    function subtotalEn(lista, i) {
+      return i < lista.size() ? lista[i].subtotal : 0;
+    }
+
+    function sumaDeSubtotales(lista) {
+      return subtotalEn(lista, 0) + subtotalEn(lista, 1) + subtotalEn(lista, 2)
+        + subtotalEn(lista, 3) + subtotalEn(lista, 4);
+    }
+
     // Lo que hace registrarPago() (pedidos.js) al volver de la pasarela
     // simulada: el dueño de un pedido pendiente con pago en línea cambia
     // SOLO el campo pago, a "aprobado" o "rechazado", con un número de
@@ -126,9 +206,10 @@ service cloud.firestore {
     // pedidos/{idPedido}
     // Cada cliente lee solo sus pedidos; el administrador, todos.
     // Un pedido nuevo lo crea solo un cliente (una cuenta de
-    // administración no compra), a su nombre, como "pendiente" y con el
-    // pago también pendiente. El estado lo cambia solo el administrador;
-    // el cliente solo registra su pago.
+    // administración no compra) y tiene que coincidir con lo que pasa
+    // en la tienda en esa misma compra: productos, precios, cantidades,
+    // stock descontado y totales (ver pedidoNuevoValido). El estado lo
+    // cambia solo el administrador; el cliente solo registra su pago.
     // ---------------------------------------------------------------
     match /pedidos/{idPedido} {
       allow read: if haySesion()
@@ -136,10 +217,7 @@ service cloud.firestore {
 
       allow create: if haySesion()
         && !esAdmin()
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.estado == "pendiente"
-        && request.resource.data.pago.metodo in ["simulado", "coordinar"]
-        && request.resource.data.pago.estado == "pendiente";
+        && pedidoNuevoValido(idPedido);
 
       allow update: if esAdmin() || registraPagoEnLinea();
 

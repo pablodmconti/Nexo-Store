@@ -13,7 +13,7 @@ Pedidos en Cloud Firestore
        ├─ cantidades:    { idProducto: cantidad, ... }
        │                 (lo mismo en forma de mapa, para las reglas)
        ├─ subtotal, envio, total
-       ├─ fecha:         momento de la confirmación
+       ├─ fecha:         momento de la confirmación (hora del servidor)
        ├─ estado:        "pendiente"
        └─ pago:          { metodo, estado, idOperacion, fecha }
                          (Sprint 4: "simulado" o "coordinar")
@@ -33,6 +33,7 @@ import {
   getDocs,
   query,
   runTransaction,
+  serverTimestamp,
   updateDoc,
   where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -88,6 +89,16 @@ export function describirPago(pedido) {
    Si falla la conexión con Firestore, el error sube a quien la llamó.
    --------------------------------------------------------------- */
 export async function confirmarPedido(usuario, carrito, metodoPago) {
+  /* Las reglas de Firestore revisan uno por uno los productos de un
+     pedido y aceptan hasta 5 distintos (base.js lo controla al agregar;
+     esto cubre un carrito guardado antes de ese límite) */
+  if (carrito.length > MAXIMO_PRODUCTOS_CARRITO) {
+    return {
+      confirmado: false,
+      problemas: [`El carrito tiene ${carrito.length} productos distintos y una compra admite hasta ${MAXIMO_PRODUCTOS_CARRITO}. Quitá algunos y compralos en otro pedido.`]
+    };
+  }
+
   /* doc() sobre la colección, sin id, reserva un id automático */
   const referenciaPedido = doc(collection(db, "pedidos"));
 
@@ -188,7 +199,9 @@ async function comprarEnTransaccion(transaccion, referenciaPedido, usuario, carr
     subtotal: subtotal,
     envio: envio,
     total: total,
-    fecha: new Date(),
+    /* La hora la pone el servidor: las reglas exigen que sea la del
+       momento de la compra, así nadie registra un pedido con otra fecha */
+    fecha: serverTimestamp(),
     estado: "pendiente",
     pago: {
       metodo: metodoPago,

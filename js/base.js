@@ -56,6 +56,11 @@ function describirStock(stock) {
 /* Nombre de la "caja" donde el navegador guarda el carrito */
 const CLAVE_CARRITO = "carritoNivel99";
 
+/* Productos DISTINTOS que admite una compra (de cada uno se pueden
+   llevar las unidades que haya en stock). Las reglas de Firestore
+   revisan uno por uno los productos del pedido y aceptan hasta 5. */
+const MAXIMO_PRODUCTOS_CARRITO = 5;
+
 /* Lee el carrito. La primera vez todavía no hay nada guardado:
    getItem() devuelve null, JSON.parse(null) también, y el || []
    deja igual un array vacío para poder trabajar. */
@@ -109,11 +114,15 @@ function agregarAlCarrito(producto) {
 
   /* 1. Un producto desactivado no se vende, aunque tenga stock.
      2. Control de stock: no se puede vender más de lo que hay.
-        Si el producto está agotado, 0 >= 0 y tampoco deja agregar. */
+        Si el producto está agotado, 0 >= 0 y tampoco deja agregar.
+     3. Un producto NUEVO entra solo si no se llegó al máximo de
+        productos distintos (sumar unidades de uno que ya está, sí). */
   if (!producto.disponible) {
     mostrarAviso(`${producto.nombre} no está disponible por el momento.`);
   } else if (cantidadEnCarrito >= producto.stock) {
     mostrarAviso(`No hay más stock disponible de ${producto.nombre}.`);
+  } else if (!item && carrito.length >= MAXIMO_PRODUCTOS_CARRITO) {
+    mostrarAviso(`El carrito admite hasta ${MAXIMO_PRODUCTOS_CARRITO} productos distintos por compra. Confirmá esta compra y agregá ${producto.nombre} en la siguiente.`);
   } else {
     if (item) {
       item.cantidad++;
@@ -129,7 +138,9 @@ function agregarAlCarrito(producto) {
 /* Costo de envío simulado, con las mismas condiciones que anuncia la
    portada: gratis a partir de cierto monto y con costo fijo por debajo.
    Está acá (y no en carrito.js) porque lo usan el resumen del carrito
-   y el registro del pedido en js/modules/pedidos.js. */
+   y el registro del pedido en js/modules/pedidos.js. Si cambian estos
+   montos, hay que cambiarlos también en firestore.rules, que vuelve a
+   calcular el envío de cada pedido. */
 const MONTO_ENVIO_GRATIS = 2000;
 const COSTO_ENVIO = 290;
 

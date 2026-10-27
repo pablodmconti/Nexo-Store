@@ -332,7 +332,8 @@ btnConfirmar.addEventListener("click", async () => {
 
   try {
     /* 2. pedidos.js revisa stock y disponibilidad actuales, calcula el
-          total, guarda el pedido y descuenta el stock en un solo lote */
+          total, guarda el pedido y descuenta el stock en una sola
+          transacción */
     resultado = await confirmarPedido(usuarioActual, obtenerCarrito(), metodoPago);
   } catch (error) {
     console.error("Error al confirmar la compra:", error);

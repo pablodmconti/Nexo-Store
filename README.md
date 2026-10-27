@@ -175,7 +175,8 @@ una computadora:
 2. **Armar el carrito.** **Agregar al carrito** está en las tarjetas y en la ficha. El
    número junto al ícono del carrito muestra cuántas unidades hay. En **Carrito** se
    cambian las cantidades con **+** y **−**, se quita un producto con **Eliminar** o se
-   vacía todo. El envío es gratis desde $ 2.000. El carrito queda guardado en el navegador.
+   vacía todo. Una compra admite hasta 5 productos distintos, con las unidades que haya de
+   cada uno. El envío es gratis desde $ 2.000. El carrito queda guardado en el navegador.
 3. **Crear una cuenta o ingresar.** Con el botón **Ingresar** de la barra superior. En la
    pestaña **Crear cuenta** se completan nombre y apellido, correo y contraseña (6
    caracteres como mínimo, repetida para confirmarla).
@@ -270,16 +271,38 @@ servidor, aunque alguien escriba en la base por fuera del sitio.
 | Colección | Quién lee | Quién escribe |
 | --- | --- | --- |
 | `usuarios` | Cada persona su documento; el administrador, todos | Se crea solo como `cliente`; nadie puede cambiarse el rol |
-| `productos` | Cualquiera, sin iniciar sesión | Solo el administrador. Única excepción: al comprar, un cliente con sesión puede **bajar** el `stock` de un producto disponible, sin tocar otro campo y sin dejarlo en negativo |
-| `pedidos` | Cada cliente los suyos; el administrador, todos | Los crea solo un cliente (una cuenta de administración no compra), con su `uid`, estado `pendiente` y pago pendiente. El estado lo cambia solo el administrador; el cliente solo registra el resultado del pago de su propio pedido |
+| `productos` | Cualquiera, sin iniciar sesión | Solo el administrador. Única excepción: al comprar, un cliente baja el `stock` de un producto disponible, y solo junto con un pedido nuevo suyo que pida exactamente esas unidades |
+| `pedidos` | Cada cliente los suyos; el administrador, todos | Los crea solo un cliente (una cuenta de administración no compra), a su nombre, `pendiente` y con el pago pendiente. Los productos, precios, cantidades, envío y total tienen que coincidir con la tienda y con el stock descontado en esa compra. El estado lo cambia solo el administrador; el cliente solo registra el resultado del pago de su propio pedido |
 | `valoraciones` | Cualquiera | Cada usuario solo su opinión, de 1 a 5 estrellas y de 10 a 500 caracteres. El administrador puede borrarlas |
 
 Todo lo que no está permitido en el archivo queda prohibido.
 
+#### Cómo se protege una compra
+
+La compra se arma en el navegador, así que las reglas comprueban cada dato contra lo que
+hay en Firestore:
+
+- **Una transacción.** `confirmarPedido()` usa `runTransaction()`: lee el stock, crea el
+  pedido y descuenta las unidades como una sola operación. Si otra compra cambia el stock
+  en el medio, se repite con los datos nuevos (hasta 3 intentos), así dos compras del mismo
+  producto no se pisan. Cancelar un pedido desde el panel también usa una transacción.
+- **El stock baja solo con un pedido.** Cada producto comprado anota el id del pedido en
+  `ultimoPedido`, y el pedido guarda las unidades en `cantidades`, un mapa por id de
+  producto (`{ p3: 2, p7: 1 }`), porque las reglas no pueden recorrer una lista para
+  buscar un producto. Las reglas exigen que ese pedido se cree en la misma operación, sea
+  de quien compra y pida exactamente las unidades descontadas.
+- **El pedido tiene que cerrar.** Las reglas comparan cada producto del pedido con el de la
+  tienda (nombre, precio y stock descontado), revisan los subtotales, el envío (gratis
+  desde $ 2.000, si no $ 290) y el total, y no aceptan campos de más. La fecha la pone el
+  servidor (`serverTimestamp()`).
+- **Hasta 5 productos distintos.** Las reglas no tienen bucles y revisan cada posición de
+  la lista por separado. El carrito avisa al llegar al máximo (`MAXIMO_PRODUCTOS_CARRITO`
+  en `base.js`).
+
 #### Otros cuidados de seguridad
 
-- **Texto de los usuarios dentro del HTML.** Los datos de un pedido (nombre, correo,
-  productos e importes) los guarda el navegador del cliente, y el panel administrativo los
+- **Texto de los usuarios dentro del HTML.** Algunos datos de un pedido, como el nombre de
+  quien compra, los escribe el navegador del cliente, y el panel administrativo los
   muestra con `innerHTML`. Un nombre como `<img onerror="...">` se ejecutaría en la sesión
   del administrador. `escaparHtml()`, en `base.js`, convierte esos caracteres en texto
   común antes de insertarlos en el panel, el perfil y la página de pago. Las opiniones ya
@@ -396,14 +419,30 @@ Comprobaciones hechas sobre el sitio publicado el 26/10/2026, después de cerrar
 **Reglas de seguridad**
 - Sin sesión, Firestore rechaza leer pedidos o usuarios, crear pedidos y escribir productos
   (respuesta 403), y permite leer el catálogo.
+- Con el emulador de Firestore y `@firebase/rules-unit-testing` (27/10/2026), usando el
+  código de `pedidos.js` y `firestore.rules`:
+  - Dos y tres compras simultáneas del mismo producto se confirman todas y el stock queda
+    bien (10 − 3 − 4 = 3). Si no alcanza para todas, una se confirma y la otra recibe el
+    aviso de stock, sin quedar en negativo.
+  - Un cliente no puede bajar el stock sin un pedido nuevo suyo, ni con un pedido viejo o
+    inventado, ni descontar más unidades que las pedidas.
+  - Se rechazan pedidos con precios, nombres, subtotales, envío o total falsos, cantidades
+    en 0, productos repetidos o sin descontar su stock, más de 5 productos, campos de más
+    o de menos, otra fecha, otro correo, estado o pago ya aprobado. Los pedidos correctos,
+    con 1 a 5 productos, se aceptan.
+  - Cancelar un pedido devuelve el stock una sola vez, aunque se cancele dos veces al mismo
+    tiempo o coincida con una compra.
+  - El carrito no deja agregar un sexto producto distinto y sí sumar unidades a uno que ya
+    está.
 
 ## Registro de los sprints anteriores
 
 Las secciones siguientes documentan cómo quedó el proyecto al cerrar cada sprint y se
 conservan como registro del proceso. Algunas cosas cambiaron después: por ejemplo, las
 páginas ya no tienen avisos de "Funcionalidad en desarrollo", `cargar-productos.html` se
-retiró antes de publicar y un cliente que abre `admin.html` ahora vuelve al inicio. La
-versión final está descrita en las secciones anteriores.
+retiró antes de publicar, un cliente que abre `admin.html` ahora vuelve al inicio y las
+compras y cancelaciones usan una transacción en lugar de un `writeBatch()`. La versión
+final está descrita en las secciones anteriores.
 
 ### Funcionalidades desarrolladas en el Sprint 3
 
@@ -1068,20 +1107,14 @@ adelante está en *Posibles mejoras futuras*.
   todavía no están optimizadas. En `assets/img/producto-placeholder.svg` hay una imagen
   local de reemplazo.
 - Los enlaces de redes sociales son simulados (`href="#"`) y están aclarados en el footer.
-- Las reglas de Firestore no comparan el precio guardado en un pedido con el de la
-  tienda, así que un pedido "Coordinar con el equipo" creado por fuera del sitio podría
-  tener un total falso; el equipo lo revisa antes de enviarlo.
-- Las reglas dejan que un cliente con sesión baje el stock (sin dejarlo negativo), porque
-  la compra lo descuenta desde el navegador. Un descuento sin compra solo se evitaría
-  confirmando el pedido desde un servidor.
 - El rol de administrador se asigna a mano desde la consola de Firebase.
 - El carrito se guarda en el navegador: si se abre el sitio en otro equipo o en otro
   navegador, el carrito aparece vacío. Compartir el carrito entre dispositivos requiere
   la cuenta de usuario del Sprint 3.
-- La confirmación lee el stock y después escribe el lote: si dos personas compran el último
-  producto en el mismo instante, las dos lecturas podrían ver stock disponible. Para
-  evitarlo del todo haría falta una transacción (`runTransaction()`); las reglas del
-  Sprint 4 ya impiden que el stock quede negativo.
+- Una compra admite hasta 5 productos distintos, porque las reglas de Firestore revisan
+  cada producto del pedido por separado. Para más productos se hace otra compra.
+- Si más de tres personas compran el mismo producto en el mismo instante, alguna compra
+  puede agotar los 3 intentos y pedir que se vuelva a confirmar. El carrito no se pierde.
 - El envío es simulado. El pago "Coordinar con el equipo" deja el pedido en estado
   "pendiente" hasta que el equipo lo actualiza.
 - El pago en línea de la entrega es simulado: el resultado lo elige la persona en la
@@ -1093,7 +1126,8 @@ adelante está en *Posibles mejoras futuras*.
 
 - Reemplazar la pasarela simulada por un medio de pago real en modo de prueba, por ejemplo
   Mercado Pago, con un servidor que guarde la clave secreta y confirme cada pago.
-- Confirmar las compras con `runTransaction()` para evitar dos ventas del último producto.
+- Confirmar las compras desde un servidor (por ejemplo, Cloud Functions), para simplificar
+  las reglas y quitar el límite de 5 productos distintos.
 - Optimizar las fotografías de `assets/img/productos` y sumar más de una por producto
   para el carrusel.
 - Subir imágenes desde el panel administrativo con Cloudinary, como propone la Semana 11.
