@@ -544,6 +544,13 @@ async function actualizarEstado(idPedido, boton) {
       await cargarProductosAdmin();
     }
   } catch (error) {
+    /* Otra sesión de administración lo canceló mientras tanto */
+    if (error.code === "ya-cancelado") {
+      mostrarAviso("Ese pedido ya estaba cancelado: no se cambió nada.");
+      await cargarPedidosAdmin();
+      return;
+    }
+
     console.error("Error al cambiar el estado:", error);
     mostrarAviso("No pudimos actualizar el pedido. Probá de nuevo.");
     boton.disabled = false;

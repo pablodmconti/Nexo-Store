@@ -26,9 +26,9 @@ import {
   getDoc,
   getDocs,
   query,
+  runTransaction,
   updateDoc,
-  where,
-  writeBatch
+  where
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ---------------------------------------------------------------
@@ -82,13 +82,48 @@ export function describirPago(pedido) {
    Si falla la conexión con Firestore, el error sube a quien la llamó.
    --------------------------------------------------------------- */
 export async function confirmarPedido(usuario, carrito, metodoPago) {
+  /* doc() sobre la colección, sin id, reserva un id automático */
+  const referenciaPedido = doc(collection(db, "pedidos"));
+
+  /* runTransaction(): todo lo que pasa adentro se confirma junto o no
+     se confirma. Además, Firestore vigila los productos que se leyeron:
+     si otra compra cambia su stock antes de terminar, rechaza la
+     escritura y la transacción se repite con los datos nuevos. Así dos
+     compras simultáneas del mismo producto no se pisan (con un
+     writeBatch() las dos calculaban el stock a partir del mismo valor
+     viejo).
+
+     Ese rechazo a veces llega como "permission-denied": las reglas
+     comparan el stock nuevo con el que hay AHORA en la base, y una
+     escritura calculada con el valor viejo no las cumple. Firestore no
+     repite sola la transacción ante ese error, así que se vuelve a
+     intentar desde acá, hasta 3 veces. Si el permiso falta de verdad,
+     los 3 intentos fallan igual y el error sube a carrito.js. */
+  for (let intento = 1; ; intento++) {
+    try {
+      return await runTransaction(db, (transaccion) => {
+        return comprarEnTransaccion(transaccion, referenciaPedido, usuario, carrito, metodoPago);
+      });
+    } catch (error) {
+      if (error.code !== "permission-denied" || intento === 3) {
+        throw error;
+      }
+    }
+  }
+}
+
+/* El contenido de la transacción de compra: primero todas las
+   lecturas, después todas las escrituras */
+async function comprarEnTransaccion(transaccion, referenciaPedido, usuario, carrito, metodoPago) {
   const items = [];
   const problemas = [];
 
-  /* Paso 1: volver a leer CADA producto. El stock y el precio pueden
-     haber cambiado desde que se armó el carrito. */
+  /* Paso 1: volver a leer CADA producto, dentro de la transacción.
+     El stock y el precio pueden haber cambiado desde que se armó el
+     carrito. En una transacción, todas las lecturas van primero. */
   for (const item of carrito) {
-    const snapshot = await getDoc(doc(db, "productos", item.idProducto));
+    const referencia = doc(db, "productos", item.idProducto);
+    const snapshot = await transaccion.get(referencia);
 
     if (!snapshot.exists()) {
       problemas.push("Uno de los productos del carrito ya no está en la tienda.");
@@ -100,12 +135,12 @@ export async function confirmarPedido(usuario, carrito, metodoPago) {
       } else if (item.cantidad > producto.stock) {
         problemas.push(`De ${producto.nombre} quedan ${producto.stock} unidades y en el carrito hay ${item.cantidad}.`);
       } else {
-        items.push({ producto, cantidad: item.cantidad });
+        items.push({ referencia, producto, cantidad: item.cantidad });
       }
     }
   }
 
-  /* Si algo no alcanza, no se guarda nada */
+  /* Si algo no alcanza, no se escribe nada */
   if (problemas.length > 0) {
     return { confirmado: false, problemas: problemas };
   }
@@ -125,16 +160,9 @@ export async function confirmarPedido(usuario, carrito, metodoPago) {
   const envio = calcularEnvio(subtotal); // está en base.js
   const total = subtotal + envio;
 
-  /* Paso 3: un solo lote (writeBatch) con el pedido nuevo y
-     el descuento de stock de cada producto. commit() confirma todo
-     junto: si algo falla, no queda un pedido sin descontar stock ni
-     stock descontado sin pedido. */
-  const lote = writeBatch(db);
-
-  /* doc() sobre la colección, sin id, reserva un id automático */
-  const referenciaPedido = doc(collection(db, "pedidos"));
-
-  lote.set(referenciaPedido, {
+  /* Paso 3: las escrituras, después de todas las lecturas: el pedido
+     nuevo y el descuento de stock de cada producto */
+  transaccion.set(referenciaPedido, {
     uid: usuario.uid,
     nombreUsuario: usuario.displayName || usuario.email,
     correo: usuario.email,
@@ -150,17 +178,9 @@ export async function confirmarPedido(usuario, carrito, metodoPago) {
     }
   });
 
-  items.forEach(({ producto, cantidad }) => {
-    const nuevoStock = producto.stock - cantidad;
-
-    /* Nunca negativo: la cantidad ya se comparó con el stock en el
-       paso 1, pero se vuelve a controlar antes de escribir */
-    if (nuevoStock >= 0) {
-      lote.update(doc(db, "productos", producto.id), { stock: nuevoStock });
-    }
+  items.forEach(({ referencia, producto, cantidad }) => {
+    transaccion.update(referencia, { stock: producto.stock - cantidad });
   });
-
-  await lote.commit();
 
   return { confirmado: true, idPedido: referenciaPedido.id, total: total };
 }
@@ -208,28 +228,47 @@ export async function obtenerTodosLosPedidos() {
 }
 
 /* Cambia el estado de un pedido.
-   Si se CANCELA, las unidades vuelven al stock de cada producto en el
-   mismo lote: o se cancela y se devuelve el stock, o no cambia nada.
-   Un pedido ya cancelado no se puede volver a cambiar, para no
-   devolver el stock dos veces (se controla también en admin.js). */
+   Si se CANCELA, las unidades vuelven al stock de cada producto en la
+   misma transacción: o se cancela y se devuelve el stock, o no cambia
+   nada. Se trabaja con los datos ACTUALES (no con los que tenía la
+   pantalla del panel): si una compra cambia el stock al mismo tiempo,
+   la transacción se repite sola, y un pedido que ya estaba cancelado
+   no se vuelve a cancelar, para no devolver el stock dos veces. */
 export async function cambiarEstadoPedido(pedido, nuevoEstado) {
-  const lote = writeBatch(db);
+  const referenciaPedido = doc(db, "pedidos", pedido.id);
 
-  lote.update(doc(db, "pedidos", pedido.id), { estado: nuevoEstado });
+  await runTransaction(db, async (transaccion) => {
+    /* Primero todas las lecturas: el pedido como está ahora y, si se
+       cancela, el stock actual de cada uno de sus productos */
+    const pedidoActual = (await transaccion.get(referenciaPedido)).data();
 
-  if (nuevoEstado === "cancelado" && pedido.estado !== "cancelado") {
-    for (const item of pedido.productos) {
-      const referencia = doc(db, "productos", item.idProducto);
-      const snapshot = await getDoc(referencia);
+    if (pedidoActual.estado === "cancelado") {
+      const error = new Error("El pedido ya estaba cancelado.");
+      error.code = "ya-cancelado";
+      throw error;
+    }
 
-      /* Si el producto fue eliminado, no hay stock que devolver */
-      if (snapshot.exists()) {
-        lote.update(referencia, { stock: snapshot.data().stock + item.cantidad });
+    const devoluciones = [];
+
+    if (nuevoEstado === "cancelado") {
+      for (const item of pedidoActual.productos) {
+        const referencia = doc(db, "productos", item.idProducto);
+        const snapshot = await transaccion.get(referencia);
+
+        /* Si el producto fue eliminado, no hay stock que devolver */
+        if (snapshot.exists()) {
+          devoluciones.push({ referencia, stock: snapshot.data().stock + item.cantidad });
+        }
       }
     }
-  }
 
-  await lote.commit();
+    /* Después las escrituras */
+    transaccion.update(referenciaPedido, { estado: nuevoEstado });
+
+    devoluciones.forEach(({ referencia, stock }) => {
+      transaccion.update(referencia, { stock: stock });
+    });
+  });
 }
 
 /* ---------------------------------------------------------------
