@@ -984,13 +984,6 @@ img {
   color: #ffffff;
 }
 
-.nota-auth {
-  margin-top: 1.5rem;
-  font-size: 0.8rem;
-  text-align: center;
-  color: var(--color-texto-suave);
-}
-
 /* Mientras se comprueba la sesión */
 .estado-carga {
   text-align: center;
