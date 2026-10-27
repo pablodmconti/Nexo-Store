@@ -1,7 +1,7 @@
 rules_version = '2';
 
 // =====================================================================
-// Reglas de seguridad de Cloud Firestore · Nivel 99 (Sprint 4)
+// Reglas de seguridad de Cloud Firestore
 // ---------------------------------------------------------------------
 // Reemplazan el "modo de prueba". Ocultar un botón en el navegador no
 // protege nada: estas reglas las aplica Firebase en el servidor, así

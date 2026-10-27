@@ -32,7 +32,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ---------------------------------------------------------------
-   0. FORMAS DE PAGO (Sprint 4)
+   0. FORMAS DE PAGO
    ---------------------------------------------------------------
    Textos para mostrar el pago en el perfil y en el panel. Los pedidos
    anteriores al Sprint 4 no tienen el campo pago: se muestran como
