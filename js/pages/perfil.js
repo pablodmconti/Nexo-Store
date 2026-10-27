@@ -15,7 +15,7 @@ Página privada perfil.html
 import { auth } from "../firebase/config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { obtenerPerfilUsuario } from "../modules/usuarios.js";
-import { obtenerPedidosDeUsuario, describirPago } from "../modules/pedidos.js";
+import { obtenerPedidosDeUsuario, describirPago, esPagoEnLinea } from "../modules/pedidos.js";
 
 const perfilCargando = document.querySelector("#perfilCargando");
 const perfilContenido = document.querySelector("#perfilContenido");
@@ -81,13 +81,13 @@ function htmlPedido(pedido) {
     envio = "Gratis";
   }
 
-  /* Forma de pago (Sprint 4). Un pedido con Mercado Pago sin pagar
+  /* Forma de pago (Sprint 4). Un pedido con pago en línea sin pagar
      (o con el pago rechazado) ofrece volver a intentarlo. */
   let botonPagar = "";
 
-  if (pedido.pago && pedido.pago.metodo === "mercadopago" && pedido.estado === "pendiente"
+  if (esPagoEnLinea(pedido) && pedido.estado === "pendiente"
       && (pedido.pago.estado === "pendiente" || pedido.pago.estado === "rechazado")) {
-    botonPagar = `<a class="btn btn-primary btn-sm mt-3" href="pago.html?pedido=${pedido.id}">Pagar con Mercado Pago</a>`;
+    botonPagar = `<a class="btn btn-primary btn-sm mt-3" href="pago.html?pedido=${escaparHtml(pedido.id)}">Pagar ahora</a>`;
   }
 
   return `

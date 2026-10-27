@@ -51,21 +51,25 @@ service cloud.firestore {
         && request.resource.data.stock < resource.data.stock;
     }
 
-    // Lo que hace registrarPago() (pedidos.js) al volver de Mercado
-    // Pago: el dueño de un pedido pendiente con Mercado Pago cambia SOLO
-    // el campo pago, con el resultado y el número de pago (payment_id).
-    // Un pago aprobado ya no se puede cambiar.
-    function registraPagoMercadoPago() {
+    // Lo que hace registrarPago() (pedidos.js) al volver del pago en
+    // línea: el dueño de un pedido pendiente con pago en línea cambia
+    // SOLO el campo pago, sin cambiar la forma de pago, con el resultado
+    // y su número de operación: SIM-123... en la pasarela simulada o el
+    // payment_id en Mercado Pago. Un pago aprobado ya no se puede cambiar.
+    function registraPagoEnLinea() {
       return haySesion()
         && resource.data.uid == request.auth.uid
         && resource.data.estado == "pendiente"
-        && resource.data.pago.metodo == "mercadopago"
+        && resource.data.pago.metodo in ["simulado", "mercadopago"]
         && resource.data.pago.estado != "aprobado"
         && soloCambia(["pago"])
-        && request.resource.data.pago.metodo == "mercadopago"
+        && request.resource.data.pago.metodo == resource.data.pago.metodo
         && request.resource.data.pago.estado in ["aprobado", "rechazado", "en proceso"]
         && request.resource.data.pago.idOperacion is string
-        && request.resource.data.pago.idOperacion.matches("[0-9]+");
+        && ((resource.data.pago.metodo == "simulado"
+              && request.resource.data.pago.idOperacion.matches("SIM-[0-9]+"))
+          || (resource.data.pago.metodo == "mercadopago"
+              && request.resource.data.pago.idOperacion.matches("[0-9]+")));
     }
 
     // ---------------------------------------------------------------
@@ -117,10 +121,10 @@ service cloud.firestore {
         && !esAdmin()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.estado == "pendiente"
-        && request.resource.data.pago.metodo in ["mercadopago", "coordinar"]
+        && request.resource.data.pago.metodo in ["simulado", "mercadopago", "coordinar"]
         && request.resource.data.pago.estado == "pendiente";
 
-      allow update: if esAdmin() || registraPagoMercadoPago();
+      allow update: if esAdmin() || registraPagoEnLinea();
 
       allow delete: if false;
     }

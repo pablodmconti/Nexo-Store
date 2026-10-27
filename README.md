@@ -23,29 +23,18 @@ Entrega final, correspondiente al **Sprint 4 · Seguridad, calidad, pruebas y pu
    | John Doe | Cliente | `johndoe@nivel99.uy` | `Prueba2026` |
 
 3. Para comprar, elegir la forma de pago en el carrito. **Coordinar con el equipo**, la
-   opción marcada por defecto, registra el pedido en el momento. **Mercado Pago** abre el
-   checkout en modo de prueba (ver los datos de prueba más abajo).
+   opción marcada por defecto, registra el pedido en el momento. **Pago en línea** lleva a
+   una pasarela simulada donde se elige si el pago se aprueba o se rechaza.
 
-### Datos de prueba de Mercado Pago (Uruguay)
+### Pago en línea (simulado)
 
-Son datos públicos de prueba de Mercado Pago: no corresponden a tarjetas reales ni
-cobran dinero.
-
-| Tarjeta | Número | Código de seguridad | Vencimiento |
-| --- | --- | --- | --- |
-| Visa crédito | `4509 9535 6623 3704` | `123` | `11/30` |
-| Mastercard crédito | `5031 7557 3453 0604` | `123` | `11/30` |
-| Visa débito | `4410 1036 7243 6886` | `123` | `11/30` |
-
-- **El nombre del titular define el resultado:** `APRO` aprueba el pago, `OTHE` lo
-  rechaza y `CONT` lo deja pendiente. Documento: CI `12345678`.
-- Pagar en una **ventana de incógnito**. Mercado Pago recomienda ingresar en el checkout
-  con una cuenta compradora de prueba. Su usuario y contraseña no se publican en el
-  repositorio; se entregan al docente si los solicita.
-- **Solo credenciales de prueba.** Antes de crear un pago, el Worker le pregunta a Mercado
-  Pago de qué cuenta es el token. Si no es una cuenta de prueba, no crea el pago, así el
-  sitio nunca cobra dinero real. Si el pago con Mercado Pago no se inicia, la compra se
-  puede completar con **Coordinar con el equipo**.
+- No se piden datos de tarjeta ni se cobra dinero. La pasarela simula el paso por un medio
+  de pago con dos botones: **Aprobar el pago** y **Rechazar el pago**.
+- El resultado vuelve a la tienda por la URL, se guarda en el pedido y se ve en **Mi
+  perfil** y en el panel administrativo. Un pago rechazado se puede reintentar desde el
+  perfil.
+- El proyecto incluye también una integración con **Mercado Pago**, desactivada en la
+  entrega (ver *Pago en línea: pasarela simulada y Mercado Pago*).
 
 ## Descripción del e-commerce
 
@@ -84,7 +73,7 @@ asesoramiento antes que el precio más bajo del mercado.
 | Firebase Authentication | Registro, inicio y cierre de sesión con correo y contraseña (Sprint 3) |
 | Cloud Firestore | Usuarios y roles, productos, pedidos y valoraciones (Sprint 3) |
 | Reglas de seguridad de Firestore | Quién puede leer y escribir cada colección, en `firestore.rules` (Sprint 4) |
-| Mercado Pago Checkout Pro | Pago con credenciales de prueba, sin dinero real (Sprint 4, extra) |
+| Mercado Pago Checkout Pro | Integración con credenciales de prueba, desactivada en la entrega (Sprint 4, extra) |
 | Cloudflare Workers | Servidor de pagos que guarda el Access Token de Mercado Pago (Sprint 4, extra) |
 | Git, GitHub y GitHub Pages | Control de versiones y publicación del sitio |
 
@@ -96,7 +85,7 @@ Nexo-Store/
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
 ├── producto.html       Ficha dinámica con características y opiniones de los usuarios
 ├── carrito.html        Carrito en LocalStorage, forma de pago y confirmación de compra
-├── pago.html           Vuelta de Mercado Pago y resumen para pagar un pedido · Sprint 4
+├── pago.html           Pago en línea: pasarela simulada y vuelta de Mercado Pago · Sprint 4
 ├── login.html          Ingresar y crear cuenta con Firebase Authentication · Sprint 3
 ├── perfil.html         Página privada: datos del usuario e historial de sus pedidos · Sprint 3
 ├── admin.html          Panel administrativo, solo para el rol admin · Sprint 3
@@ -117,14 +106,14 @@ Nexo-Store/
 │   │   ├── usuarios.js Documento usuarios/{uid} en Firestore
 │   │   ├── productos-firestore.js  Carga con writeBatch() y CRUD de la colección productos
 │   │   ├── pedidos.js  Confirmar compra, pedidos, estados y registro del pago
-│   │   ├── mercadopago.js  Pedidos al Worker de pagos con fetch() · Sprint 4
+│   │   ├── mercadopago.js  Interruptor de Mercado Pago y pedidos al Worker · Sprint 4
 │   │   ├── valoraciones.js  Validar, guardar y leer las opiniones de un producto
 │   │   ├── agregar-carrito.js  Vuelve a consultar stock y disponibilidad antes de agregar
 │   │   └── navbar.js   Navbar según la sesión y el rol (se carga en todas las páginas)
 │   └── pages/
 │       ├── admin.js    Protección por rol y panel: productos y pedidos
 │       ├── login.js    Formularios de login.html: validación y estados de carga
-│       ├── pago.js     Confirma el pago con Mercado Pago y lo guarda en el pedido
+│       ├── pago.js     Pasarela simulada y confirmación del pago de Mercado Pago
 │       └── perfil.js   Protección de perfil.html, datos del usuario e historial de pedidos
 ├── assets/
 │   ├── img/            Placeholder y carpeta productos/ con las fotos de cada producto
@@ -149,8 +138,8 @@ una computadora:
 4. Se requiere conexión a internet, ya que Bootstrap, las tipografías y Firebase se cargan
    desde servicios externos. Las fotografías de los productos están en `assets/img/productos`.
 5. Para probar compras y opiniones hay que iniciar sesión (ver *Cómo evaluar el proyecto*).
-6. El Worker de pagos acepta pedidos desde Live Server (`localhost` y `127.0.0.1`), así que
-   el pago con Mercado Pago también se puede probar en local.
+6. La pasarela simulada funciona igual en local. Con Mercado Pago activo, el Worker de
+   pagos acepta pedidos desde Live Server (`localhost` y `127.0.0.1`).
 
 ## Manual breve de usuario
 
@@ -168,12 +157,12 @@ una computadora:
    caracteres como mínimo, repetida para confirmarla).
 4. **Confirmar la compra.** En el carrito, elegir la forma de pago y tocar **Confirmar
    compra**. Con **Coordinar con el equipo**, el pedido queda registrado y la tienda escribe
-   para coordinar el pago y la entrega. Con **Mercado Pago** se abre el checkout en modo de
-   prueba (ver *Datos de prueba de Mercado Pago*). Si un producto se agotó mientras tanto,
-   la tienda avisa y el carrito no se pierde.
+   para coordinar el pago y la entrega. Con **Pago en línea** se pasa a la pasarela
+   simulada: **Aprobar el pago** o **Rechazar el pago**. Si un producto se agotó mientras
+   tanto, la tienda avisa y el carrito no se pierde.
 5. **Seguir los pedidos.** **Mi perfil** muestra los datos de la cuenta y el historial de
-   pedidos, con su estado y su forma de pago. Un pedido de Mercado Pago sin pagar ofrece
-   **Pagar con Mercado Pago**.
+   pedidos, con su estado y su forma de pago. Un pedido con pago en línea pendiente o
+   rechazado ofrece **Pagar ahora**.
 6. **Opinar.** En la ficha de un producto, con la sesión iniciada: de 1 a 5 estrellas y un
    comentario de 10 a 500 caracteres. Si se vuelve a opinar, se actualiza la opinión anterior.
 7. **Salir.** En el menú con el nombre del usuario, **Cerrar sesión**.
@@ -196,7 +185,8 @@ una computadora:
 
 El último sprint no suma módulos grandes: cierra el proyecto con roles, panel
 administrativo, reglas de seguridad, una revisión completa y la publicación. Como extra,
-incorpora el pago con Mercado Pago en modo de prueba.
+incorpora el pago en línea: una pasarela simulada y una integración con Mercado Pago
+preparada para activarse.
 
 ### Semana del 18/10 · Roles y acceso administrativo
 
@@ -296,13 +286,47 @@ El sitio se publica con **GitHub Pages** desde la rama `main`
 El dominio `pablodmconti.github.io` está agregado en *Authentication → Settings →
 Dominios autorizados* de Firebase para que funcione el inicio de sesión.
 
-### Pago con Mercado Pago (extra, modo de prueba)
+### Pago en línea: pasarela simulada y Mercado Pago (extra)
 
-La consigna no pide pagos reales, así que esto es una funcionalidad adicional: usa
-**Checkout Pro de Mercado Pago con credenciales de prueba** y no cobra dinero real. En el
-carrito se elige la forma de pago: **Mercado Pago** o **Coordinar con el equipo**
-(transferencia o efectivo al recibir, como en el Sprint 3). "Coordinar con el equipo"
-está marcada por defecto mientras el entorno de prueba de Mercado Pago rechace los pagos.
+La consigna no pide pagos reales, así que esto es una funcionalidad adicional. En el
+carrito se elige la forma de pago: **Coordinar con el equipo** (transferencia o efectivo
+al recibir, como en el Sprint 3, marcada por defecto) o **Pago en línea**.
+
+**Interruptor.** "Pago en línea" funciona de dos maneras, según una sola constante de
+`js/modules/mercadopago.js`:
+
+```js
+export const MERCADO_PAGO_ACTIVO = false;
+```
+
+- `false`, como está en la entrega: **pasarela simulada**, explicada abajo.
+- `true`: **Mercado Pago Checkout Pro** con credenciales de prueba, a través del Worker de
+  Cloudflare. Queda desactivado porque Mercado Pago no permitió ingresar con las cuentas
+  de prueba, que son necesarias para obtener esas credenciales (ver *Configuración*).
+
+Cada pedido guarda su forma de pago (`simulado`, `mercadopago` o `coordinar`), así que
+cambiar el interruptor no afecta a los pedidos que ya existen.
+
+#### Pasarela simulada
+
+1. Al confirmar la compra, el pedido se registra igual que en el Sprint 3, con
+   `pago: { metodo: "simulado", estado: "pendiente" }`, y el carrito lleva a
+   `pago.html?pedido=ID`.
+2. `pago.html` muestra el resumen del pedido y dos botones: **Aprobar el pago** y
+   **Rechazar el pago**. No pide datos de tarjeta.
+3. Cada botón vuelve a la misma página con el resultado en la URL, como vuelve una
+   pasarela real a la tienda: `pago.html?pedido=ID&estado=aprobado&operacion=SIM-…`
+   (parámetros de URL, Semana 7).
+4. `js/pages/pago.js` guarda el resultado en el campo `pago` del pedido con `updateDoc()`
+   y quita esos datos de la dirección, para que una recarga no los procese de nuevo.
+5. El perfil muestra la forma y el estado del pago y ofrece **Pagar ahora** si quedó
+   pendiente o rechazado. El panel administrativo muestra el pago y su número de operación.
+
+Las reglas de Firestore dejan que el dueño de un pedido pendiente cambie **solo** el campo
+`pago`, sin cambiar la forma de pago, a "aprobado" o "rechazado" y con un número de
+operación `SIM-…`. Un pago aprobado ya no se puede cambiar.
+
+#### Mercado Pago (desactivado en la entrega)
 
 **Por qué hace falta un Worker.** Para crear un pago, Mercado Pago pide un *Access Token*
 secreto, que no puede ir en el JavaScript que descarga el navegador, y GitHub Pages no
@@ -314,7 +338,7 @@ niega a crear el pago.
 
 **Recorrido**
 
-1. Al confirmar la compra, el pedido se registra igual que en el Sprint 3, con
+1. Al confirmar la compra, el pedido se registra con
    `pago: { metodo: "mercadopago", estado: "pendiente" }`.
 2. `js/modules/mercadopago.js` le pide al Worker la dirección del checkout con `fetch()`.
 3. El Worker lee el pedido con el token de sesión del usuario, así que las reglas solo se
@@ -340,8 +364,30 @@ niega a crear el pago.
 3. En *Settings → Variables and Secrets* del Worker, agregar ese token como secreto
    `MP_ACCESS_TOKEN`.
 4. Comprobar en https://nivel99-pagos.pablodmconti.workers.dev/ que diga
-   `"accessTokenConfigurado": true` y `"modo": "prueba"`.
-5. La dirección del Worker está en `URL_WORKER`, dentro de `js/modules/mercadopago.js`.
+   `"accessTokenConfigurado": true` y `"modo": "prueba"`. El apartado `credenciales`
+   muestra, sin revelar el token, su prefijo, el número de cuenta y sus etiquetas. Una
+   cuenta de prueba tiene la etiqueta `test_user`.
+5. La dirección del Worker está en `URL_WORKER` y el interruptor en
+   `MERCADO_PAGO_ACTIVO`, los dos dentro de `js/modules/mercadopago.js`.
+
+**Datos para probarlo cuando esté activo.** Son datos públicos de prueba de Mercado Pago
+Uruguay: no son tarjetas reales ni cobran dinero.
+
+| Tarjeta | Número | Código de seguridad | Vencimiento |
+| --- | --- | --- | --- |
+| Visa crédito | `4509 9535 6623 3704` | `123` | `11/30` |
+| Mastercard crédito | `5031 7557 3453 0604` | `123` | `11/30` |
+| Visa débito | `4410 1036 7243 6886` | `123` | `11/30` |
+
+El nombre del titular define el resultado: `APRO` aprueba el pago, `OTHE` lo rechaza y
+`CONT` lo deja pendiente (documento: CI `12345678`). Se paga en una ventana privada,
+ingresando en el checkout con una cuenta compradora de prueba.
+
+**Estado al momento de la entrega.** El Worker está desplegado **sin Access Token** y el
+interruptor está en `false`. Para Checkout Pro, las credenciales de prueba se obtienen
+iniciando sesión con una cuenta vendedora de prueba, y Mercado Pago no permitió ingresar
+con las cuentas de prueba creadas. La integración queda lista: cargando ese token en el
+Worker y poniendo el interruptor en `true`, funciona sin cambiar otro código.
 
 `fetch()` con JSON y la lectura de parámetros de URL (Semana 7) son lo único nuevo del
 lado del sitio. El Worker excede los contenidos del curso y está comentado paso a paso.
@@ -371,8 +417,11 @@ lado del sitio. El Worker excede los contenidos del curso y está comentado paso
   aparece en el perfil y el stock baja.
 - El administrador crea y edita un producto y lo ve en el catálogo, cambia el estado de un
   pedido y, al cancelarlo, el stock vuelve.
-- Mercado Pago: el pedido se registra, el Worker crea el pago y se abre el checkout. Con un
-  token que no es de una cuenta de prueba, el Worker se niega a crear el pago.
+- Pago en línea simulado: aprobar deja el pedido con "pago aprobado" en el perfil y en el
+  panel. Rechazar lo deja "pago rechazado" y **Pagar ahora** permite reintentar. Recargar la
+  página del resultado no vuelve a registrar el pago.
+- Mercado Pago (Worker): con un token que no es de una cuenta de prueba, el Worker se niega
+  a crear el pago (respuesta 403).
 
 ## Funcionalidades desarrolladas en el Sprint 3
 
@@ -1026,10 +1075,11 @@ adelante está en *Posibles mejoras futuras*.
   las semanas 1 a 4: HTML semántico, selectores, herencia, especificidad, modelo de caja,
   `box-sizing`, `position`, pseudo-clases, `::before` y los componentes de Bootstrap
   (contenedores, grilla de 12 columnas, utilidades, botones, cards, navbar y formularios).
-- **Mercado Pago como extra acotado.** La única pieza que excede los contenidos del curso
-  es el Worker de pagos, porque el Access Token no puede vivir en el navegador. El sitio
-  solo agrega `fetch()` y la lectura de parámetros de URL, y el pago se puede evitar
-  eligiendo "Coordinar con el equipo".
+- **Pago en línea simulado, con Mercado Pago como extra acotado.** La pasarela simulada se
+  resuelve con contenidos del curso: parámetros de URL y Firestore. La única pieza que los
+  excede es el Worker de Mercado Pago, porque el Access Token no puede vivir en el
+  navegador. Se activa o desactiva con una sola constante, y el pago siempre se puede
+  evitar eligiendo "Coordinar con el equipo".
 
 ## Limitaciones conocidas
 
@@ -1054,9 +1104,12 @@ adelante está en *Posibles mejoras futuras*.
   Sprint 4 ya impiden que el stock quede negativo.
 - El envío es simulado. El pago "Coordinar con el equipo" deja el pedido en estado
   "pendiente" hasta que el equipo lo actualiza.
+- El pago en línea de la entrega es simulado: el resultado lo elige la persona en la
+  pasarela. En un comercio real lo confirmaría el medio de pago.
 - Mercado Pago funciona solo con credenciales de prueba: con credenciales reales, el
-  Worker se niega a crear pagos.
-- El resultado del pago lo guarda el navegador al volver de Mercado Pago, después de
+  Worker se niega a crear pagos. Al momento de la entrega está desactivado y sin
+  credenciales (ver *Pago en línea: pasarela simulada y Mercado Pago*).
+- Con Mercado Pago, el resultado del pago lo guarda el navegador al volver, después de
   confirmarlo con el Worker. Las reglas no pueden consultar a Mercado Pago, así que antes
   de enviar un pedido el equipo comprueba su número de operación en el panel de Mercado
   Pago. Por la misma razón, si un pago queda "en proceso" y se aprueba más tarde, el

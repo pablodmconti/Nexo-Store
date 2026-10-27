@@ -53,23 +53,41 @@ const COSTO_ENVIO = 290;
    para distinguirlas se consulta la cuenta dueña del token, y las
    cuentas de prueba de Mercado Pago tienen la etiqueta "test_user" y
    un apodo que empieza con TEST. */
-async function credencialesDePrueba(env) {
+async function revisarCredenciales(env) {
+  const revision = {
+    prefijoToken: env.MP_ACCESS_TOKEN.split("-")[0],   // "TEST" o "APP_USR", nunca el token
+    esDePrueba: false
+  };
+
   if (env.MP_ACCESS_TOKEN.startsWith("TEST-")) {
-    return true;
+    revision.esDePrueba = true;
+    return revision;
   }
 
   const respuesta = await fetch("https://api.mercadopago.com/users/me", {
     headers: { "Authorization": `Bearer ${env.MP_ACCESS_TOKEN}` }
   });
 
+  revision.consultaCuenta = respuesta.status;
+
   if (!respuesta.ok) {
-    return false;
+    return revision;
   }
 
   const cuenta = await respuesta.json().catch(() => ({}));
   const etiquetas = cuenta.tags || [];
 
-  return etiquetas.includes("test_user") || String(cuenta.nickname || "").startsWith("TEST");
+  revision.idCuenta = cuenta.id;
+  revision.etiquetas = etiquetas;
+  revision.apodoDePrueba = String(cuenta.nickname || "").startsWith("TEST");
+  revision.esDePrueba = etiquetas.includes("test_user") || revision.apodoDePrueba;
+
+  return revision;
+}
+
+async function credencialesDePrueba(env) {
+  const revision = await revisarCredenciales(env);
+  return revision.esDePrueba;
 }
 
 function origenPermitido(origen) {
@@ -326,9 +344,11 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/") {
       let modo = "sin Access Token";
+      let credenciales = null;
 
       if (env.MP_ACCESS_TOKEN) {
-        modo = (await credencialesDePrueba(env))
+        credenciales = await revisarCredenciales(env);
+        modo = credenciales.esDePrueba
           ? "prueba"
           : "REAL: el Worker no crea pagos con estas credenciales";
       }
@@ -337,6 +357,7 @@ export default {
         servicio: "Servidor de pagos de Nivel 99",
         accessTokenConfigurado: Boolean(env.MP_ACCESS_TOKEN),
         modo: modo,
+        credenciales: credenciales,
         moneda: env.MONEDA || "UYU"
       }, 200, origen);
     }

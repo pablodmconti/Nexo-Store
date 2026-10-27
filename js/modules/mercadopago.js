@@ -8,6 +8,16 @@ Conexión con el Worker de pagos (Sprint 4)
    Este archivo SOLO habla con el Worker: no toca el HTML.
    ===================================================================== */
 
+/* ---------------------------------------------------------------
+   INTERRUPTOR DE MERCADO PAGO
+   ---------------------------------------------------------------
+   false → "Pago en línea" usa la pasarela simulada de pago.html.
+   true  → usa Mercado Pago a través del Worker. Antes hay que cargar
+           en el Worker el Access Token de una cuenta vendedora de
+           PRUEBA (el Worker rechaza las credenciales reales).
+   --------------------------------------------------------------- */
+export const MERCADO_PAGO_ACTIVO = false;
+
 /* Dirección del Worker publicado en Cloudflare (uno propio de Nivel 99) */
 export const URL_WORKER = "https://nivel99-pagos.pablodmconti.workers.dev";
 
