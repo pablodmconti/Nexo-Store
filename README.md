@@ -355,24 +355,59 @@ queda en el historial de git, en los commits del 26/10.
 | README actualizado con cuentas para la evaluación | *Cómo evaluar el proyecto* y esta sección |
 | Manual breve de usuario (resultado final del proyecto) | *Manual breve de usuario* |
 
-### Pruebas del Sprint 4
+## Pruebas de la versión final
 
-- Sin sesión: inicio, catálogo, ficha, carrito y login cargan sin errores en la consola ni
-  imágenes rotas. `perfil.html` y `admin.html` llevan al login.
-- A 375 px de ancho, ninguna página se desplaza hacia los costados.
-- Un cliente que escribe `admin.html` vuelve al inicio con el aviso; el administrador entra
-  al panel. Con la cuenta de administración, el carrito no permite confirmar la compra.
-- Registro, inicio y cierre de sesión. Compra con "Coordinar con el equipo": el pedido
-  aparece en el perfil y el stock baja.
-- El administrador crea y edita un producto y lo ve en el catálogo, cambia el estado de un
-  pedido y, al cancelarlo, el stock vuelve.
+Comprobaciones hechas sobre el sitio publicado el 26/10/2026, después de cerrar el Sprint 4.
+
+**Navegación, diseño y errores**
+- Las 9 páginas (incluida la ficha con y sin producto) cargan sin errores en la consola ni
+  imágenes rotas, en teléfono (375 px), tablet (768 px) y escritorio (1366 px), sin
+  desplazamiento horizontal.
+- Todos los enlaces, imágenes, hojas de estilo y scripts locales apuntan a archivos que
+  existen, con rutas relativas y respetando mayúsculas y minúsculas.
+- Todos los campos de formulario tienen su etiqueta y todas las imágenes, texto alternativo.
+- El enlace "Administración" solo se ve con la cuenta de administración, tanto en el menú
+  como en el pie de página.
+
+**Catálogo, ficha y carrito**
+- El catálogo muestra los 12 productos de Firestore. Buscar, filtrar por categoría y ordenar
+  funcionan combinados, y sin coincidencias aparece el aviso.
+- La ficha abre el producto del `id` de la URL, avisa si el producto no existe e invita a
+  elegir uno si se abre sin `id`.
+- El carrito agrega, cambia cantidades y elimina, recalcula subtotales, envío y total,
+  respeta el stock y se conserva al recargar.
+
+**Cuentas y compras**
+- Registro, inicio y cierre de sesión. La sesión se mantiene al recargar, y `perfil.html`,
+  `admin.html` y `pago.html` llevan al login si no hay sesión.
+- Sin sesión, el carrito pide ingresar para comprar. La cuenta de administración no puede
+  confirmar compras.
+- Compra con "Coordinar con el equipo": el pedido aparece en el perfil y el stock baja.
 - Pago en línea simulado: aprobar deja el pedido con "pago aprobado" en el perfil y en el
   panel. Rechazar lo deja "pago rechazado" y **Pagar ahora** permite reintentar. Recargar la
   página del resultado no vuelve a registrar el pago.
 
-## Funcionalidades desarrolladas en el Sprint 3
+**Administración**
+- Un cliente que escribe `admin.html` vuelve al inicio con el aviso; el administrador entra
+  al panel.
+- Crear y editar un producto se refleja en el catálogo. Cambiar el estado de un pedido se ve
+  en el perfil del cliente, y al cancelarlo el stock vuelve.
 
-### Semana del 20/9 · Firebase y autenticación de usuarios
+**Reglas de seguridad**
+- Sin sesión, Firestore rechaza leer pedidos o usuarios, crear pedidos y escribir productos
+  (respuesta 403), y permite leer el catálogo.
+
+## Registro de los sprints anteriores
+
+Las secciones siguientes documentan cómo quedó el proyecto al cerrar cada sprint y se
+conservan como registro del proceso. Algunas cosas cambiaron después: por ejemplo, las
+páginas ya no tienen avisos de "Funcionalidad en desarrollo", `cargar-productos.html` se
+retiró antes de publicar y un cliente que abre `admin.html` ahora vuelve al inicio. La
+versión final está descrita en las secciones anteriores.
+
+### Funcionalidades desarrolladas en el Sprint 3
+
+#### Semana del 20/9 · Firebase y autenticación de usuarios
 
 - **Proyecto en Firebase.** Se creó el proyecto `login-nexostore`, se registró la
   aplicación web y se habilitó el proveedor *Correo electrónico/Contraseña* en
@@ -404,9 +439,9 @@ queda en el historial de git, en los commits del 26/10.
   responde, muestra los datos básicos de Authentication y un aviso.
 - **Cierre de sesión** con `signOut()` desde el menú o desde el perfil; luego se vuelve al inicio.
 
-### Semana del 4/10 · Productos almacenados en Cloud Firestore
+#### Semana del 4/10 · Productos almacenados en Cloud Firestore
 
-#### Colección `productos` y carga inicial
+##### Colección `productos` y carga inicial
 
 - **Colección `productos`.** Cada producto es un documento cuyo id es el mismo que ya
   usaba el sitio (`p1` a `p12`), por eso el id no se repite como campo adentro.
@@ -422,7 +457,7 @@ queda en el historial de git, en los commits del 26/10.
   de `js/productos.js` a Firestore. En la semana 11 se ajustó a la forma del curso (ver
   más abajo).
 
-#### Los productos se obtienen desde Firestore
+##### Los productos se obtienen desde Firestore
 
 - **`js/productos.js` ya no es la fuente del catálogo.** Solo lo carga
   `cargar-productos.html`; el inicio, el catálogo, la ficha y el carrito leen Firestore.
@@ -440,7 +475,7 @@ queda en el historial de git, en los commits del 26/10.
   distingue "no hay productos" (array vacío) de "falló la consulta" (error) y se muestra
   el mensaje que corresponde con `htmlMensaje()`.
 
-#### Buscar, filtrar y ordenar
+##### Buscar, filtrar y ordenar
 
 - La búsqueda, el filtro por categoría y el orden del Sprint 2 funcionan sin cambios
   sobre el array que llega de Firestore: `filter()`, `includes()` y `sort()` no saben de
@@ -453,7 +488,7 @@ queda en el historial de git, en los commits del 26/10.
   (`p1`, `p10`, `p11`, `p2`…). Para respetar el orden original se ordena por el número
   que sigue a la "p".
 
-#### Ficha del producto
+##### Ficha del producto
 
 - `producto.html` lee el `id` de la URL con `URLSearchParams` y pide ese único documento
   con `getDoc()`. Si no hay `id` o el documento no existe, muestra el aviso de producto
@@ -463,7 +498,7 @@ queda en el historial de git, en los commits del 26/10.
 - Un producto con `disponible: false` muestra "No disponible por el momento" y el botón
   queda deshabilitado.
 
-#### Validar disponibilidad y stock antes de agregar al carrito
+##### Validar disponibilidad y stock antes de agregar al carrito
 
 - El stock puede cambiar desde que se cargó la página. Por eso, al tocar "Agregar al
   carrito" en el catálogo o en la ficha, `js/modules/agregar-carrito.js` vuelve a pedir
@@ -476,7 +511,7 @@ queda en el historial de git, en los commits del 26/10.
   disponible o si se llegó al stock. Si un producto guardado ya no existe en Firestore,
   se quita del carrito con un aviso.
 
-#### Pruebas de la semana del 4/10
+##### Pruebas de la semana del 4/10
 
 - Con la colección vacía, el catálogo y el inicio muestran el mensaje de "no hay productos".
 - Sin conexión con Firestore, el catálogo, el inicio, la ficha y el carrito muestran un
@@ -492,7 +527,7 @@ queda en el historial de git, en los commits del 26/10.
   agregar.
 - Los totales del carrito se calculan con los precios de Firestore.
 
-### Semana 11 · Migración de productos e imágenes (ajustes)
+#### Semana 11 · Migración de productos e imágenes (ajustes)
 
 Con los recursos de la Semana 11 se ajustó la carga inicial a la forma del curso:
 
@@ -511,9 +546,9 @@ Con los recursos de la Semana 11 se ajustó la carga inicial a la forma del curs
   nombres simples sin espacios ni tildes (`teclado-tkl-aurora.jpg`). Firestore guarda solo
   la ruta relativa como texto, nunca el archivo ni una versión en base64.
 
-### Semana del 11/10 · Compras, pedidos y valoraciones
+#### Semana del 11/10 · Compras, pedidos y valoraciones
 
-#### Confirmar una compra
+##### Confirmar una compra
 
 - **Solo con sesión.** Sin usuario autenticado, el botón dice "Ingresá para comprar" y, al
   tocarlo, aparece un aviso con un enlace a `login.html?volver=carrito.html`. Después de
@@ -549,7 +584,7 @@ Cada pedido es un documento de la colección `pedidos`:
 | `fecha` | Momento de la confirmación |
 | `estado` | `"pendiente"` al crearse (lo cambiará el panel administrativo) |
 
-#### Historial de pedidos en el perfil
+##### Historial de pedidos en el perfil
 
 - `perfil.html` muestra "Mis pedidos" con la fecha, el estado, los productos, el envío y
   el total de cada compra, de la más reciente a la más antigua.
@@ -558,7 +593,7 @@ Cada pedido es un documento de la colección `pedidos`:
   llegan al navegador.
 - Tiene estado de carga, mensaje si todavía no hay compras y mensaje si falla la consulta.
 
-#### Opiniones y valoraciones en Firestore
+##### Opiniones y valoraciones en Firestore
 
 - En el Sprint 2 no se habían implementado comentarios locales, así que las opiniones se
   crearon directamente en la colección `valoraciones` de Firestore.
@@ -577,7 +612,7 @@ Cada pedido es un documento de la colección `pedidos`:
 - La ficha muestra el promedio con estrellas y la cantidad de opiniones, y la lista de
   opiniones de la más nueva a la más vieja, con estado de carga y mensaje de error.
 
-#### Pruebas de la semana del 11/10
+##### Pruebas de la semana del 11/10
 
 - Sin sesión, "Confirmar compra" no registra nada y ofrece ingresar; al registrarse se
   vuelve al carrito.
@@ -595,7 +630,7 @@ Cada pedido es un documento de la colección `pedidos`:
 - Un comentario con etiquetas HTML se muestra como texto.
 - Un parámetro `volver` con una dirección externa se descarta y se va al perfil.
 
-### Cómo se confirma una compra y se actualiza el stock
+#### Cómo se confirma una compra y se actualiza el stock
 
 1. En `carrito.html`, `js/carrito.js` comprueba que haya un usuario autenticado.
 2. Llama a `confirmarPedido(usuario, carrito)` de `js/modules/pedidos.js`.
@@ -606,7 +641,7 @@ Cada pedido es un documento de la colección `pedidos`:
 5. Si todo salió bien, `carrito.js` vacía el carrito y muestra la confirmación; si no,
    muestra el problema y el carrito queda como estaba.
 
-### Completitud del Sprint 3
+#### Completitud del Sprint 3
 
 | Para considerar completo el Sprint 3 | Dónde |
 | --- | --- |
@@ -621,9 +656,9 @@ Cada pedido es un documento de la colección `pedidos`:
 | Errores y estados de carga en la interfaz | `htmlCargando()` y `htmlMensaje()` en todas las páginas |
 | Panel administrativo inicial con CRUD (resultado esperado del sprint) | `admin.html` y `js/pages/admin.js`, protegido por rol |
 
-### Panel administrativo (`admin.html`)
+#### Panel administrativo (`admin.html`)
 
-#### Roles de cliente y administrador
+##### Roles de cliente y administrador
 
 - Todas las cuentas se registran con `rol: "cliente"` en `usuarios/{uid}`. El rol
   `"admin"` se asigna a mano desde la consola de Firebase, como anticipa la Semana 9:
@@ -635,7 +670,7 @@ Cada pedido es un documento de la colección `pedidos`:
   `login.html?volver=admin.html`; con rol cliente el panel nunca se dibuja, aunque se
   escriba la dirección a mano (desde el Sprint 4, además, vuelve al inicio con un aviso).
 
-#### Gestión de productos (CRUD)
+##### Gestión de productos (CRUD)
 
 | Operación | Cómo se hace | Función de Firebase |
 | --- | --- | --- |
@@ -660,7 +695,7 @@ Cada pedido es un documento de la colección `pedidos`:
   venderse pero conserva sus opiniones. Los pedidos guardan nombre y precio, así que
   eliminar un producto no rompe el historial.
 
-#### Consulta de pedidos
+##### Consulta de pedidos
 
 - La pestaña **Pedidos** muestra todos los pedidos de la tienda, del más reciente al más
   antiguo, con cliente, correo, fecha, productos y total.
@@ -670,7 +705,7 @@ Cada pedido es un documento de la colección `pedidos`:
   las unidades a cada producto. Un pedido cancelado ya no se puede cambiar, para no
   devolver el stock dos veces.
 
-#### Pruebas del panel
+##### Pruebas del panel
 
 - Sin sesión, `admin.html` redirige al login y, después de ingresar, vuelve al panel.
 - Con una cuenta cliente el enlace del menú no se ve y el panel no se muestra.
@@ -682,7 +717,7 @@ Cada pedido es un documento de la colección `pedidos`:
 - Una compra aparece en la pestaña Pedidos; pasarla a "enviado" se ve en el perfil del
   cliente y cancelarla devuelve el stock (10 → 12).
 
-### Cómo se registran y autentican los usuarios
+#### Cómo se registran y autentican los usuarios
 
 1. En `login.html`, `js/pages/login.js` valida el formulario.
 2. Llama a `registrarUsuario()` de `js/modules/auth.js`, que ejecuta en orden:
@@ -696,7 +731,7 @@ Cada pedido es un documento de la colección `pedidos`:
 La contraseña nunca pasa por la base de datos del proyecto: la guarda y la valida
 Firebase Authentication.
 
-### Cómo está organizado el código JavaScript del Sprint 3
+#### Cómo está organizado el código JavaScript del Sprint 3
 
 Se separó la conexión, las operaciones con Firebase y la presentación, como pide la
 consigna (no mezclar autenticación, base de datos e interfaz en un único archivo):
@@ -712,14 +747,14 @@ Los archivos de las páginas del Sprint 2 (`inicio.js`, `catalogo.js`, `producto
 `carrito.js`) conservan su lugar en `js/` para no cambiar la estructura del proyecto, pero
 desde la semana del 4/10 son módulos que leen los productos de Firestore.
 
-### Usuarios de prueba
+#### Usuarios de prueba
 
 Las cuentas están en *Cómo evaluar el proyecto*, al principio de este archivo. Con dos
 cuentas se puede comprobar que cada usuario ve únicamente sus propios pedidos en el perfil
 y que cada opinión aparece con el nombre de quien la escribió. Con la cuenta de
 administrador se accede a `admin.html`; con las de cliente se vuelve al inicio con un aviso.
 
-### Pruebas de la semana del 20/9
+#### Pruebas de la semana del 20/9
 
 - Firebase se inicializa sin errores en la consola.
 - Registro vacío o con datos inválidos: cada campo muestra su error y no se llama a Firebase.
@@ -733,9 +768,9 @@ administrador se accede a `admin.html`; con las de cliente se vuelve al inicio c
 - Cerrar sesión vuelve al inicio y el navbar muestra otra vez *Ingresar*.
 - El catálogo, la ficha y el carrito siguen funcionando igual que en el Sprint 2.
 
-## Funcionalidades desarrolladas en el Sprint 2
+### Funcionalidades desarrolladas en el Sprint 2
 
-### Semana del 23/8 · Productos y catálogo dinámico
+#### Semana del 23/8 · Productos y catálogo dinámico
 
 - **Los productos dejaron de estar escritos en el HTML.** Ahora viven en el array de
   objetos `productos` de `js/productos.js`, la estructura que la Semana 5 presenta como
@@ -758,7 +793,7 @@ administrador se accede a `admin.html`; con las de cliente se vuelve al inicio c
 - `catalogo.html` pasó de ser la plantilla bloqueada del proyecto base a una página con
   la identidad Nivel 99: mismo navbar, footer, toast, tipografías y paleta que el inicio.
 
-### Semana del 30/8 · Búsqueda, filtros y eventos
+#### Semana del 30/8 · Búsqueda, filtros y eventos
 
 - **Buscador por nombre.** El texto escrito en el campo se compara contra el nombre de
   cada producto con `filter()`, `toLowerCase()` e `includes()`, de modo que no distingue
@@ -783,7 +818,7 @@ administrador se accede a `admin.html`; con las de cliente se vuelve al inicio c
   `change` en el selector, `click` en el botón Limpiar y `submit` en el formulario con
   `preventDefault()` para que al apretar Enter la página no se recargue.
 
-### Semana del 6/9 · Detalle dinámico del producto
+#### Semana del 6/9 · Detalle dinámico del producto
 
 - **Una sola página para los doce productos.** `producto.html` no cambia: lo que cambia es
   el identificador que recibe en la URL (`producto.html?id=p9`). No existe un archivo HTML
@@ -804,7 +839,7 @@ administrador se accede a `admin.html`; con las de cliente se vuelve al inicio c
 - **Los enlaces ya venían del catálogo.** Cada tarjeta genera su propio
   `producto.html?id=${producto.id}` desde la semana del 23/8.
 
-### Semana del 13/9 · Carrito y LocalStorage
+#### Semana del 13/9 · Carrito y LocalStorage
 
 - **El carrito es un arreglo de objetos con lo mínimo indispensable:**
   `[{ idProducto: "p1", cantidad: 2 }]`. No guarda nombre, precio ni imagen: esos datos se
@@ -848,7 +883,7 @@ administrador se accede a `admin.html`; con las de cliente se vuelve al inicio c
   `js/base.js` (`formatearPrecio()` y `describirStock()`), que se carga en todas las
   páginas: ahora el catálogo, la ficha y el carrito muestran siempre lo mismo.
 
-### Ajustes de coherencia hechos junto con esta entrega
+#### Ajustes de coherencia hechos junto con esta entrega
 
 - **Los productos destacados de la portada se generan desde JavaScript.** Estaban escritos
   a mano desde el Sprint 1, con el precio y el stock duplicados respecto de
@@ -863,7 +898,7 @@ administrador se accede a `admin.html`; con las de cliente se vuelve al inicio c
   ahora es un `<a href="carrito.html">`, que es lo que corresponde a un enlace y evita
   resolver con JavaScript algo que ya resuelve el HTML.
 
-### Contenidos del curso aplicados
+#### Contenidos del curso aplicados
 
 | Semana | Contenido | Dónde se usa |
 | --- | --- | --- |
@@ -904,7 +939,7 @@ miles (`21900` se muestra como `$ 21.900`). Sin esa llamada el precio se vería 
 Sprint 1: `setAttribute("aria-current", "page")` para marcar la página actual y el
 encadenamiento opcional `?.` al conectar botones que no existen en todas las páginas.
 
-### Cómo está organizado el código JavaScript
+#### Cómo está organizado el código JavaScript
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -919,7 +954,7 @@ La idea es que los datos, la lógica de cada página y el comportamiento común 
 separados. `js/productos.js` se carga antes que `catalogo.js` y que `producto.js`, porque
 las dos páginas leen el mismo array y así la información no se repite en ningún lado.
 
-### Información guardada en LocalStorage
+#### Información guardada en LocalStorage
 
 | Clave | Contenido | Ejemplo |
 | --- | --- | --- |
@@ -928,7 +963,7 @@ las dos páginas leen el mismo array y así la información no se repite en ning
 Es lo único que se guarda en el navegador. No se almacenan datos personales ni información
 de pago: los pedidos reales y las cuentas de usuario corresponden al Sprint 3, con Firebase.
 
-### Opcionales de la consigna incorporados
+#### Opcionales de la consigna incorporados
 
 | Opcional | Dónde |
 | --- | --- |
@@ -937,12 +972,12 @@ de pago: los pedidos reales y las cuentas de usuario corresponden al Sprint 3, c
 | Mensajes mediante toast en lugar de `alert()` | Todos los avisos del sitio |
 | Costo de envío simulado en el resumen del carrito | Panel de resumen |
 
-### Pendiente dentro del Sprint 2
+#### Pendiente dentro del Sprint 2
 
 Las cuatro entregas semanales están completas. Queda la semana de cierre: pulido general,
 validaciones y repaso integrador del sprint.
 
-## Funcionalidades desarrolladas en el Sprint 1
+### Funcionalidades desarrolladas en el Sprint 1
 
 - Identidad visual propia: nombre, logotipo e isotipo en SVG, paleta azul y blanca con
   acento cian, tipografías, botones, tarjetas, bordes y sombras.
@@ -965,7 +1000,7 @@ validaciones y repaso integrador del sprint.
   texto además de color.
 - Páginas de los próximos sprints enlazadas y con su cartel de funcionalidad en desarrollo.
 
-## Pruebas realizadas antes de la entrega
+### Pruebas realizadas en los sprints 1 y 2
 
 - `index.html` carga sin errores en la consola del navegador.
 - Los seis enlaces del navbar, el logotipo y los botones del hero dirigen a páginas existentes.
