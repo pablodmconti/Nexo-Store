@@ -14,7 +14,7 @@ Pedidos en Cloud Firestore
        ├─ fecha:         momento de la confirmación
        ├─ estado:        "pendiente"
        └─ pago:          { metodo, estado, idOperacion, fecha }
-                         (Sprint 4: "simulado", "mercadopago" o "coordinar")
+                         (Sprint 4: "simulado" o "coordinar")
 
    Este archivo SOLO habla con la base de datos: no toca el HTML.
    ===================================================================== */
@@ -36,24 +36,24 @@ import {
    ---------------------------------------------------------------
    Textos para mostrar el pago en el perfil y en el panel. Los pedidos
    anteriores al Sprint 4 no tienen el campo pago: se muestran como
-   "A coordinar con el equipo".
+   "A coordinar con el equipo". "mercadopago" queda solo para mostrar
+   los pedidos de prueba de una integración que se retiró.
    --------------------------------------------------------------- */
 export const METODOS_PAGO = {
   simulado: "Pago en línea (simulado)",
-  mercadopago: "Mercado Pago",
-  coordinar: "A coordinar con el equipo"
+  coordinar: "A coordinar con el equipo",
+  mercadopago: "Mercado Pago (prueba retirada)"
 };
 
-/* Formas de pago que se pagan en línea y tienen estado propio */
+/* El pago en línea es el único que se paga desde la tienda */
 export function esPagoEnLinea(pedido) {
-  return Boolean(pedido.pago) && (pedido.pago.metodo === "simulado" || pedido.pago.metodo === "mercadopago");
+  return Boolean(pedido.pago) && pedido.pago.metodo === "simulado";
 }
 
 export const ESTADOS_PAGO = {
   pendiente: "pago pendiente",
   aprobado: "pago aprobado",
-  rechazado: "pago rechazado",
-  "en proceso": "pago en proceso"
+  rechazado: "pago rechazado"
 };
 
 /* Ejemplo: "Pago en línea (simulado) · pago aprobado" */
@@ -64,7 +64,7 @@ export function describirPago(pedido) {
 
   let texto = METODOS_PAGO[pedido.pago.metodo];
 
-  if (esPagoEnLinea(pedido)) {
+  if (pedido.pago.metodo !== "coordinar") {
     texto += ` · ${ESTADOS_PAGO[pedido.pago.estado]}`;
   }
 
@@ -75,7 +75,7 @@ export function describirPago(pedido) {
    1. CONFIRMAR UNA COMPRA
    ---------------------------------------------------------------
    Recibe el usuario autenticado, el carrito de LocalStorage y la forma
-   de pago elegida ("simulado", "mercadopago" o "coordinar").
+   de pago elegida ("simulado" o "coordinar").
    Devuelve un objeto con el resultado:
      { confirmado: true,  idPedido, total }
      { confirmado: false, problemas: ["...", "..."] }
@@ -233,7 +233,7 @@ export async function cambiarEstadoPedido(pedido, nuevoEstado) {
 }
 
 /* ---------------------------------------------------------------
-   4. PAGO EN LÍNEA: PASARELA SIMULADA O MERCADO PAGO (Sprint 4)
+   4. PAGO EN LÍNEA SIMULADO (Sprint 4)
    --------------------------------------------------------------- */
 
 /* Un pedido a partir de su id, o null si no existe.
@@ -249,14 +249,14 @@ export async function obtenerPedido(idPedido) {
   return { id: snapshot.id, ...snapshot.data() };
 }
 
-/* Guarda en el pedido el resultado del pago y su número de operación
-   (SIM-... en la pasarela simulada, payment_id en Mercado Pago).
-   updateDoc() cambia SOLO el campo pago: las reglas de Firestore
-   rechazan que un cliente toque el estado, el total o los productos. */
-export async function registrarPago(idPedido, metodo, estadoPago, idOperacion) {
+/* Guarda en el pedido el resultado de la pasarela y su número de
+   operación (SIM-...). updateDoc() cambia SOLO el campo pago: las
+   reglas de Firestore rechazan que un cliente toque el estado, el
+   total o los productos. */
+export async function registrarPago(idPedido, estadoPago, idOperacion) {
   await updateDoc(doc(db, "pedidos", idPedido), {
     pago: {
-      metodo: metodo,
+      metodo: "simulado",
       estado: estadoPago,
       idOperacion: idOperacion,
       fecha: new Date()

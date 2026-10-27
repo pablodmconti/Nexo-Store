@@ -101,18 +101,17 @@
                             <p class="linea-resumen total-resumen">
                                 <span>Total</span><span id="resumenTotal">$ 0</span>
                             </p>
-                            <!-- Forma de pago (Sprint 4). "Pago en línea" usa la pasarela
-                                 simulada o Mercado Pago, según el interruptor de
-                                 js/modules/mercadopago.js. Nunca se cobra dinero real -->
+                            <!-- Forma de pago (Sprint 4). "Pago en línea" usa una pasarela
+                                 simulada: nunca se piden datos de tarjeta ni se cobra dinero -->
                             <fieldset class="metodos-pago">
                                 <legend class="h6 mb-2">Forma de pago</legend>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="metodoPago"
-                                        id="pagoEnLinea" value="enlinea">
+                                        id="pagoEnLinea" value="simulado">
                                     <label class="form-check-label" for="pagoEnLinea">
-                                        Pago en línea <span class="badge text-bg-warning" id="etiquetaPagoEnLinea">Simulado</span>
-                                        <span class="d-block small texto-suave" id="detallePagoEnLinea">Aprobás o
-                                            rechazás el pago en una pasarela de prueba, sin datos de tarjeta.</span>
+                                        Pago en línea <span class="badge text-bg-warning">Simulado</span>
+                                        <span class="d-block small texto-suave">Aprobás o rechazás el pago en una
+                                            pasarela de prueba, sin datos de tarjeta.</span>
                                     </label>
                                 </div>
                                 <div class="form-check">

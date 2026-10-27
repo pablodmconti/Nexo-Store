@@ -7,9 +7,7 @@ Carrito de compras
    el carrito muestra siempre la información actual de la tienda.
    Desde el 11/10 el botón "Confirmar compra" registra el pedido.
    Desde el Sprint 4 se elige la forma de pago. Con "Pago en línea" el
-   pedido se registra y se pasa a la pasarela simulada (pago.html) o,
-   si el interruptor de mercadopago.js está activo, al checkout de
-   Mercado Pago.
+   pedido se registra y se pasa a la pasarela simulada (pago.html).
    ===================================================================== */
 
 import { auth } from "./firebase/config.js";
@@ -17,13 +15,6 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/f
 import { obtenerProductos } from "./modules/productos-firestore.js";
 import { confirmarPedido } from "./modules/pedidos.js";
 import { obtenerPerfilUsuario } from "./modules/usuarios.js";
-import { iniciarPago, MERCADO_PAGO_ACTIVO } from "./modules/mercadopago.js";
-
-/* Con Mercado Pago activo, la opción "Pago en línea" lo dice */
-if (MERCADO_PAGO_ACTIVO) {
-  document.querySelector("#etiquetaPagoEnLinea").textContent = "Mercado Pago · prueba";
-  document.querySelector("#detallePagoEnLinea").textContent = "Tarjeta, débito o saldo en el sitio de Mercado Pago.";
-}
 
 /* Productos de la tienda, tal como llegan de Firestore */
 let productos = [];
@@ -330,18 +321,9 @@ btnConfirmar.addEventListener("click", async () => {
     return;
   }
 
-  /* Forma de pago elegida: el botón de radio marcado del grupo.
-     "Pago en línea" se guarda como "simulado" o "mercadopago". */
-  const opcionElegida = document.querySelector('input[name="metodoPago"]:checked').value;
-  let metodoPago = "coordinar";
-
-  if (opcionElegida === "enlinea") {
-    if (MERCADO_PAGO_ACTIVO) {
-      metodoPago = "mercadopago";
-    } else {
-      metodoPago = "simulado";
-    }
-  }
+  /* Forma de pago elegida: el botón de radio marcado del grupo
+     ("simulado" para el pago en línea o "coordinar") */
+  const metodoPago = document.querySelector('input[name="metodoPago"]:checked').value;
 
   btnConfirmar.disabled = true;
   btnConfirmar.textContent = "Confirmando compra…";
@@ -387,25 +369,10 @@ btnConfirmar.addEventListener("click", async () => {
   /* 4. Todo salió bien: recién ahora se vacía el carrito */
   guardarCarrito([]);
 
-  /* 5. Pasarela simulada: el pedido ya quedó reservado y se pasa a
-        pago.html con su id en la URL (Semana 7) */
+  /* 5. Pago en línea: el pedido ya quedó reservado y se pasa a la
+        pasarela simulada, con su id en la URL (Semana 7) */
   if (metodoPago === "simulado") {
     window.location.href = `pago.html?pedido=${resultado.idPedido}`;
-    return;
-  }
-
-  /* 6. Con Mercado Pago el pedido ya quedó reservado: el Worker crea
-        el pago y se va directo al checkout. Si no se puede abrir, se
-        pasa a pago.html para reintentar (el pedido no se pierde). */
-  if (metodoPago === "mercadopago") {
-    btnConfirmar.textContent = "Abriendo Mercado Pago…";
-
-    try {
-      window.location.href = await iniciarPago(usuarioActual, resultado.idPedido);
-    } catch (error) {
-      console.error("Error al abrir Mercado Pago:", error);
-      window.location.href = `pago.html?pedido=${resultado.idPedido}&aviso=pago-no-iniciado`;
-    }
     return;
   }
 

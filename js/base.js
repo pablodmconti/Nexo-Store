@@ -196,8 +196,7 @@ function escaparHtml(valor) {
    Solo se muestran los de esta lista: un texto escrito a mano en la
    URL no llega nunca a la pantalla. */
 const AVISOS_URL = {
-  "sin-permisos": "La sección Administración es solo para el equipo de Nivel 99. Te trajimos al inicio.",
-  "pago-no-iniciado": "Registramos tu pedido, pero no pudimos abrir Mercado Pago. Probá de nuevo con el botón Ir a Mercado Pago."
+  "sin-permisos": "La sección Administración es solo para el equipo de Nivel 99. Te trajimos al inicio."
 };
 
 document.addEventListener("DOMContentLoaded", () => {

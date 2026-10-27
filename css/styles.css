@@ -25,7 +25,7 @@
    19. Características en la ficha del producto (Sprint 3)
    20. Compra confirmada, pedidos y opiniones (Sprint 3)
    21. Panel administrativo (Sprint 3)
-   22. Forma de pago y Mercado Pago (Sprint 4)
+   22. Forma de pago y pago en línea simulado (Sprint 4)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -1232,7 +1232,7 @@ img {
 }
 
 /* ---------------------------------------------------------------
-   22. FORMA DE PAGO Y MERCADO PAGO (Sprint 4)
+   22. FORMA DE PAGO Y PAGO EN LÍNEA SIMULADO (Sprint 4)
    --------------------------------------------------------------- */
 
 /* Opciones de pago del resumen del carrito */
@@ -1246,8 +1246,8 @@ img {
   margin-bottom: 0.6rem;
 }
 
-/* Tarjeta del resumen antes de pagar: el borde punteado y el cartel
-   amarillo dejan claro que la tienda está en modo de prueba */
+/* Tarjeta de la pasarela: el borde punteado y el cartel amarillo
+   dejan claro que es una simulación */
 .tarjeta-pago {
   max-width: 520px;
   margin: 0 auto;
@@ -1277,15 +1277,10 @@ img {
   padding: 1rem 1.25rem;
 }
 
-/* Variantes del ícono de la compra confirmada */
+/* Variante roja del ícono de la compra confirmada */
 .icono-rechazado {
   background-color: #f8d7da;
   color: #b02a37;
-}
-
-.icono-pendiente {
-  background-color: #fff3cd;
-  color: #664d03;
 }
 
 /* Línea con la forma de pago en las tarjetas de pedidos */
