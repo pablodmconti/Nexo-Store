@@ -293,7 +293,9 @@ hay en Firestore:
   de quien compra y pida exactamente las unidades descontadas.
 - **El pedido tiene que cerrar.** Las reglas comparan cada producto del pedido con el de la
   tienda (nombre, precio y stock descontado), revisan los subtotales, el envío (gratis
-  desde $ 2.000, si no $ 290) y el total, y no aceptan campos de más. La fecha la pone el
+  desde $ 2.000, si no $ 290) y el total, y no aceptan campos de más. La lista no puede
+  repetir un producto y `cantidades` tiene que tener exactamente los mismos ids: así no se
+  puede descontar stock de un producto que no figura en la compra. La fecha la pone el
   servidor (`serverTimestamp()`).
 - **Hasta 5 productos distintos.** Las reglas no tienen bucles y revisan cada posición de
   la lista por separado. El carrito avisa al llegar al máximo (`MAXIMO_PRODUCTOS_CARRITO`
@@ -430,6 +432,9 @@ Comprobaciones hechas sobre el sitio publicado el 26/10/2026, después de cerrar
     en 0, productos repetidos o sin descontar su stock, más de 5 productos, campos de más
     o de menos, otra fecha, otro correo, estado o pago ya aprobado. Los pedidos correctos,
     con 1 a 5 productos, se aceptan.
+  - Un producto repetido en la lista junto con una clave de más en `cantidades` (por
+    ejemplo, la lista con p1 dos veces y `cantidades` con p1 y p2) se rechaza y el stock
+    de p2 no cambia. Antes de agregar la comprobación de ids únicos, este pedido pasaba.
   - Cancelar un pedido devuelve el stock una sola vez, aunque se cancele dos veces al mismo
     tiempo o coincida con una compra.
   - El carrito no deja agregar un sexto producto distinto y sí sumar unidades a uno que ya

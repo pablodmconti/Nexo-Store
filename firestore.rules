@@ -98,17 +98,23 @@ service cloud.firestore {
 
     // Las reglas no tienen bucles: por eso la compra admite hasta 5
     // productos distintos (MAXIMO_PRODUCTOS_CARRITO en base.js) y cada
-    // posición de la lista se revisa por separado. cantidades tiene que
-    // tener un id por producto: si un producto se repite en la lista,
-    // los tamaños no coinciden.
+    // posición de la lista se revisa por separado.
+    // La lista y cantidades tienen que hablar EXACTAMENTE de los mismos
+    // productos: ningún id repetido en la lista y ninguna clave de más
+    // en cantidades. Si no, un pedido con { p1, p1 } en la lista y
+    // { p1, p2 } en cantidades dejaría descontar stock de p2 sin
+    // comprarlo (bajaStockConPedidoNuevo solo mira cantidades).
     function productosDelPedidoValidos(pedido, idPedido) {
       let lista = pedido.productos;
+      let ids = idsDeLaLista(lista);
 
       return lista is list
         && lista.size() >= 1
         && lista.size() <= 5
+        && ids.toSet().size() == lista.size()
         && pedido.cantidades is map
         && pedido.cantidades.size() == lista.size()
+        && pedido.cantidades.keys().hasOnly(ids)
         && productoDelPedidoValido(pedido, 0, idPedido)
         && (lista.size() < 2 || productoDelPedidoValido(pedido, 1, idPedido))
         && (lista.size() < 3 || productoDelPedidoValido(pedido, 2, idPedido))
@@ -136,6 +142,17 @@ service cloud.firestore {
         && item.nombre == producto.nombre
         && item.precioUnitario == producto.precio
         && item.subtotal == item.precioUnitario * item.cantidad;
+    }
+
+    // Los idProducto de la lista (hasta 5), como una lista nueva:
+    // ["p1"].concat(["p3"]).concat([]) ... = ["p1", "p3"]
+    function idEn(lista, i) {
+      return i < lista.size() ? [lista[i].idProducto] : [];
+    }
+
+    function idsDeLaLista(lista) {
+      return idEn(lista, 0).concat(idEn(lista, 1)).concat(idEn(lista, 2))
+        .concat(idEn(lista, 3)).concat(idEn(lista, 4));
     }
 
     // La suma de los subtotales de la lista (hasta 5 productos).
