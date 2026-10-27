@@ -196,7 +196,7 @@ una computadora:
 
 1. Al ingresar con una cuenta de rol `admin`, aparece **Administración** en el menú. Las
    cuentas de administración no pueden comprar: para probar una compra se usa una cuenta
-   de cliente.
+   de cliente. Por eso **Mi perfil** no muestra "Mis pedidos", sino un acceso al panel.
 2. **Pestaña Productos:**
    - **+ Nuevo producto** abre el formulario. La imagen se indica con su ruta, por ejemplo
      `assets/img/productos/teclado.jpg`, o con una URL.
@@ -223,7 +223,7 @@ el valor `"admin"`, el que ya usaba el Sprint 3.
 | Acción | Cliente | Administrador |
 | --- | --- | --- |
 | Ver el catálogo, la ficha y las opiniones | Sí | Sí |
-| Comprar, pagar y ver sus pedidos en el perfil | Sí | No: el carrito lo explica y las reglas lo impiden |
+| Comprar, pagar y ver sus pedidos en el perfil | Sí | No: el carrito lo explica, las reglas lo impiden y el perfil ofrece el panel en lugar de "Mis pedidos" |
 | Opinar sobre un producto | Sí | Sí |
 | Ver el enlace "Administración" en el menú | No | Sí |
 | Abrir `admin.html` | No: vuelve al inicio con un aviso | Sí |

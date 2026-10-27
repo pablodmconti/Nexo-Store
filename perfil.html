@@ -91,7 +91,7 @@
                                 <span class="pastilla-rol" id="perfilRol"></span>
 
                                 <dl class="datos-perfil">
-                                    <dt>Cliente desde</dt>
+                                    <dt id="perfilFechaEtiqueta">Cliente desde</dt>
                                     <dd id="perfilFecha">—</dd>
                                     <dt>Identificador de la cuenta</dt>
                                     <dd class="uid-perfil" id="perfilUid"></dd>
@@ -103,10 +103,20 @@
                             </article>
                         </div>
                         <div class="col-lg-7">
-                            <section aria-labelledby="tituloPedidos">
+                            <section id="seccionPedidos" aria-labelledby="tituloPedidos">
                                 <h2 class="h4 mb-3" id="tituloPedidos">Mis pedidos</h2>
                                 <!-- js/pages/perfil.js muestra acá solo los pedidos del usuario -->
                                 <div class="row g-3" id="listaPedidos"></div>
+                            </section>
+
+                            <!-- Solo para el rol admin: una cuenta de administración no
+                                 compra, así que en lugar de "Mis pedidos" se ofrece el panel -->
+                            <section class="d-none" id="seccionAdministracion" aria-labelledby="tituloAdministracion">
+                                <h2 class="h4 mb-3" id="tituloAdministracion">Administración</h2>
+                                <div class="sin-resultados">
+                                    <p class="mb-3">Las cuentas de administración no compran. Los productos y los pedidos de todos los clientes se gestionan desde el panel.</p>
+                                    <a class="btn btn-primary" href="admin.html">Ir al panel de administración</a>
+                                </div>
                             </section>
                         </div>
                     </div>

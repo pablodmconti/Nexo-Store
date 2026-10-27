@@ -35,7 +35,8 @@ function mostrarAvisoPerfil(texto) {
 }
 
 /* Completa la tarjeta con lo que haya: si Firestore no respondió,
-   se usan los datos de Authentication y un rol por defecto. */
+   se usan los datos de Authentication y un rol por defecto.
+   Devuelve el rol, para saber si hay que cargar los pedidos. */
 function mostrarPerfil(usuario, datos) {
   let nombre = usuario.displayName || usuario.email;
   let rol = "cliente";
@@ -53,8 +54,18 @@ function mostrarPerfil(usuario, datos) {
   document.querySelector("#perfilRol").textContent = rol;
   document.querySelector("#perfilUid").textContent = usuario.uid;
 
+  /* Una cuenta de administración no compra (Sprint 4): en lugar de
+     "Mis pedidos" se muestra el acceso al panel */
+  if (rol === "admin") {
+    document.querySelector("#perfilFechaEtiqueta").textContent = "Cuenta creada";
+    document.querySelector("#seccionPedidos").classList.add("d-none");
+    document.querySelector("#seccionAdministracion").classList.remove("d-none");
+  }
+
   perfilCargando.classList.add("d-none");
   perfilContenido.classList.remove("d-none");
+
+  return rol;
 }
 
 /* ---------------------------------------------------------------
@@ -147,6 +158,8 @@ onAuthStateChanged(auth, async (usuario) => {
   }
 
   /* Con sesión: se buscan sus datos en Firestore */
+  let rol;
+
   try {
     const datos = await obtenerPerfilUsuario(usuario.uid);
 
@@ -154,12 +167,15 @@ onAuthStateChanged(auth, async (usuario) => {
       mostrarAvisoPerfil("No encontramos los datos guardados de tu cuenta. Mostramos la información básica.");
     }
 
-    mostrarPerfil(usuario, datos);
+    rol = mostrarPerfil(usuario, datos);
   } catch (error) {
     mostrarAvisoPerfil("No pudimos cargar todos tus datos en este momento. Mostramos la información básica.");
-    mostrarPerfil(usuario, null);
+    rol = mostrarPerfil(usuario, null);
   }
 
-  /* Historial: solo los pedidos de ESTE usuario */
-  cargarPedidos(usuario.uid);
+  /* Historial: solo los pedidos de ESTE usuario. Un administrador
+     no tiene pedidos propios, así que no se consultan */
+  if (rol !== "admin") {
+    cargarPedidos(usuario.uid);
+  }
 });
