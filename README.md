@@ -117,9 +117,10 @@ Nivel99/
 ├── login.html          Ingresar y crear cuenta con Firebase Authentication · Sprint 3
 ├── perfil.html         Página privada: datos del usuario e historial de sus pedidos · Sprint 3
 ├── admin.html          Panel administrativo, solo para el rol admin · Sprint 3
+├── 404.html            Página para las direcciones que no existen en el sitio · Sprint 4
 ├── firestore.rules     Reglas de seguridad publicadas en la consola de Firebase · Sprint 4
 ├── css/
-│   └── styles.css      Hoja de estilos organizada en 22 secciones comentadas
+│   └── styles.css      Hoja de estilos organizada en 23 secciones comentadas
 ├── js/
 │   ├── base.js         Navegación, avisos y funciones compartidas (precio, stock, carrito)
 │   ├── productos.js    Respaldo de los datos iniciales (ninguna página lo carga)
@@ -141,6 +142,7 @@ Nivel99/
 │       ├── admin.js    Protección por rol y panel: productos y pedidos
 │       ├── login.js    Formularios de login.html: validación y estados de carga
 │       ├── pago.js     Pasarela simulada: aprobar o rechazar y guardar el resultado
+│       ├── pagina-404.js  Muestra en 404.html la dirección que no se encontró
 │       └── perfil.js   Protección de perfil.html, datos del usuario e historial de pedidos
 ├── assets/
 │   ├── img/            Placeholder y carpeta productos/ con las fotos de cada producto
@@ -164,6 +166,8 @@ una computadora:
    desde servicios externos. Las fotografías de los productos están en `assets/img/productos`.
 5. Para probar compras y opiniones hay que iniciar sesión (ver *Cómo evaluar el proyecto*).
 6. La pasarela de pago simulada funciona igual en local que en el sitio publicado.
+7. `404.html` solo se ve completa en el sitio publicado: sus rutas parten de `/Nivel99/`
+   (ver *Revisión antes de publicar*).
 
 ## Manual breve de usuario
 
@@ -326,6 +330,14 @@ hay en Firestore:
   pantallas grandes.
 - Se revisaron todas las rutas de los HTML y los JS distinguiendo mayúsculas, porque
   GitHub Pages trata `Foto.jpg` y `foto.jpg` como archivos distintos.
+- **Página 404 propia.** Una dirección que no existe dentro del sitio mostraba la página
+  de error genérica de GitHub, sin el diseño ni la navegación de la tienda. Ahora GitHub
+  Pages muestra `404.html`, con el mismo menú y pie que el resto, la dirección que se
+  abrió y botones para volver al inicio o al catálogo. Como esa página puede aparecer en
+  cualquier dirección (por ejemplo `/Nivel99/carpeta/vieja.html`), usa
+  `<base href="/Nivel99/">` para que los estilos, las imágenes y los enlaces partan
+  siempre de la raíz del sitio. Si el repositorio cambia de nombre, hay que cambiar esa
+  línea.
 
 #### Publicación
 

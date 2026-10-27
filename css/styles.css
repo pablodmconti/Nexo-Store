@@ -26,6 +26,7 @@
    20. Compra confirmada, pedidos y opiniones (Sprint 3)
    21. Panel administrativo (Sprint 3)
    22. Forma de pago y pago en línea simulado (Sprint 4)
+   23. Página no encontrada, 404 (Sprint 4)
    ===================================================================== */
 
 /* ---------------------------------------------------------------
@@ -1280,4 +1281,45 @@ img {
 .linea-pago {
   font-size: 0.85rem;
   color: var(--color-texto-suave);
+}
+
+/* ---------------------------------------------------------------
+   23. PÁGINA NO ENCONTRADA, 404 (Sprint 4)
+   --------------------------------------------------------------- */
+
+.pagina-404 {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 1rem 0 2rem;
+  text-align: center;
+}
+
+/* El número grande, con una sombra cian corrida como en los juegos
+   retro. clamp() lo achica en pantallas angostas. */
+.codigo-404 {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: clamp(5rem, 24vw, 9rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--color-noche);
+  text-shadow: 0.06em 0.06em 0 var(--color-acento);
+  margin-bottom: 1.25rem;
+}
+
+.direccion-404 {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+/* Una dirección larga se corta en varias líneas en lugar de
+   desbordar la pantalla del teléfono */
+.direccion-404 code {
+  word-break: break-all;
+  color: var(--color-primario-oscuro);
+  background-color: var(--color-superficie);
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
 }
