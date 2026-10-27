@@ -8,6 +8,17 @@ Entrega final, correspondiente al **Sprint 4 · Seguridad, calidad, pruebas y pu
 - **Curso:** Desarrollo Web · 2.º semestre · Año lectivo 2026
 - **Repositorio:** https://github.com/pablodmconti/Nexo-Store
 - **Sitio publicado:** https://pablodmconti.github.io/Nexo-Store/
+- **Estado:** versión final publicada en GitHub Pages y probada desde la dirección pública
+  el 26/10/2026, con cuentas de cliente y de administrador.
+
+## Entregas del proyecto
+
+| Sprint | Contenido | Entrega |
+| --- | --- | --- |
+| Sprint 1 | Interfaz web, página de inicio e identidad visual | 16/8/2026 |
+| Sprint 2 | Catálogo, detalle de producto y carrito con LocalStorage | 13/9/2026 |
+| Sprint 3 | Firebase: autenticación, productos, pedidos, opiniones y panel administrativo | 11/10/2026 |
+| Sprint 4 | Roles, reglas de seguridad, revisión, pago en línea simulado y publicación final | 30/10/2026 |
 
 ## Cómo evaluar el proyecto
 
