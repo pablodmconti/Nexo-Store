@@ -6,8 +6,8 @@ Entrega final, correspondiente al **Sprint 4 · Seguridad, calidad, pruebas y pu
 
 - **Estudiante:** Pablo Montaña Conti
 - **Curso:** Desarrollo Web · 2.º semestre · Año lectivo 2026
-- **Repositorio:** https://github.com/pablodmconti/Nexo-Store
-- **Sitio publicado:** https://pablodmconti.github.io/Nexo-Store/
+- **Repositorio:** https://github.com/pablodmconti/Nivel99
+- **Sitio publicado:** https://pablodmconti.github.io/Nivel99/
 - **Estado:** versión final publicada en GitHub Pages y probada desde la dirección pública
   el 26/10/2026, con cuentas de cliente y de administrador.
 
@@ -22,7 +22,7 @@ Entrega final, correspondiente al **Sprint 4 · Seguridad, calidad, pruebas y pu
 
 ## Cómo evaluar el proyecto
 
-1. Abrir el sitio publicado: https://pablodmconti.github.io/Nexo-Store/
+1. Abrir el sitio publicado: https://pablodmconti.github.io/Nivel99/
 2. Ingresar con una de estas cuentas, creadas exclusivamente para la evaluación. Los
    correos no existen: Firebase Authentication no los verifica, así que alcanza con que
    tengan formato válido.
@@ -108,7 +108,7 @@ asesoramiento antes que el precio más bajo del mercado.
 ## Estructura del proyecto
 
 ```
-Nexo-Store/
+Nivel99/
 ├── index.html          Página de inicio personalizada
 ├── catalogo.html       Catálogo dinámico generado desde JavaScript
 ├── producto.html       Ficha dinámica con características y opiniones de los usuarios
@@ -152,10 +152,10 @@ Nexo-Store/
 
 ## Instrucciones de ejecución
 
-El sitio está publicado en https://pablodmconti.github.io/Nexo-Store/. Para ejecutarlo en
+El sitio está publicado en https://pablodmconti.github.io/Nivel99/. Para ejecutarlo en
 una computadora:
 
-1. Clonar el repositorio: `git clone https://github.com/pablodmconti/Nexo-Store.git`
+1. Clonar el repositorio: `git clone https://github.com/pablodmconti/Nivel99.git`
 2. Abrir la carpeta en Visual Studio Code.
 3. Iniciar la extensión **Live Server** sobre `index.html`. Desde el Sprint 3 es obligatorio:
    los archivos de Firebase son módulos (`type="module"`) y el navegador no los ejecuta
@@ -330,7 +330,7 @@ hay en Firestore:
 #### Publicación
 
 El sitio se publica con **GitHub Pages** desde la rama `main`
-(*Settings → Pages → Deploy from a branch*): https://pablodmconti.github.io/Nexo-Store/.
+(*Settings → Pages → Deploy from a branch*): https://pablodmconti.github.io/Nivel99/.
 El dominio `pablodmconti.github.io` está agregado en *Authentication → Settings →
 Dominios autorizados* de Firebase para que funcione el inicio de sesión.
 
@@ -376,7 +376,7 @@ queda en el historial de git, en los commits del 26/10.
 | Consultar, crear y editar productos | `admin.html`, `admin.js` y `productos-firestore.js` |
 | Proteger las operaciones principales de Firestore | `firestore.rules` |
 | Conservar las funcionalidades de los sprints anteriores | Catálogo, ficha, carrito, pedidos, perfil y opiniones |
-| Publicar la aplicación con un enlace | GitHub Pages: https://pablodmconti.github.io/Nexo-Store/ |
+| Publicar la aplicación con un enlace | GitHub Pages: https://pablodmconti.github.io/Nivel99/ |
 | README actualizado con cuentas para la evaluación | *Cómo evaluar el proyecto* y esta sección |
 | Manual breve de usuario (resultado final del proyecto) | *Manual breve de usuario* |
 
